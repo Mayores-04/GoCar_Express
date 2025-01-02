@@ -16,7 +16,7 @@ export default function AboutPage() {
       </header>
       <main className="space-y-8 px-4 py-16">
         {/* Welcome Section */}
-        <section className="text-center bg-gray-100 py-8 px-4">
+        <section className="text-center bg-gray-100 py-8 px-4 elements">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-800">
             Welcome to Go Car Express
           </h1>
@@ -31,7 +31,7 @@ export default function AboutPage() {
         </section>
 
         {/* Mission Section */}
-        <section className="bg-blue-800 text-white text-center py-8 px-4">
+        <section className="bg-blue-800 text-white text-center py-8 px-4 elements">
           <h2 className="text-3xl font-semibold">Our Mission</h2>
           <p className="mt-4 text-xl">
             Our mission is simple: to provide an outstanding car rental
@@ -43,7 +43,7 @@ export default function AboutPage() {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="py-8 px-4">
+        <section className="py-8 px-4 elements">
           <h2 className="text-3xl font-semibold text-center text-blue-800">
             Why Choose Go Car Express?
           </h2>
@@ -84,7 +84,7 @@ export default function AboutPage() {
         </section>
 
         {/* Our Values Section */}
-        <section className="bg-blue-800 text-white text-center py-8 px-4">
+        <section className="bg-blue-800 text-white text-center py-8 px-4 elements">
           <h2 className="text-3xl font-semibold">Our Values</h2>
           <div className="mt-8 space-y-6">
             <div>
@@ -117,7 +117,7 @@ export default function AboutPage() {
         </section>
 
         {/* Our Vehicle Section */}
-        <section className="text-center py-8 px-4">
+        <section className="text-center py-8 px-4 elements">
           <h2 className="text-3xl font-semibold text-blue-800">Our Vehicle</h2>
           <p className="mt-4 text-xl text-gray-600">
             The Go Car Express Ride: We currently offer one carefully selected
@@ -128,7 +128,7 @@ export default function AboutPage() {
         </section>
 
         {/* Contact Section */}
-        <section className="bg-gray-100 text-center py-8 px-4">
+        <section className="bg-gray-100 text-center py-8 px-4 elements">
           <h2 className="text-3xl font-semibold text-blue-800">Contact Us</h2>
           <p className="mt-4 text-xl text-gray-600">
             Have any questions or need to book your rental? We're here to help!

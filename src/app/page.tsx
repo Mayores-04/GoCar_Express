@@ -17,8 +17,8 @@ export default function Home() {
       >
         <Header />
       </header>
-      <main className=" ">
-        <section className="relative">
+      <main id="Home" className="transition-all ">
+        <section className="relative elements">
           <div className="relative">
             <Image
               src="/images/mg_car.jpg"
@@ -40,7 +40,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className=" w-full ">
+        <section className=" w-full elements">
           <div className="flex flex-col items-center justify-center py-8 ">
             {/* Welcome Section */}
             <section className="text-center  py-8 px-6 w-[95%]">
@@ -77,9 +77,9 @@ export default function Home() {
         </section>
 
         {/* FeatureCard Section */}
-        <section className="text-center  bg-gray-300 py-8 px-6 w-full">
+        <section className="text-center elements bg-gray-300 py-8 px-6 w-full">
           <h1 className="text-center text-[#4169e1] text-xl md:text-[35px] lg:text-[65px] xl:text-[75px] font-bold leading-tight">
-            Why Choose Go Car Express?
+            Why Choose GoCar Express?
           </h1>
           <div className="flex flex-wrap justify-center gap-6 mt-8">
             <FeatureCard

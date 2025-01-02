@@ -35,7 +35,7 @@ export default function Header() {
             RESERVATIONS
           </Link>
           <Link
-            href="/#"
+            href="/#Home"
             className={`font-semibold ${isActive("/")} hover:text-sky-500`}
           >
             HOME

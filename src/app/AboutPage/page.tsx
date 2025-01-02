@@ -3,6 +3,7 @@
 import React from "react";
 import Header from "../components/Header";
 import { GsapAnimation } from "../hooks/GsapAnimation";
+import Footer from "../components/Footer"
 
 export default function AboutPage() {
   const headerRef = GsapAnimation();
@@ -14,9 +15,9 @@ export default function AboutPage() {
       >
         <Header />
       </header>
-      <main className="space-y-8 px-4 py-16">
+      <main className="space-y-4 px-4 pt-24 pb-8 bg-gray-200">
         {/* Welcome Section */}
-        <section className="text-center bg-gray-100 py-8 px-4 elements">
+        <section className="text-center bg-gray-100 py-8  px-4 elements">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-800">
             Welcome to Go Car Express
           </h1>
@@ -128,7 +129,7 @@ export default function AboutPage() {
         </section>
 
         {/* Contact Section */}
-        <section className="bg-gray-100 text-center py-8 px-4 elements">
+        <section className="bg-gray-100 text-center w-full py-8 px-4 elements">
           <h2 className="text-3xl font-semibold text-blue-800">Contact Us</h2>
           <p className="mt-4 text-xl text-gray-600">
             Have any questions or need to book your rental? We're here to help!
@@ -140,6 +141,9 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
+      <footer>
+        <Footer />
+      </footer>
     </>
   );
 }

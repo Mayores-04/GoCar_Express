@@ -12,7 +12,7 @@ export default function Header() {
   };
 
   return (
-    <header className="h-[82px] px-6 p-1 bg-white fixed w-full z-50 ">
+    <header className="h-[82px] px-6 p-1 bg-white fixed w-full z-50  rounded-bl-lg rounded-br-lg shadow-md">
       <div className="flex items-center space-x-4 w-full justify-between text-end">
         <div className="flex space-x-6">
           <div className="">
@@ -57,7 +57,7 @@ export default function Header() {
             ABOUT US
           </Link>
           <Link
-            href="/LocationPage"
+            href="/#LocationPage"
             className={`font-semibold ${isActive(
               "/LocationPage"
             )} hover:text-sky-500`}

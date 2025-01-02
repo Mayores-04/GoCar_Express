@@ -2,6 +2,7 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPhone, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -9,7 +10,7 @@ export default function Footer() {
       <footer className="h-auto p-6 px-9 flex flex-col md:flex-row items-center justify-between bg-gray-100 shadow-md">
         {/* Logo Section */}
         <div className="flex items-center space-x-4">
-          <img
+          <Image
             src="/images/blueLogo.PNG"
             alt="GoCar Express Logo"
             width={60}

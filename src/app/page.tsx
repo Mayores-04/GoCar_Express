@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import { GsapAnimation } from "./hooks/GsapAnimation";
 import FeatureCard from "./components/FeatureCard";
 import Footer from "./components/Footer";
+import Image from "next/image";
 
 export default function Home() {
   const headerRef = GsapAnimation();
@@ -19,10 +20,11 @@ export default function Home() {
       <main className=" ">
         <section className="relative">
           <div className="relative">
-            <img
+            <Image
               src="/images/mg_car.jpg"
               alt="car pic"
               className="w-full h-auto object-cover elements"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-70" />
             <div className="absolute inset-0 flex items-center justify-center elements">

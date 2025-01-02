@@ -11,7 +11,7 @@ export default function Footer() {
         {/* Logo Section */}
         <div className="flex items-center space-x-4">
           <Image
-            src="/images/blueLogo.PNG"
+            src="/images/blueLogo.png"
             alt="GoCar Express Logo"
             width={60}
             height={60}
@@ -46,7 +46,7 @@ export default function Footer() {
 
         {/* Copyright Section */}
         <div className="mt-4 md:mt-0 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} GoCar Express. All rights reserved.
+          © 2025 GoCar Express. All rights reserved.
         </div>
       </footer>
     </>

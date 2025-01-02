@@ -7,6 +7,11 @@
   --foreground: #171717;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -15,7 +20,29 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  /* color: var(--foreground);
+  background: var(--background); */
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes appear {
+  from{
+    opacity: 0;
+    scale: 0.5;
+  }
+  to{
+    opacity: 1;
+    scale:1;
+  }
+}
+
+.elements {
+  animation: appear linear;
+  animation-timeline: view();
+  animation-range: entry 0% cover 40%;
+}
+
+header.hidden {
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-in-out;
 }

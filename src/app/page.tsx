@@ -1,101 +1,104 @@
-import Image from "next/image";
+"use client";
+
+import React, { useEffect, useRef } from "react";
+import Header from "./components/Header";
+import { GsapAnimation } from "./hooks/GsapAnimation";
+import FeatureCard from "./components/FeatureCard";
+import Footer from "./components/Footer";
 
 export default function Home() {
+  const headerRef = GsapAnimation();
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <>
+      <header
+        ref={headerRef}
+        className="sticky top-0 w-full z-50 bg-white shadow-md transition-all"
+      >
+        <Header />
+      </header>
+      <main className=" ">
+        <section className="relative">
+          <div className="relative">
+            <img
+              src="/images/mg_car.jpg"
+              alt="car pic"
+              className="w-full h-auto object-cover elements"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-70" />
+            <div className="absolute inset-0 flex items-center justify-center elements">
+              <h1
+                className="text-center text-white text-xl md:text-[35px] 
+                lg:text-[65px] xl:text-[75px] font-bold leading-tight z-10"
+              >
+                "Driving your dreams, delivering excellence."
+              </h1>
+            </div>
+          </div>
+        </section>
+
+        <section className=" w-full ">
+          <div className="flex flex-col items-center justify-center py-8 ">
+            {/* Welcome Section */}
+            <section className="text-center  py-8 px-6 w-[95%]">
+              <h1
+                className="text-center text-[#4169e1] text-xl md:text-[35px] 
+                lg:text-[65px] xl:text-[75px] font-bold leading-tight"
+              >
+                Car Rental Philippines
+              </h1>
+              <p className="mt-4 text-xl text-gray-600">
+                At Go Car Express, we are committed to providing a seamless,
+                high-quality car rental experience. Whether you're looking to
+                rent for a business trip, leisure, or a special occasion, we
+                ensure that every journey is smooth, reliable, and stress-free.
+                <br />
+                <br />
+                With our single, carefully maintained vehicle, you can enjoy
+                comfort and peace of mind knowing you’re in safe hands.
+                <br />
+                <br />
+                We prioritize customer satisfaction and offer flexible rental
+                periods, transparent pricing, and no hidden fees. From pick-up
+                to drop-off, your convenience is our priority. Our agreement
+                outlines everything you need to know about your rental, ensuring
+                clarity and transparency every step of the way.
+                <br />
+                <br />
+                Thank you for choosing Go Car Express. We look forward to
+                providing you with a premium car rental experience tailored to
+                your needs.
+              </p>
+            </section>
+          </div>
+        </section>
+
+        {/* FeatureCard Section */}
+        <section className="text-center  bg-gray-300 py-8 px-6 w-full">
+          <h1 className="text-center text-[#4169e1] text-xl md:text-[35px] lg:text-[65px] xl:text-[75px] font-bold leading-tight">
+            Why Choose Go Car Express?
+          </h1>
+          <div className="flex flex-wrap justify-center gap-6 mt-8">
+            <FeatureCard
+              title="Comfortable Ride"
+              description="Our vehicle is maintained for the utmost comfort, ensuring that every trip is pleasant."
+              icon="🚗"
+            />
+            <FeatureCard
+              title="Flexible Rental Periods"
+              description="Choose rental periods that best suit your needs, whether it's for a day, a week, or longer."
+              icon="⏳"
+            />
+            <FeatureCard
+              title="Transparent Pricing"
+              description="We offer clear and competitive pricing with no hidden fees."
+              icon="💲"
+            />
+          </div>
+        </section>
+
+        {/* Footer */}
+        <Footer/>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </>
   );
 }

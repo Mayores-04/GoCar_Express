@@ -58,7 +58,7 @@ export default function Home() {
                 <br />
                 <br />
                 With our single, carefully maintained vehicle, you can enjoy
-                comfort and peace of mind knowing you’re in safe hands.
+                comfort and peace of mind knowing you're in safe hands.
                 <br />
                 <br />
                 We prioritize customer satisfaction and offer flexible rental

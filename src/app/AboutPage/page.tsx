@@ -53,7 +53,7 @@ export default function AboutPage() {
                 Quality Over Quantity
               </h3>
               <p className="mt-4 text-gray-600">
-                While we only offer one car, it’s a car that meets the highest
+                While we only offer one car, it's a car that meets the highest
                 standards of reliability and comfort. You can trust that it will
                 be well-maintained, clean, and ready for your journey.
               </p>
@@ -134,9 +134,9 @@ export default function AboutPage() {
             Have any questions or need to book your rental? We're here to help!
           </p>
           <div className="mt-4">
-            <p className="text-lg">Phone: [Your Contact Number]</p>
-            <p className="text-lg">Email: [Your Email Address]</p>
-            <p className="text-lg">Address: [Your Physical Address]</p>
+            <p className="text-lg">Phone: +63 920 907 5454</p>
+            <p className="text-lg">Email: gocarexpress0608@gmail.com</p>
+            <p className="text-lg">Address: Cainta Rizal, Philippines</p>
           </div>
         </section>
       </main>

@@ -23,6 +23,8 @@ export default function Home() {
             <Image
               src="/images/mg_car.jpg"
               alt="car pic"
+              width={500}  
+              height={300}  
               className="w-full h-auto object-cover elements"
               priority
             />
@@ -99,7 +101,7 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <Footer/>
+        <Footer />
       </main>
     </>
   );

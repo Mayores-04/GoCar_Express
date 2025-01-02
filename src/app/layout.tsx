@@ -25,8 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/images/blueLogo.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/images/blueLogo.png" />
+        <link
+          rel="icon"
+          href="https://go-car-express.vercel.app/_next/image?url=%2Fimages%2FblueLogo.png&w=96&q=75"
+          type="image/jpeg"
+        />
+        <link rel="apple-touch-icon" href="https://go-car-express.vercel.app/_next/image?url=%2Fimages%2FblueLogo.png&w=96&q=75" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body

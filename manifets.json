@@ -1,0 +1,12 @@
+{
+    "name": "Go Car Express",
+    "short_name": "GoCar",
+    "icons": [
+      {
+        "src": "/images/blueLogo.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ]
+  }
+  

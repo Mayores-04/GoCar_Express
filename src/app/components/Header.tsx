@@ -17,7 +17,7 @@ export default function Header() {
         <div className="flex space-x-6">
           <div className="">
             <Image
-              src="/images/blueLogo.png"
+              src="/images/blueLogo.PNG"
               alt="logo"
               width={80}
               height={80}

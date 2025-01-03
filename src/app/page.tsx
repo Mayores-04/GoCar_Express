@@ -1,39 +1,50 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useState } from "react";
 import Header from "./components/Header";
 import { GsapAnimation } from "./hooks/GsapAnimation";
 import FeatureCard from "./components/FeatureCard";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import NewsCard from "./components/NewsCard";
+import Modal from "./components/Modal";
 
 const newsCards = [
   {
     title: "Travel to Marinduque",
-    description:
-      "On December 20, 2024, experience the scenic journey to Marinduque, Philippines. Explore the beauty of this peaceful island, famous for its stunning beaches and vibrant culture.",
+    description: "On December 20, 2024, experience the scenic journey...",
     date: "December 20, 2024",
     picture: "/images/mg_car.jpg",
+    location: "Marinduque, Philippines",
+    duration: "5 days",
+    contact: "info@travelmarinduque.com",
+    readmore: "news",
   },
   {
     title: "Road Trip to Baguio",
-    description:
-      "On November 10, 2024, set off for a refreshing road trip to the cool highlands of Baguio. Enjoy picturesque mountain views, fresh strawberries, and a relaxing escape from the city.",
+    description: "On November 10, 2024, set off for a refreshing road trip...",
     date: "November 10, 2024",
     picture: "/images/mg_car.jpg",
-  },
-  {
-    title: "Weekend Getaway to Tagaytay",
-    description:
-      "On March 15, 2024, take a weekend trip to Tagaytay for panoramic views of Taal Volcano, cool weather, and delicious local food to recharge and relax.",
-    date: "March 15, 2024",
-    picture: "/images/mg_car.jpg",
+    location: "Baguio, Philippines",
+    duration: "3 days",
+    contact: "info@roadtripbaguio.com",
+    readmore: "news",
   },
 ];
 
 const Home: React.FC = () => {
   const headerRef = GsapAnimation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedNews, setSelectedNews] = useState(newsCards[0]);
+
+  const openModal = (news: (typeof newsCards)[0]) => {
+    setSelectedNews(news);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <>
@@ -140,10 +151,21 @@ const Home: React.FC = () => {
                 description={card.description}
                 date={card.date}
                 picture={card.picture}
+                readmore={card.readmore}
+                onMoreInfo={() => openModal(card)}
               />
             ))}
           </div>
         </section>
+
+        {/* News Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          content={
+            selectedNews || { title: "No News Selected", description: "" }
+          }
+        />
 
         {/* Location Page Section */}
         <section

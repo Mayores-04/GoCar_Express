@@ -44,7 +44,6 @@ export default function Header() {
 
   const handleClick = (button: string) => {
     setActiveButton(button);
-    
   };
 
   const handleLocationClick = () => {
@@ -74,6 +73,13 @@ export default function Header() {
 
         <nav className="px-4 space-x-8 py-4 sticky top-0 w-full">
           <Link
+            href="/#Home"
+            className={`font-semibold ${isActive("/#Home")} hover:text-sky-500`}
+            onClick={() => handleClick("HOME")}
+          >
+            HOME
+          </Link>
+          <Link
             href="/ReservationPage"
             className={`font-semibold ${isActive(
               "/ReservationPage"
@@ -81,13 +87,6 @@ export default function Header() {
             onClick={() => handleClick("RESERVATIONS")}
           >
             RESERVATIONS
-          </Link>
-          <Link
-            href="/#Home"
-            className={`font-semibold ${isActive("/#Home")} hover:text-sky-500`}
-            onClick={() => handleClick("HOME")}
-          >
-            HOME
           </Link>
           <Link
             href="/CarsPage"
@@ -100,9 +99,7 @@ export default function Header() {
           </Link>
           <Link
             href="/news"
-            className={`font-semibold ${isActive(
-              "/news"
-            )} hover:text-sky-500`}
+            className={`font-semibold ${isActive("/news")} hover:text-sky-500`}
             onClick={() => handleClick("NEWS")}
           >
             NEWS

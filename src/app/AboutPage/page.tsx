@@ -44,12 +44,12 @@ export default function AboutPage() {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="py-8 px-4 elements">
-          <h2 className="text-3xl font-semibold text-center text-blue-800">
+        <section className="py-8 px-4 ">
+          <h2 className="text-3xl elements font-semibold text-center text-blue-800">
             Why Choose Go Car Express?
           </h2>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+            <div className="bg-gray-100 elements p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold text-blue-800">
                 Quality Over Quantity
               </h3>
@@ -59,7 +59,7 @@ export default function AboutPage() {
                 be well-maintained, clean, and ready for your journey.
               </p>
             </div>
-            <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+            <div className="bg-gray-100 elements p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold text-blue-800">
                 Personalized Service
               </h3>
@@ -70,7 +70,7 @@ export default function AboutPage() {
                 options to make your experience as convenient as possible.
               </p>
             </div>
-            <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+            <div className="bg-gray-100 elements p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold text-blue-800">
                 Affordable Pricing
               </h3>

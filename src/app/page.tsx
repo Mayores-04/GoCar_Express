@@ -77,17 +77,17 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section className=" w-full elements">
+        <section className=" w-full ">
           <div className="flex flex-col items-center justify-center py-16 ">
             {/* Welcome Section */}
-            <section className="text-center  py-8 px-6 w-[95%]">
+            <section className="text-center  px-6 w-[95%]">
               <h1
-                className="text-center text-gray-600 text-xl md:text-[35px] 
+                className="text-center elements text-gray-600 text-xl md:text-[35px] 
                 lg:text-[65px] xl:text-[75px] font-bold leading-tight"
               >
                 Car Rental Philippines
               </h1>
-              <p className="mt-4 text-xl text-gray-600">
+              <p className="mt-4 elements text-xl text-gray-600">
                 At Go Car Express, we are committed to providing a seamless,
                 high-quality car rental experience. Whether you're looking to
                 rent for a business trip, leisure, or a special occasion, we
@@ -114,8 +114,8 @@ const Home: React.FC = () => {
         </section>
 
         {/* FeatureCard Section */}
-        <section className="text-center elements bg-gray-300 py-16 px-6 w-full">
-          <h1 className="text-center text-[#4169e1] text-xl md:text-[35px] lg:text-[65px] xl:text-[75px] font-bold leading-tight">
+        <section className="text-center  bg-gray-300 py-16 px-6 w-full">
+          <h1 className="text-center elements text-[#4169e1] text-xl md:text-[35px] lg:text-[65px] xl:text-[75px] font-bold leading-tight">
             <span className="text-gray-600">Why Choose</span> GoCar Express{" "}
             <span className="text-gray-600">?</span>
           </h1>
@@ -140,8 +140,8 @@ const Home: React.FC = () => {
 
         {/* Latest News Section */}
         <section className="text-center py-16 px-6 w-full">
-          <h1 className="text-left px-6 text-gray-600 text-xl md:text-[25px] lg:text-[50px] xl:text-[60px] font-bold leading-tight">
-            <span className=" text-[#4169e1]">GoCar Express</span> Group News
+          <h1 className="text-left px-6 text-gray-600 elements text-xl md:text-[25px] lg:text-[50px] xl:text-[60px] font-bold leading-tight">
+            <span className=" text-[#4169e1] ">GoCar Express</span> Group News
           </h1>
           <div className="flex flex-col w-full justify-center gap-6 mt-8">
             {newsCards.map((card, index) => (
@@ -170,10 +170,10 @@ const Home: React.FC = () => {
         {/* Location Page Section */}
         <section
           id="LocationPage"
-          className="text-center elements  bg-gray-200 py-16 px-6 w-full"
+          className="text-center bg-gray-200 py-16 px-6 w-full"
         >
-          <div className="flex flex-row items-center justify-center w-[95%]">
-            <div className="w-full text-center px-16">
+          <div className="flex flex-col elements lg:flex-row md:flex-col xl:flex-row sm:flex-col items-center justify-center w-[95%]">
+            <div className="w-full elements text-center px-16">
               {" "}
               <h1 className="text-center text-[#4169e1] text-xl md:text-[35px] lg:text-[65px] xl:text-[75px] font-bold leading-tight">
                 GoCar Express <span className="text-gray-600">Location</span>
@@ -194,7 +194,7 @@ const Home: React.FC = () => {
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-md mt-6"
+              className="rounded-md mt-6 elements"
             />
           </div>
         </section>

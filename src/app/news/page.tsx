@@ -9,6 +9,9 @@ import {
   FaSave,
 } from "react-icons/fa";
 import Header from "../components/Header";
+import CarRentalBooking from "../components/CarRentalBooking";
+import { GsapAnimation } from "../hooks/GsapAnimation";
+import Footer from "../components/Footer";
 
 type GalleryItem = {
   title: string;
@@ -18,6 +21,7 @@ type GalleryItem = {
 
 type NewsItem = {
   title: string;
+  customerName: string;
   description: string;
   date: string;
   location: string;
@@ -30,6 +34,7 @@ type NewsItem = {
 const newsData: NewsItem[] = [
   {
     title: "Travel to Marinduque",
+    customerName: "Jake Mayores",
     description: "On December 20, 2024, experience the scenic journey...",
     date: "December 20, 2024",
     location: "Marinduque, Philippines",
@@ -40,17 +45,17 @@ const newsData: NewsItem[] = [
       {
         title: "Sunset View in Marinduque",
         date: "December 21, 2024",
-        picture: "/images/mg_car.jpg",
+        picture: "/images/monggi.png",
       },
       {
         title: "Scenic Beaches",
         date: "December 22, 2024",
-        picture: "/images/mg_car.jpg",
+        picture: "/images/image1.png",
       },
       {
         title: "Mountain Views",
         date: "December 23, 2024",
-        picture: "/images/mg_car.jpg",
+        picture: "/images/image2.png",
       },
       {
         title: "Local Culture",
@@ -61,6 +66,7 @@ const newsData: NewsItem[] = [
   },
   {
     title: "Road Trip to Baguio",
+    customerName: "Justine Mayores",
     description: "On November 10, 2024, set off for a refreshing road trip...",
     date: "November 10, 2024",
     location: "Baguio, Philippines",
@@ -87,12 +93,32 @@ const newsData: NewsItem[] = [
         title: "Baguio Night Market",
         date: "November 14, 2024",
         picture: "/images/mg_car.jpg",
+      },{
+        title: "Sunset View in Marinduque",
+        date: "December 21, 2024",
+        picture: "/images/monggi.png",
+      },
+      {
+        title: "Scenic Beaches",
+        date: "December 22, 2024",
+        picture: "/images/image1.png",
+      },
+      {
+        title: "Mountain Views",
+        date: "December 23, 2024",
+        picture: "/images/image2.png",
+      },
+      {
+        title: "Local Culture",
+        date: "December 24, 2024",
+        picture: "/images/mg_car.jpg",
       },
     ],
   },
 ];
 
 const NewsPage: React.FC = () => {
+  const headerRef = GsapAnimation();
   const [zoomedGallery, setZoomedGallery] = useState<{
     gallery: GalleryItem[];
     currentIndex: number;
@@ -193,7 +219,11 @@ const NewsPage: React.FC = () => {
       console.error("Error downloading the image:", error);
     }
   };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleBookNowToggle = () => {
+    setIsModalOpen((prev) => !prev);
+  };
   return (
     <>
       {/* Header with Hamburger Menu */}
@@ -208,7 +238,7 @@ const NewsPage: React.FC = () => {
         {/* Latest News Section */}
         <section className="w-[95%] justify-center py-16 px-6 pt-24">
           <div className="max-w-full mx-auto w-full">
-            <h1 className="text-left text-gray-600 text-3xl lg:text-5xl font-bold leading-tight mb-8">
+            <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
               <span className="text-[#4169e1]">GoCar Express</span> Group News
             </h1>
 
@@ -217,49 +247,60 @@ const NewsPage: React.FC = () => {
               {newsData.map((news, index) => (
                 <div
                   key={index}
-                  className="bg-white flex flex-col justify-center items-center p-6 rounded-lg shadow-lg transform transition duration-300"
+                  className="bg-white justify-center items-center flex flex-col p-6 rounded-lg shadow-lg transform transition duration-300"
                 >
-                  <div className="w-full">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  <div className="w-[95%] justify-center items-center">
+                    {/* Big Image */}
+                    <div className="flex justify-center items-center w-full my-6">
+                      <img
+                        src={news.picture}
+                        alt={news.title}
+                        className="w-full h-auto rounded-md shadow-md"
+                      />
+                    </div>
+                    <h1 className="text-5xl  text-center font-extrabold text-gray-800 mb-4">
                       {news.title}
+                    </h1>
+                    <h2 className="text-3xl  text-justify font-semibold text-gray-800 mb-4">
+                      {news.customerName} {news.title}
                     </h2>
-                    <p className="text-gray-600 mb-4">{news.description}</p>
-                    <p className="text-gray-500 mb-4">{news.date}</p>
-                    <p className="text-gray-500 mb-4">{news.location}</p>
-                    <p className="text-gray-500 mb-4">
+                    <p className="text-gray-600 mb-4 ">{news.description}</p>
+                    <p className="text-gray-500 mb-4 ">{news.date}</p>
+                    <p className="text-gray-500 mb-4 ">{news.location}</p>
+                    <p className="text-gray-500 mb-4 ">
                       Duration: {news.duration}
                     </p>
-                    <p className="text-gray-500 mb-4">
+                    <p className="text-gray-500 mb-4 ">
                       Contact: {news.contact}
                     </p>
                   </div>
-
-                  {/* Big Image */}
-                  <div className="w-full my-6">
-                    <img
-                      src={news.picture}
-                      alt={news.title}
-                      className="w-full h-auto rounded-md shadow-md"
-                    />
-                  </div>
-
-                  {/* Description Below Image */}
-                  <div className="text-gray-600 mb-4">
-                    <p>{news.description}</p>
+                  {/* Book Now Button */}
+                  <div className="flex items-center justify-center p-3">
+                    <button
+                      className="relative inline-flex  items-center justify-center  p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
+                      onClick={handleBookNowToggle}
+                    >
+                      <span className="relative   px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                        Book Now
+                      </span>
+                    </button>
                   </div>
 
                   {/* Gallery Section */}
-                  <div className="w-full py-8 bg-gray-100 rounded-lg">
-                    <h3 className="text-xl font-bold text-gray-800 text-center mb-6">
-                      Gallery for {news.title}
+                  <div className="w-[95%] py-8 bg-gray-100 rounded-lg">
+                    <h3 className="text-2xl font-bold text-gray-800 text-left px-6 mb-6">
+                      GALLERY: {news.title}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6 px-6">
                       {news.gallery.map((item, galleryIndex) => (
-                        <div key={galleryIndex} className="relative">
+                        <div
+                          key={galleryIndex}
+                          className="relative elements overflow-hidden rounded-lg shadow-md"
+                        >
                           <img
                             src={item.picture}
                             alt={item.title}
-                            className="w-full h-auto rounded-md mb-4 cursor-pointer"
+                            className="w-full h-full object-cover rounded-lg cursor-pointer"
                             onClick={() =>
                               openGallery(news.gallery, galleryIndex)
                             }
@@ -274,6 +315,9 @@ const NewsPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* Render Modal */}
+        {isModalOpen && <CarRentalBooking onClose={handleBookNowToggle} />}
       </div>
 
       {zoomedGallery && (
@@ -290,8 +334,8 @@ const NewsPage: React.FC = () => {
             {/* Share Button */}
             <button
               onClick={(e) => {
-                e.stopPropagation();  
-                setShowShareOptions(!showShareOptions);  
+                e.stopPropagation();
+                setShowShareOptions(!showShareOptions);
               }}
               className="bg-blue-500 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600"
             >
@@ -354,7 +398,7 @@ const NewsPage: React.FC = () => {
             data-carousel="slide"
           >
             {/* Carousel Images */}
-            <div className="relative h-auto rounded-lg">
+            <div className="relative h-[70vh] w-[90vw] max-w-4xl mx-auto rounded-lg  flex items-center justify-center">
               {zoomedGallery.gallery.map((image, idx) => (
                 <div
                   key={idx}
@@ -369,7 +413,7 @@ const NewsPage: React.FC = () => {
                     src={image.picture}
                     alt={image.title}
                     draggable={false}
-                    className="absolute block max-w-full h-auto -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                    className="block w-full h-full object-contain rounded-lg"
                   />
                 </div>
               ))}
@@ -435,6 +479,10 @@ const NewsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <footer>
+        <Footer />
+      </footer>
     </>
   );
 };

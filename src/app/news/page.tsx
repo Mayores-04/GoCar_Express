@@ -45,7 +45,8 @@ const newsData: NewsItem[] = [
       {
         title: "Sunset View in Marinduque",
         date: "December 21, 2024",
-        picture: "/images/monggi.png",
+        picture:
+          "https://scontent.fmnl3-2.fna.fbcdn.net/v/t39.30808-6/467751846_122104873214620841_5916689405426250962_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeEzJGK_oefbwMWVhjGsAt097RZwoz_0947tFnCjP_T3jtLsOCo8loCTFWcyCk4U86olYW8vmsi2uITAAk8KCrgF&_nc_ohc=i5aG2fKGuAkQ7kNvgEsR4A3&_nc_zt=23&_nc_ht=scontent.fmnl3-2.fna&_nc_gid=AYYeR0omKTWKh9jSu3o9n1i&oh=00_AYDTJ6rdMLDAMplZxKgtdBXHdmUvEKQ91m0ADiiVQY3Lfg&oe=67802D74",
       },
       {
         title: "Scenic Beaches",
@@ -93,7 +94,8 @@ const newsData: NewsItem[] = [
         title: "Baguio Night Market",
         date: "November 14, 2024",
         picture: "/images/mg_car.jpg",
-      },{
+      },
+      {
         title: "Sunset View in Marinduque",
         date: "December 21, 2024",
         picture: "/images/monggi.png",
@@ -162,17 +164,14 @@ const NewsPage: React.FC = () => {
   const handleShare = (type: string, imageUrl: string) => {
     switch (type) {
       case "facebook":
-        window.open(
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-            imageUrl
-          )}`,
-          "_blank",
-          "width=600,height=400"
-        );
+        const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+          imageUrl
+        )}`;
+        window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
         break;
 
       case "email":
-        openEmailClient(imageUrl); // Send email with embedded image
+        openEmailClient(imageUrl);  
         break;
 
       case "messenger":
@@ -194,14 +193,15 @@ const NewsPage: React.FC = () => {
 
   const openEmailClient = (imageUrl: string) => {
     const subject = "Check out this amazing image!";
-    const body = `I wanted to share this image with you: <br/><img src="${imageUrl}" alt="Image"/>`;
-
+    const body = `I wanted to share this image with you: ${imageUrl}`;
+  
     const mailtoLink = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
-
+  
     window.location.href = mailtoLink;
   };
+  
 
   const saveImage = async (imageUrl: string) => {
     try {

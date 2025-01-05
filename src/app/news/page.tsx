@@ -120,13 +120,11 @@ const newsData: NewsItem[] = [
 ];
 
 const NewsPage: React.FC = () => {
-  const headerRef = GsapAnimation();
+  // const headerRef = GsapAnimation();
   const [zoomedGallery, setZoomedGallery] = useState<{
     gallery: GalleryItem[];
     currentIndex: number;
   } | null>(null);
-
-  const [showShareOptions, setShowShareOptions] = useState(false);
 
   const openGallery = (gallery: GalleryItem[], index: number) => {
     setZoomedGallery({ gallery, currentIndex: index });
@@ -161,64 +159,69 @@ const NewsPage: React.FC = () => {
   };
 
   // Share Handlers
-  const handleShare = (type: string, imageUrl: string) => {
-    switch (type) {
-      case "facebook":
-        const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-          imageUrl
-        )}`;
-        window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
-        break;
-
-      case "email":
-        openEmailClient(imageUrl);  
-        break;
-
-      case "messenger":
-        window.open(
-          `https://www.messenger.com/t/?link=${encodeURIComponent(imageUrl)}`,
-          "_blank",
-          "width=600,height=400"
-        );
-        break;
-
-      case "save":
-        saveImage(imageUrl);
-        break;
-
-      default:
-        break;
-    }
-  };
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   const openEmailClient = (imageUrl: string) => {
     const subject = "Check out this amazing image!";
     const body = `I wanted to share this image with you: ${imageUrl}`;
-  
+
     const mailtoLink = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
-  
+
     window.location.href = mailtoLink;
   };
-  
 
-  const saveImage = async (imageUrl: string) => {
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-
+  const handleShare = (type: string, imageUrl: string) => {
+    if (type === "facebook") {
+      const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        imageUrl
+      )}`;
+      window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
+    } else if (type === "messenger") {
+      const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(
+        imageUrl
+      )}&app_id=YOUR_APP_ID&redirect_uri=${encodeURIComponent(
+        window.location.href
+      )}`;
+      window.open(messengerShareUrl, "_blank", "noopener,noreferrer");
+    } else if (type === "email") {
+      openEmailClient(imageUrl);
+    } else if (type === "save") {
       const link = document.createElement("a");
-      const objectUrl = URL.createObjectURL(blob);
-      link.href = objectUrl;
-      link.download = imageUrl.split("/").pop() || "downloaded_image";
+      link.href = imageUrl;
+      link.download = "image.jpg";
+      document.body.appendChild(link);
       link.click();
-
-      URL.revokeObjectURL(objectUrl);
-    } catch (error) {
-      console.error("Error downloading the image:", error);
+      document.body.removeChild(link);
     }
   };
+  
+  const saveImage = async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl, { mode: "cors" });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch the image. Status: ${response.status}`);
+      }
+  
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+  
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = imageUrl.split("/").pop() || "downloaded_image";
+      document.body.appendChild(link);
+      link.click();
+  
+      URL.revokeObjectURL(objectUrl);
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error saving the image:", error);
+      alert("Failed to save the image. Please try again.");
+    }
+  };
+  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleBookNowToggle = () => {
@@ -329,8 +332,7 @@ const NewsPage: React.FC = () => {
           <div className="text-white text-2xl absolute top-4 left-4 mb-4">
             {zoomedGallery.currentIndex + 1}/{zoomedGallery.gallery.length}
           </div>
-          {/* Share */}
-          <div className=" text-white text-2xl absolute top-4 right-4 mb-4 z-10">
+          <div className="text-white text-2xl absolute top-4 right-4 mb-4 z-10">
             {/* Share Button */}
             <button
               onClick={(e) => {

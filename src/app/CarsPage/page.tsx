@@ -64,11 +64,11 @@ const CarsPage: React.FC = () => {
               </div>
             </div>
           
-            <div>
+            <div className="justify-center items-center flex">
               <img
                 src={car.Picture || "/images/placeholder.jpg"}
                 alt={`${car.Name} Image`}
-                className="w-full max-h-[550px] object-center rounded-lg"
+                className="w-auto max-h-[550px] object-center rounded-lg"
               />
             </div>
           </div>

@@ -14,8 +14,8 @@ type Passenger = {
   fullName: string;
   dateOfBirth: string;
   relationship: string;
-  authorizedDriver: "Yes" | "No"; 
-  driverLicense: string;  
+  authorizedDriver: "Yes" | "No";
+  driverLicense: string;
 };
 
 export default function ReservationPage() {
@@ -45,7 +45,7 @@ export default function ReservationPage() {
       dateOfBirth: "",
       relationship: "",
       authorizedDriver: "No",
-      driverLicense: "",  
+      driverLicense: "",
     }))
   );
 
@@ -57,6 +57,23 @@ export default function ReservationPage() {
     const updatedPassengers = [...passengerDetails];
     updatedPassengers[index][field] = value;
     setPassengerDetails(updatedPassengers);
+  };
+
+  const [ownDriverInfo, setOwnDriverInfo] = useState({
+    fullName: "",
+    licenseNumber: "",
+    phoneNumber: "",
+  });
+
+  // Handler to update own driver information
+  const handleOwnDriverChange = (
+    field: keyof typeof ownDriverInfo,
+    value: string
+  ) => {
+    setOwnDriverInfo({
+      ...ownDriverInfo,
+      [field]: value,
+    });
   };
 
   if (!isClient) return null;
@@ -93,6 +110,57 @@ export default function ReservationPage() {
                 <option>With Driver</option>
                 <option>Without Driver</option>
               </select>
+              {service === "Without Driver" && (
+                <div className="mt-6 bg-gray-100 p-4 rounded-lg">
+                  <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                    Driver Information
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block mb-2 text-gray-600">
+                        Driver's Full Name
+                      </label>
+                      <input
+                        type="text"
+                        value={ownDriverInfo.fullName}
+                        onChange={(e) =>
+                          handleOwnDriverChange("fullName", e.target.value)
+                        }
+                        placeholder="First Name Last Name"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-gray-600">
+                        Driver's License Number
+                      </label>
+                      <input
+                        type="text"
+                        value={ownDriverInfo.licenseNumber}
+                        onChange={(e) =>
+                          handleOwnDriverChange("licenseNumber", e.target.value)
+                        }
+                        placeholder="License Number"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-gray-600">
+                        Driver's Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={ownDriverInfo.phoneNumber}
+                        onChange={(e) =>
+                          handleOwnDriverChange("phoneNumber", e.target.value)
+                        }
+                        placeholder="Phone Number"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Renter Information */}
@@ -270,7 +338,7 @@ export default function ReservationPage() {
                         </label>
                         <input
                           type="text"
-                          value={passenger.driverLicense || ""}  
+                          value={passenger.driverLicense || ""}
                           onChange={(e) =>
                             handlePassengerChange(
                               index,

@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 const Cars = [
   {
     Name: "MG ZS",
-    Brand: "MG ZS",
+    Brand: "MG",
     Seats: 5,
     Picture: "/images/monggi.png",
     Description:
@@ -48,24 +48,31 @@ const CarsPage: React.FC = () => {
         <div className={`grid ${gridCols} gap-8`}>
           {Cars.map((car, index) => (
             <div
-              key={index}
-              className="bg-white rounded-lg shadow-lg p-6 grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 items-start gap-8"
-            >
+            key={index}
+            className="bg-white rounded-lg shadow-lg p-6 grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 items-start gap-8"
+          >
+            <div className="flex flex-col justify-between h-full">
               <div>
-                <h2 className="text-xl font-bold text-[#263033]">{car.Name}</h2>
-                <p className="text-gray-500 mt-2">{car.Brand}</p>
-                <p className="text-gray-500 mt-2">{car.Description}</p>
-                <p className="text-gray-500 mt-2">Seats: {car.Seats}</p>
+                <h2 className="font-bold text-[#263033] text-3xl mt-4 lg:text-5xl">{car.Name}</h2>
+                <p className="text-gray-500 mt-3 text-2xl lg:text-4xl">Brand: {car.Brand}</p>
+                <p className="text-gray-500 mt-3 text-xl">{car.Description}</p>
               </div>
-
-              <div>
-                <img
-                  src={car.Picture || "/images/placeholder.jpg"}
-                  alt={`${car.Name} Image`}
-                  className="w-full max-h-[550px] object-center rounded-lg"
-                />
+          
+              {/* This section will push the Seats information to the bottom */}
+              <div className="mt-3 text-xl text-gray-500">
+                <p>Seats: {car.Seats}</p>
               </div>
             </div>
+          
+            <div>
+              <img
+                src={car.Picture || "/images/placeholder.jpg"}
+                alt={`${car.Name} Image`}
+                className="w-full max-h-[550px] object-center rounded-lg"
+              />
+            </div>
+          </div>
+          
           ))}
         </div>
       </section>

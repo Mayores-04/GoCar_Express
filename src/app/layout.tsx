@@ -30,7 +30,17 @@ export default function RootLayout({
           href="https://go-car-express.vercel.app/_next/image?url=%2Fimages%2FblueLogo.png&w=96&q=75"
           type="image/jpeg"
         />
-        <link rel="apple-touch-icon" href="https://go-car-express.vercel.app/_next/image?url=%2Fimages%2FblueLogo.png&w=96&q=75" />
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-o88wwjUt6fU9yFffhOBfyBRVtI0pTc8kaVpQDqXpZT0="
+          crossOrigin=""
+        />
+
+        <link
+          rel="apple-touch-icon"
+          href="https://go-car-express.vercel.app/_next/image?url=%2Fimages%2FblueLogo.png&w=96&q=75"
+        />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body

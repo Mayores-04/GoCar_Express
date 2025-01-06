@@ -188,12 +188,13 @@ const NewsPage: React.FC = () => {
     } else if (type === "email") {
       openEmailClient(imageUrl);
     } else if (type === "save") {
-      const link = document.createElement("a");
-      link.href = imageUrl;
-      link.download = "image.jpg";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // const link = document.createElement("a");
+      // link.href = imageUrl;
+      // link.download = "image.jpg";
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link); 
+      saveImage(imageUrl);
     }
   };
   

@@ -126,7 +126,7 @@ const ContactPage: React.FC = () => {
                   <OperationHours
                     day="Sunday - Saturday"
                     time="All Day"
-                    available={true}  
+                    available={false}  
                   />
                   <OperationHours
                     day="February 23, 2025"

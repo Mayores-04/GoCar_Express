@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "leaflet/dist/leaflet.css";
@@ -13,6 +14,7 @@ import {
   LayersControl,
 } from "react-leaflet";
 
+// Custom Leaflet Marker Icon
 const CustomIcon = L.icon({
   iconUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
@@ -23,35 +25,47 @@ const CustomIcon = L.icon({
 });
 
 export default function ReservationPage() {
+  const [isClient, setIsClient] = useState(false);
   const [service, setService] = useState("With Driver");
-  const [userLocation] = useState<[number, number]>([12.8797, 121.774]);
-  const [markerLocation, setMarkerLocation] = useState<[number, number] | null>(null);
+  const [userLocation] = useState<[number, number]>([12.8797, 121.774]); // Default to the Philippines
+  const [markerLocation, setMarkerLocation] = useState<[number, number] | null>(
+    null
+  );
   const [locationName, setLocationName] = useState<string | null>(null);
 
+  // Ensure the code runs only on the client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Fetch location name from coordinates using Nominatim API
   const fetchLocationName = async (lat: number, lng: number) => {
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
     try {
       const response = await fetch(url);
       const data = await response.json();
-      setLocationName(data.display_name || "Unknown location");  
+      setLocationName(data.display_name || "Unknown location");
     } catch (error) {
       console.error("Error fetching location name:", error);
       setLocationName("Unable to retrieve location name");
     }
   };
-  
+
+  // Handle map clicks and set marker location
   const LocationSelector: React.FC = () => {
     useMapEvents({
       click(e) {
         const { lat, lng } = e.latlng;
-        setMarkerLocation([lat, lng]);  
-        fetchLocationName(lat, lng);  
+        setMarkerLocation([lat, lng]);
+        fetchLocationName(lat, lng);
       },
     });
-  
-    return markerLocation ? <Marker position={markerLocation} icon={CustomIcon}></Marker> : null;
+    return markerLocation ? (
+      <Marker position={markerLocation} icon={CustomIcon}></Marker>
+    ) : null;
   };
-  
+
+  if (!isClient) return null; // Prevent server-side rendering issues
 
   return (
     <>
@@ -60,23 +74,21 @@ export default function ReservationPage() {
         <Header />
       </header>
 
-      {/* Main Section */}
+      {/* Main Content */}
       <main className="py-16 pt-24 px-8 justify-center bg-[#263033] w-full items-center">
         <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
           <span className="text-[#4169e1]">GoCar Express</span> Reservation
         </h1>
 
-        {/* Reservation Form Section */}
+        {/* Reservation Form */}
         <section className="w-full justify-center h-auto items-center flex rounded-md">
           <form className="w-full bg-white shadow-md rounded-lg p-8">
-            {/* Services Section */}
+            {/* Service Selection */}
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
                 Services We Offer
               </h2>
-              <label className="block mb-2 text-gray-600">
-                Select Service:
-              </label>
+              <label className="block mb-2 text-gray-600">Select Service:</label>
               <select
                 className="w-full p-2 border rounded"
                 value={service}
@@ -87,8 +99,8 @@ export default function ReservationPage() {
               </select>
             </div>
 
-            {/* Renter Information */}
-            <div className="mb-6">
+                        {/* Renter Information */}
+                        <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
                 Renter Information
               </h2>
@@ -236,7 +248,7 @@ export default function ReservationPage() {
                       style={{ height: "100%", width: "100%" }}
                     >
                       <LayersControl position="topright">
-                        {/* Default Map Style */}
+                        {/* Standard Map */}
                         <LayersControl.BaseLayer checked name="Standard">
                           <TileLayer
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -244,7 +256,7 @@ export default function ReservationPage() {
                           />
                         </LayersControl.BaseLayer>
 
-                        {/* Terrain Map Style */}
+                        {/* Terrain Map */}
                         <LayersControl.BaseLayer name="Terrain">
                           <TileLayer
                             url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
@@ -294,8 +306,8 @@ export default function ReservationPage() {
               )}
             </div>
 
-            {/* Rules and Regulations */}
-            <div className="mb-6">
+           {/* Rules and Regulations */}
+           <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
                 Rules and Regulations
               </h2>

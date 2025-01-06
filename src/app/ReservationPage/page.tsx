@@ -5,67 +5,61 @@ import dynamic from "next/dynamic";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  LayersControl,
-} from "react-leaflet";
 
-// Custom Leaflet Marker Icon
-const CustomIcon = L.icon({
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12.5, 41],
+const MapWithNoSSR = dynamic(() => import("../components/MapComponent"), {
+  ssr: false,
 });
+
+type Passenger = {
+  fullName: string;
+  dateOfBirth: string;
+  relationship: string;
+  authorizedDriver: "Yes" | "No"; 
+  driverLicense: string;  
+};
 
 export default function ReservationPage() {
   const [isClient, setIsClient] = useState(false);
   const [service, setService] = useState("With Driver");
-  const [userLocation] = useState<[number, number]>([12.8797, 121.774]); // Default to the Philippines
-  const [markerLocation, setMarkerLocation] = useState<[number, number] | null>(
-    null
-  );
-  const [locationName, setLocationName] = useState<string | null>(null);
 
-  // Ensure the code runs only on the client
   useEffect(() => {
     setIsClient(true);
   }, []);
+  const [numberOfPassengers, setNumberOfPassengers] = useState(1);
 
-  // Fetch location name from coordinates using Nominatim API
-  const fetchLocationName = async (lat: number, lng: number) => {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      setLocationName(data.display_name || "Unknown location");
-    } catch (error) {
-      console.error("Error fetching location name:", error);
-      setLocationName("Unable to retrieve location name");
-    }
+  useEffect(() => {
+    setPassengerDetails(
+      Array.from({ length: numberOfPassengers }, (_, index) => ({
+        ...passengerDetails[index],
+        fullName: passengerDetails[index]?.fullName || "",
+        dateOfBirth: passengerDetails[index]?.dateOfBirth || "",
+        relationship: passengerDetails[index]?.relationship || "",
+        authorizedDriver: passengerDetails[index]?.authorizedDriver || "No",
+      }))
+    );
+  }, [numberOfPassengers]);
+
+  const [passengerDetails, setPassengerDetails] = useState(
+    Array.from({ length: numberOfPassengers }, () => ({
+      fullName: "",
+      dateOfBirth: "",
+      relationship: "",
+      authorizedDriver: "No",
+      driverLicense: "",  
+    }))
+  );
+
+  const handlePassengerChange = (
+    index: number,
+    field: keyof Passenger,
+    value: string
+  ) => {
+    const updatedPassengers = [...passengerDetails];
+    updatedPassengers[index][field] = value;
+    setPassengerDetails(updatedPassengers);
   };
 
-  // Handle map clicks and set marker location
-  const LocationSelector: React.FC = () => {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        setMarkerLocation([lat, lng]);
-        fetchLocationName(lat, lng);
-      },
-    });
-    return markerLocation ? (
-      <Marker position={markerLocation} icon={CustomIcon}></Marker>
-    ) : null;
-  };
-
-  if (!isClient) return null; // Prevent server-side rendering issues
+  if (!isClient) return null;
 
   return (
     <>
@@ -88,7 +82,9 @@ export default function ReservationPage() {
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
                 Services We Offer
               </h2>
-              <label className="block mb-2 text-gray-600">Select Service:</label>
+              <label className="block mb-2 text-gray-600">
+                Select Service:
+              </label>
               <select
                 className="w-full p-2 border rounded"
                 value={service}
@@ -99,8 +95,8 @@ export default function ReservationPage() {
               </select>
             </div>
 
-                        {/* Renter Information */}
-                        <div className="mb-6">
+            {/* Renter Information */}
+            <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
                 Renter Information
               </h2>
@@ -162,46 +158,134 @@ export default function ReservationPage() {
               </div>
             </div>
 
+            {/* Number of Passengers */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                Number of Passengers
+              </h2>
+              <select
+                className="w-full p-2 border rounded"
+                value={numberOfPassengers}
+                onChange={(e) => setNumberOfPassengers(Number(e.target.value))}
+              >
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+              </select>
+            </div>
+
             {/* Passenger Information */}
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
                 Passenger Information
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block mb-2 text-gray-600">Full Name</label>
-                  <input
-                    type="text"
-                    placeholder="First Name Last Name"
-                    className="w-full p-2 border rounded"
-                  />
+              {passengerDetails.map((passenger, index) => (
+                <div
+                  key={index}
+                  className="p-4 border rounded-lg mb-4 bg-gray-100"
+                >
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                    Passenger {index + 1}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block mb-2 text-gray-600">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        value={passenger.fullName}
+                        onChange={(e) =>
+                          handlePassengerChange(
+                            index,
+                            "fullName",
+                            e.target.value
+                          )
+                        }
+                        placeholder="First Name Last Name"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-gray-600">
+                        Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        value={passenger.dateOfBirth}
+                        onChange={(e) =>
+                          handlePassengerChange(
+                            index,
+                            "dateOfBirth",
+                            e.target.value
+                          )
+                        }
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-gray-600">
+                        Relationship to Renter
+                      </label>
+                      <input
+                        type="text"
+                        value={passenger.relationship}
+                        onChange={(e) =>
+                          handlePassengerChange(
+                            index,
+                            "relationship",
+                            e.target.value
+                          )
+                        }
+                        placeholder="Spouse/Friend/Colleague"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-gray-600">
+                        Authorized Driver
+                      </label>
+                      <select
+                        value={passenger.authorizedDriver}
+                        onChange={(e) =>
+                          handlePassengerChange(
+                            index,
+                            "authorizedDriver",
+                            e.target.value
+                          )
+                        }
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+
+                    {/* Conditionally render the Driver's License input if authorized driver is "Yes" */}
+                    {passenger.authorizedDriver === "Yes" && (
+                      <div className="col-span-2">
+                        <label className="block mb-2 text-gray-600">
+                          Driver's License
+                        </label>
+                        <input
+                          type="text"
+                          value={passenger.driverLicense || ""}  
+                          onChange={(e) =>
+                            handlePassengerChange(
+                              index,
+                              "driverLicense",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Enter Driver's License Number"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <label className="block mb-2 text-gray-600">
-                    Date of Birth
-                  </label>
-                  <input type="date" className="w-full p-2 border rounded" />
-                </div>
-                <div>
-                  <label className="block mb-2 text-gray-600">
-                    Relationship to Renter
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Spouse/Friend/Colleague"
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 text-gray-600">
-                    Authorized Driver
-                  </label>
-                  <select className="w-full p-2 border rounded">
-                    <option>Yes</option>
-                    <option>No</option>
-                  </select>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Additional Information */}
@@ -210,16 +294,6 @@ export default function ReservationPage() {
                 Additional Details
               </h2>
               <div>
-                <label className="block mb-2 text-gray-600">
-                  Number of Passengers
-                </label>
-                <input
-                  type="number"
-                  placeholder="Enter number"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              <div className="mt-4">
                 <label className="block mb-2 text-gray-600">
                   Time/Travel Duration
                 </label>
@@ -237,55 +311,8 @@ export default function ReservationPage() {
                 Pickup Location
               </h2>
               {service === "With Driver" ? (
-                <div>
-                  <p className="text-gray-600 mb-4">
-                    Click on the map to specify your pickup location:
-                  </p>
-                  <div className="w-full h-64 border rounded">
-                    <MapContainer
-                      center={userLocation}
-                      zoom={6}
-                      style={{ height: "100%", width: "100%" }}
-                    >
-                      <LayersControl position="topright">
-                        {/* Standard Map */}
-                        <LayersControl.BaseLayer checked name="Standard">
-                          <TileLayer
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                          />
-                        </LayersControl.BaseLayer>
-
-                        {/* Terrain Map */}
-                        <LayersControl.BaseLayer name="Terrain">
-                          <TileLayer
-                            url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                            attribution='&copy; <a href="https://opentopomap.org/">OpenTopoMap</a> contributors'
-                          />
-                        </LayersControl.BaseLayer>
-                      </LayersControl>
-
-                      <LocationSelector />
-                    </MapContainer>
-                  </div>
-                  <div className="mt-4">
-                    <label className="block text-gray-600">
-                      Selected Location:
-                    </label>
-                    {markerLocation ? (
-                      <div>
-                        <p className="text-gray-800">
-                          Latitude: {markerLocation[0]}, Longitude:{" "}
-                          {markerLocation[1]}
-                        </p>
-                        <p className="text-gray-800">
-                          Location Name: {locationName || "Fetching..."}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-gray-600">No location selected yet.</p>
-                    )}
-                  </div>
+                <div style={{ height: "400px", width: "100%" }}>
+                  <MapWithNoSSR />
                 </div>
               ) : (
                 <div>
@@ -306,8 +333,8 @@ export default function ReservationPage() {
               )}
             </div>
 
-           {/* Rules and Regulations */}
-           <div className="mb-6">
+            {/* Rules and Regulations */}
+            <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
                 Rules and Regulations
               </h2>

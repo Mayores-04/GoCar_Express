@@ -54,40 +54,40 @@ const Home: React.FC = () => {
       >
         <Header />
       </header>
-      <main id="Home" className="bg-gray-100 transition-all ">
+      <main id="Home" className="bg-[#364043] transition-all ">
         <section className="relative elements">
           <div className="relative">
             <Image
-              src="/images/mg_car.jpg"
+              src="/mg_car.jpg"
               alt="car pic"
               width={500}
               height={300}
-              className="w-full pt-20 xl:pt-0 lg:pt-2 md:pt-10 h-screen xl:h-auto lg:h-auto md:h-auto sm:h-screen object-cover elements"
+              className="opacity-[60%] w-full pt-20 xl:pt-0 lg:pt-2 md:pt-10 h-screen xl:h-auto lg:h-auto md:h-auto sm:h-screen object-cover elements"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-70" />
             <div className="absolute inset-0 flex items-center justify-center elements">
               <h1
-                className="text-center text-white text-4xl p-6 md:text-[35px] 
-                lg:text-[65px] xl:text-[75px] font-bold leading-tight z-10"
+                className="text-center text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-200 to-white 
+             text-4xl p-6 md:text-[35px] lg:text-[65px] xl:text-[75px] font-bold leading-tight z-10"
               >
                 "Driving your dreams, delivering excellence."
               </h1>
             </div>
           </div>
         </section>
-
+        
         <section className=" w-full ">
           <div className="flex flex-col items-center justify-center py-16 ">
             {/* Welcome Section */}
             <section className="text-center  px-6 w-full xl:w-[95%] lg:w-[95%] md:w-[95%] ">
               <h1
-                className="text-center elements text-gray-600 text-3xl md:text-[35px] 
+                className="text-center elements text-gray-300 text-3xl md:text-[35px] 
                 lg:text-[65px] xl:text-[75px] font-bold leading-tight"
               >
                 Car Rental Philippines
               </h1>
-              <p className="mt-4 elements text-lg xl:text-xl lg:text-xl text-gray-600">
+              <p className="mt-4 elements text-lg xl:text-xl lg:text-xl text-gray-200">
                 At Go Car Express, we are committed to providing a seamless,
                 high-quality car rental experience. Whether you're looking to
                 rent for a business trip, leisure, or a special occasion, we

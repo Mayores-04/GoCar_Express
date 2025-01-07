@@ -73,7 +73,7 @@ export default function Header() {
           />
         </div>
 
-        {/* Hamburger Icon */}
+        {/* Hamburger Icon */}  
         <button
           className="md:hidden text-2xl focus:outline-none"
           onClick={() => setMenuOpen(!menuOpen)}

@@ -58,6 +58,7 @@ const MapComponent = () => {
       </p>
       <div className="w-full h-64 border rounded">
         <MapContainer
+          className="z-0"
           center={userLocation}
           zoom={6}
           style={{ height: "100%", width: "100%" }}
@@ -90,10 +91,10 @@ const MapComponent = () => {
         </label>
         {markerLocation ? (
           <div>
-            <p className="text-gray-800">
+            {/* <p className="text-gray-800">
               Latitude: {markerLocation[0]}, Longitude: {markerLocation[1]}
-            </p>
-            <p className="text-gray-800">
+            </p> */}
+            <p className="text-gray-800 text-sm">
               Location Name: {locationName || "Fetching..."}
             </p>
           </div>

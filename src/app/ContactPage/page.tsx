@@ -12,14 +12,16 @@ import {
 
 const ContactPage: React.FC = () => {
   return (
-    <div id="ContactPage" className="bg-[#263033] text-white">
-      {/* Header */}
-      <header>
+    <>
+    {/* Header */}
+    <header>
         <Header />
       </header>
 
+    <div id="ContactPage" className="bg-[#263033] text-white">
+      
       {/* Contact Section */}
-      <section className="w-full justify-center py-16 px-6 pt-24">
+      <section className="w-full justify-center px-6 pt-24 py-5">
         <div className="max-w-7xl mx-auto px-4 py-12 md:px-8">
           <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Contact Form */}
@@ -51,7 +53,7 @@ const ContactPage: React.FC = () => {
                   className="relative inline-flex w-full items-center justify-center  p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
                 >
                   <span className="relative w-full  px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                    Book Now
+                    SEND
                   </span>
                 </button>
               </form>
@@ -140,11 +142,14 @@ const ContactPage: React.FC = () => {
         </div>
       </section>
 
+    </div>
+    
       {/* Footer */}
       <footer>
         <Footer />
       </footer>
-    </div>
+    </>
+    
   );
 };
 

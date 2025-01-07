@@ -9,7 +9,7 @@ const Cars = [
     Name: "MG ZS",
     Brand: "MG",
     Seats: 5,
-    Picture: "/images/monggi.png",
+    Picture: "/images/mg_car.jpg",
     Description:
       "The MG ZS is a compact SUV offering a blend of style, practicality, and affordability. It features a 1.5-liter engine producing 112 horsepower, with a 0 to 100 km/h time of approximately 10.9 seconds. The car is equipped with modern tech such as a 12.3-inch touchscreen display and advanced safety features.",
   },

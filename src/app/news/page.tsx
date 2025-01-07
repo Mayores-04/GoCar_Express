@@ -119,7 +119,6 @@ const newsData: NewsItem[] = [
 ];
 
 const NewsPage: React.FC = () => {
-  // const headerRef = GsapAnimation();
   const [zoomedGallery, setZoomedGallery] = useState<{
     gallery: GalleryItem[];
     currentIndex: number;
@@ -158,7 +157,7 @@ const NewsPage: React.FC = () => {
   };
 
   // Share Handlers
-  const [showShareOptions, setShowShareOptions] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false); 
 
   const openEmailClient = (imageUrl: string) => {
     const subject = "Check out this amazing image!";
@@ -222,11 +221,11 @@ const NewsPage: React.FC = () => {
   };
   
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleBookNowToggle = () => {
-    setIsModalOpen((prev) => !prev);
-  };
+  // const handleBookNowToggle = () => {
+  //   setIsModalOpen((prev) => !prev);
+  // };
   return (
     <>
       {/* Header with Hamburger Menu */}
@@ -261,7 +260,7 @@ const NewsPage: React.FC = () => {
                         className="w-full h-auto rounded-md shadow-md"
                       />
                     </div>
-                    <h1 className="text-5xl  text-center font-extrabold text-gray-800 mb-4">
+                    <h1 className="text-4xl  text-center font-extrabold text-gray-800 mb-4">
                       {news.title}
                     </h1>
                     <h2 className="text-3xl  text-justify font-semibold text-gray-800 mb-4">

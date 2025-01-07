@@ -21,7 +21,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
   readmore,
   onMoreInfo,
 }) => (
-  <div className="elements justify-around bg-white grid grid-cols-1 md:grid-cols-2 gap-10 p-6 text-left rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
+  <div className="elements justify-center items-center bg-white grid grid-cols-1 md:grid-cols-2 gap-10 p-6 text-left rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
     <div className="px-4 flex flex-col justify-between h-full">
       <div>
         <h2 className="text-md font-bold text-gray-400 mb-2">{date}</h2>
@@ -48,7 +48,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
       </div>
     </div>
 
-    <div className="w-full px-24 items-center justify-center">
+    <div className="w-full items-center justify-center">
       {picture && (
         <Image
           src={picture}

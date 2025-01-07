@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 export default function Header() {
   const pathname = usePathname();
   const [activeButton, setActiveButton] = useState<string>("HOME");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (pathname === "/" || pathname === "/#Home") {
@@ -44,6 +45,7 @@ export default function Header() {
 
   const handleClick = (button: string) => {
     setActiveButton(button);
+    setMenuOpen(false);  
   };
 
   const handleLocationClick = () => {
@@ -52,26 +54,39 @@ export default function Header() {
     if (locationSection) {
       locationSection.scrollIntoView({ behavior: "smooth" });
       setActiveButton("LOCATION");
+      setMenuOpen(false);  
     }
   };
 
   return (
-    <header className="h-[82px] px-6 p-1 bg-white fixed w-full z-50 rounded-bl-lg rounded-br-lg shadow-md">
-      <div className="flex items-center space-x-4 w-full justify-between text-end">
-        <div className="flex space-x-6">
-          <div className="">
-            <Image
-              src="/images/blueLogo.png"
-              alt="logo"
-              width={80}
-              height={80}
-              className="rounded-br-[50%] rounded-bl-[50%] p-2"
-              priority
-            />
-          </div>
+    <header className="h-[82px] px-6 py-2 bg-white fixed w-full z-50 rounded-bl-lg rounded-br-lg shadow-md">
+      <div className="flex justify-between items-center w-full">
+        {/* Logo */}
+        <div>
+          <Image
+            src="/images/blueLogo.png"
+            alt="logo"
+            width={80}
+            height={80}
+            className="rounded-br-[50%] rounded-bl-[50%] p-2"
+            priority
+          />
         </div>
 
-        <nav className="px-4 space-x-8 py-4 sticky top-0 w-full">
+        {/* Hamburger Icon */}
+        <button
+          className="md:hidden text-2xl focus:outline-none"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? "✖️" : "☰"}
+        </button>
+
+        {/* Navigation Menu */}
+        <nav
+          className={`${
+            menuOpen ? "flex flex-col space-y-4 w-screen justify-center items-center " : "hidden"
+          } md:flex md:items-center md:space-x-8 w-full md:w-auto bg-white absolute md:static top-[82px] left-0 md:top-0 md:bg-transparent p-6 md:p-0 shadow-md md:shadow-none`}
+        >
           <Link
             href="/#Home"
             className={`font-semibold ${isActive("/#Home")} hover:text-sky-500`}

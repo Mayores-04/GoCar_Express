@@ -81,7 +81,7 @@ export default function ReservationPage() {
   return (
     <>
       {/* Header */}
-      <header>
+      <header className="z-1000">
         <Header />
       </header>
 
@@ -384,7 +384,7 @@ export default function ReservationPage() {
                 </div>
               ) : (
                 <div>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-8">
                     Your pickup location is fixed at:
                   </p>
                   <iframe

@@ -7,7 +7,7 @@ import Image from "next/image";
 export default function Footer() {
   return (
     <>
-      <footer className="h-auto p-6 px-9 flex flex-col md:flex-row items-center justify-between bg-gray-100 shadow-md">
+      <footer className="h-auto p-6 md:px-12 flex flex-col md:flex-row items-center md:justify-between bg-gray-100 shadow-md space-y-6 md:space-y-0">
         {/* Logo Section */}
         <div className="flex items-center space-x-4">
           <Image
@@ -17,11 +17,13 @@ export default function Footer() {
             height={60}
             className="rounded-br-full rounded-bl-full"
           />
-          <h1 className="text-xl font-semibold text-[#4169e1]">GoCar Express</h1>
+          <h1 className="text-xl font-semibold text-[#4169e1]">
+            GoCar Express
+          </h1>
         </div>
 
         {/* Contact Us Section */}
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
+        <div className="flex flex-col md:flex-row items-center md:space-x-8 space-y-4 md:space-y-0">
           <div className="flex items-center space-x-2">
             <FontAwesomeIcon icon={faPhone} className="text-[#4169e1]" />
             <a
@@ -45,7 +47,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright Section */}
-        <div className="mt-4 md:mt-0 text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-500 md:mt-0">
           © 2025 GoCar Express. All rights reserved.
         </div>
       </footer>

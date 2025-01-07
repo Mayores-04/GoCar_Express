@@ -260,10 +260,10 @@ const NewsPage: React.FC = () => {
                         className="w-full h-auto rounded-md shadow-md"
                       />
                     </div>
-                    <h1 className="text-4xl  text-center font-extrabold text-gray-800 mb-4">
+                    <h1 className="text-3xl xl:text-5xl lg:text-5xl md:text-3xl text-center font-extrabold text-gray-800 mb-4">
                       {news.title}
                     </h1>
-                    <h2 className="text-3xl  text-justify font-semibold text-gray-800 mb-4">
+                    <h2 className="text-xl xl:text-3xl lg:text-3xl md:text-2xl text-left font-semibold text-gray-800 mb-4">
                       {news.customerName} {news.title}
                     </h2>
                     <p className="text-gray-600 mb-4 ">{news.description}</p>
@@ -289,7 +289,7 @@ const NewsPage: React.FC = () => {
                   </div>
 
                   {/* Gallery Section */}
-                  <div className="w-[95%] py-8 bg-gray-100 rounded-lg">
+                  <div className="w-full xl:w-[95%] lg:w-[95%] md:w-[95%] py-8 bg-gray-100 rounded-lg">
                     <h3 className="text-2xl font-bold text-gray-800 text-left px-6 mb-6">
                       GALLERY: {news.title}
                     </h3>
@@ -321,7 +321,7 @@ const NewsPage: React.FC = () => {
 
       {zoomedGallery && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex flex-col justify-center items-center"
+          className="fixed w-full inset-0 bg-black bg-opacity-80 z-50 flex flex-col justify-center items-center"
           onClick={closeGallery}
         >
           {/* Image Number positioned at the top-left */}
@@ -392,7 +392,7 @@ const NewsPage: React.FC = () => {
           {/* Carousel Wrapper */}
           <div
             id="gallery"
-            className="relative w-full top-4 right-4 "
+            className="relative w-full "
             data-carousel="slide"
           >
             {/* Carousel Images */}

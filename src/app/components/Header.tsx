@@ -59,16 +59,16 @@ export default function Header() {
   };
 
   return (
-    <header className="h-[82px] px-6 py-2 bg-white fixed w-full z-50 rounded-bl-lg rounded-br-lg shadow-md">
+    <header className="h-[85px] px-6 py-2 bg-white fixed w-full z-50 rounded-bl-lg rounded-br-lg shadow-md">
       <div className="flex justify-between items-center w-full">
         {/* Logo */}
-        <div>
+        <div className="">
           <Image
             src="/images/blueLogo.png"
             alt="logo"
             width={80}
             height={80}
-            className="rounded-br-[50%] rounded-bl-[50%] p-2"
+            className="rounded-br-[50%] rounded-bl-[50%]  p-2"
             priority
           />
         </div>

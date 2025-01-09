@@ -26,7 +26,7 @@ export default function Header() {
       setActiveButton("ABOUT");
     } else if (pathname === "/ContactPage") {
       setActiveButton("CONTACT");
-    } else if (pathname === "/news") {
+    } else if (pathname === "/NewsPage") {
       setActiveButton("NEWS");
     }
   }, [pathname]);
@@ -113,8 +113,8 @@ export default function Header() {
             OUR CARS
           </Link>
           <Link
-            href="/news"
-            className={`font-semibold ${isActive("/news")} hover:text-sky-500`}
+            href="/NewsPage"
+            className={`font-semibold ${isActive("/NewsPage")} hover:text-sky-500`}
             onClick={() => handleClick("NEWS")}
           >
             NEWS

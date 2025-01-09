@@ -5,6 +5,7 @@ interface ModalProps {
   onClose: () => void;
   content: {
     title?: string;
+    customerName?: string;
     description?: string;
     date?: string;
     picture?: string;
@@ -13,6 +14,7 @@ interface ModalProps {
     contact?: string;
   };
 }
+
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, content }) => {
   if (!isOpen) return null;
@@ -35,6 +37,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, content }) => {
           />
         )}
         <p className="mb-2">{content.description || "No description available."}</p>
+        <p className="mb-2"><strong>Customer:</strong> {content.customerName || "No Name available."}</p>
         <p className="mb-2"><strong>Date:</strong> {content.date || "N/A"}</p>
         <p className="mb-2"><strong>Location:</strong> {content.location || "N/A"}</p>
         <p className="mb-2"><strong>Duration:</strong> {content.duration || "N/A"}</p>

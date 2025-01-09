@@ -7,37 +7,15 @@ import FeatureCard from "./components/FeatureCard";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import NewsCard from "./components/NewsCard";
-import Modal from "./components/Modal";
-
-const newsCards = [
-  {
-    title: "Travel to Marinduque",
-    description: "On December 20, 2024, experience the scenic journey...",
-    date: "December 20, 2024",
-    picture: "/images/mg_car.jpg",
-    location: "Marinduque, Philippines",
-    duration: "5 days",
-    contact: "info@travelmarinduque.com",
-    readmore: "news",
-  },
-  {
-    title: "Road Trip to Baguio",
-    description: "On November 10, 2024, set off for a refreshing road trip...",
-    date: "November 10, 2024",
-    picture: "/images/mg_car.jpg",
-    location: "Baguio, Philippines",
-    duration: "3 days",
-    contact: "info@roadtripbaguio.com",
-    readmore: "news",
-  },
-];
+import Modal from "./components/MoreNewsInfo";
+import { newsData, NewsItem } from "./data/news";
 
 const Home: React.FC = () => {
   const headerRef = GsapAnimation();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedNews, setSelectedNews] = useState(newsCards[0]);
+  const [selectedNews, setSelectedNews] = useState<NewsItem>(newsData[0]);
 
-  const openModal = (news: (typeof newsCards)[0]) => {
+  const openModal = (news: NewsItem) => {
     setSelectedNews(news);
     setIsModalOpen(true);
   };
@@ -45,7 +23,6 @@ const Home: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
   };
-
   return (
     <>
       <header
@@ -76,7 +53,7 @@ const Home: React.FC = () => {
             </div>
           </div>
         </section>
-        
+
         <section className=" w-full ">
           <div className="flex flex-col items-center justify-center py-16 ">
             {/* Welcome Section */}
@@ -144,16 +121,19 @@ const Home: React.FC = () => {
             <span className=" text-[#4169e1] ">GoCar Express</span> Group News
           </h1>
           <div className="flex flex-col w-full justify-center gap-6 mt-8">
-            {newsCards.map((card, index) => (
+            {newsData.map((card) => (
               <NewsCard
-                key={index}
+                key={card.id}
+                id={card.id}
                 title={card.title}
+                picture={card.picture}
                 description={card.description}
                 date={card.date}
-                picture={card.picture}
-                readmore={card.readmore}
-                onMoreInfo={() => openModal(card)}
-              />
+                location={card.location}
+                duration={card.duration}
+                contact={card.contact}
+                gallery={card.gallery}
+                onMoreInfo={() => openModal(card)} customerName={card.customerName} />
             ))}
           </div>
         </section>
@@ -162,9 +142,7 @@ const Home: React.FC = () => {
         <Modal
           isOpen={isModalOpen}
           onClose={closeModal}
-          content={
-            selectedNews || { title: "No News Selected", description: "" }
-          }
+          content={selectedNews}
         />
 
         {/* Location Page Section */}

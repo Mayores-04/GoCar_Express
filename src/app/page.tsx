@@ -7,22 +7,11 @@ import FeatureCard from "./components/FeatureCard";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import NewsCard from "./components/NewsCard";
-import Modal from "./components/MoreNewsInfo";
 import { newsData, NewsItem } from "./data/news";
+import Link from "next/link";
 
 const Home: React.FC = () => {
   const headerRef = GsapAnimation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedNews, setSelectedNews] = useState<NewsItem>(newsData[0]);
-
-  const openModal = (news: NewsItem) => {
-    setSelectedNews(news);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
   return (
     <>
       <header
@@ -116,11 +105,20 @@ const Home: React.FC = () => {
         </section>
 
         {/* Latest News Section */}
-        <section className="text-center py-16 px-6 w-full">
+        <section id="NewsSection" className="text-center py-16 px-6 w-full">
           <h1 className="text-left px-6 text-gray-600 elements text-xl md:text-[25px] lg:text-[50px] xl:text-[60px] font-bold leading-tight">
             <span className=" text-[#4169e1] ">GoCar Express</span> Group News
           </h1>
-          <div className="flex flex-col w-full justify-center gap-6 mt-8">
+          <h2 className="elements p-4 px-8 items-left justify-center text-left">
+            <Link
+              href={`NewsPage`}
+              className="text-black bg-gray-400 p-4 rounded-lg font-semibold hover:underline"
+            >
+              View all News
+            </Link>
+          </h2>
+
+          <div className="flex flex-col w-full justify-center px-8 gap-6 mt-3">
             {newsData.map((card) => (
               <NewsCard
                 key={card.id}
@@ -133,17 +131,11 @@ const Home: React.FC = () => {
                 duration={card.duration}
                 contact={card.contact}
                 gallery={card.gallery}
-                onMoreInfo={() => openModal(card)} customerName={card.customerName} />
+                customerName={card.customerName}
+              />
             ))}
           </div>
         </section>
-
-        {/* News Modal */}
-        <Modal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          content={selectedNews}
-        />
 
         {/* Location Page Section */}
         <section

@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Modal from "./MoreNewsInfo";
 import { NewsItem } from "../data/news";
 
-interface NewsCardProps extends NewsItem {
-  onMoreInfo: () => void;
-}
-
-const NewsCard: React.FC<NewsCardProps> = ({
+const NewsCard: React.FC<NewsItem> = ({
   id,
   title,
   customerName,
@@ -18,31 +13,8 @@ const NewsCard: React.FC<NewsCardProps> = ({
   location,
   duration,
   contact,
-  gallery,
-  onMoreInfo,
+  gallery
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState<Partial<NewsItem>>({});
-
-  const handleReadMore = () => {
-    setModalContent({
-      title,
-      customerName,
-      description,
-      date,
-      picture,
-      location,
-      duration,
-      contact,
-      gallery,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
   return (
     <>
       <div className="elements justify-center items-center bg-white grid grid-cols-1 md:grid-cols-2 gap-10 p-6 text-left rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
@@ -56,20 +28,15 @@ const NewsCard: React.FC<NewsCardProps> = ({
           </div>
 
           <div className="flex gap-4 mt-auto">
+  
+
             <Link
-              // href={`/news/${id}`}
-              href={`NewsPage`}
+              href={`/news/${id}`}
+              // onClick={handleReadMore} for button tag
               className="text-blue-500 font-semibold hover:underline"
             >
               Read More
             </Link>
-
-            <button
-              onClick={handleReadMore}
-              className="text-blue-500 font-semibold hover:underline"
-            >
-              More Info
-            </button>
           </div>
         </div>
 
@@ -85,13 +52,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
           )}
         </div>
       </div>
-
-      {/* Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        content={modalContent}
-      />
     </>
   );
 };

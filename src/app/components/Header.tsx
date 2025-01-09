@@ -26,7 +26,7 @@ export default function Header() {
       setActiveButton("ABOUT");
     } else if (pathname === "/ContactPage") {
       setActiveButton("CONTACT");
-    } else if (pathname === "/NewsPage") {
+    } else if (pathname === "/#NewsSection") {
       setActiveButton("NEWS");
     }
   }, [pathname]);
@@ -54,6 +54,16 @@ export default function Header() {
     if (locationSection) {
       locationSection.scrollIntoView({ behavior: "smooth" });
       setActiveButton("LOCATION");
+      setMenuOpen(false);  
+    }
+  };
+
+  const handleNewsSectionClick = () => {
+    const newsSection = document.getElementById("NewsSection");
+
+    if (newsSection) {
+      newsSection.scrollIntoView({ behavior: "smooth" });
+      setActiveButton("NEWS");
       setMenuOpen(false);  
     }
   };
@@ -112,13 +122,17 @@ export default function Header() {
           >
             OUR CARS
           </Link>
-          <Link
-            href="/NewsPage"
-            className={`font-semibold ${isActive("/NewsPage")} hover:text-sky-500`}
-            onClick={() => handleClick("NEWS")}
+          <a
+            id="newsSectionButton"
+            href="/#NewsSection"
+            className={`font-semibold ${
+              activeButton === "NEWS" ? "text-sky-500" : "text-[#001f3f]"
+            } hover:text-sky-500`}
+            onClick={handleNewsSectionClick}
+            
           >
             NEWS
-          </Link>
+          </a>
           <Link
             href="/AboutPage"
             className={`font-semibold ${isActive(

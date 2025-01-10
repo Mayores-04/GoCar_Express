@@ -317,7 +317,6 @@ const NewsPage: React.FC = () => {
                     e.stopPropagation();
                     goToNextImage();
                   }}
-                  
                 >
                   <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
                     <svg

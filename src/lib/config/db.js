@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const ConnectDB = async () => {
-  if (mongoose.connection.readyState >= 1) return; // Prevent reconnecting if already connected
+  if (mongoose.connection.readyState >= 1) return;  
 
   if (!process.env.MONGO_URI) {
     throw new Error("MONGO_URI is not defined in environment variables");

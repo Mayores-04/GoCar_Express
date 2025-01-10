@@ -48,12 +48,10 @@ const CarsPage: React.FC = () => {
       <header>
         <Header />
       </header>
-
       <section className="py-16 pt-24 px-8 justify-center bg-[#263033] w-full items-center">
         <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
           <span className="text-[#4169e1]">GoCar Express</span> CARS
         </h1>
-
         <div className={`grid grid-cols-1 sm:grid-cols-1  xl:grid-cols-2  lg:grid-cols-2  md:grid-cols-1 gap-8`}>
           {cars.map((car, index) => (
             <div
@@ -77,7 +75,6 @@ const CarsPage: React.FC = () => {
                   <p>Seats: {car.seats || "N/A"}</p>
                 </div>
               </div>
-
               <div className="justify-center items-center flex">
                 <img
                   src={car.picture || "/images/placeholder.jpg"}

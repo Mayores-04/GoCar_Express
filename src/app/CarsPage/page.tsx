@@ -48,11 +48,13 @@ const CarsPage: React.FC = () => {
       <header>
         <Header />
       </header>
+
       <section className="py-16 pt-24 px-8 justify-center bg-[#263033] w-full items-center">
         <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
           <span className="text-[#4169e1]">GoCar Express</span> CARS
         </h1>
-        <div className={`grid grid-cols-1 sm:grid-cols-1  xl:grid-cols-2  lg:grid-cols-2  md:grid-cols-1 gap-8`}>
+
+        <div className={`grid  gap-8`}>
           {cars.map((car, index) => (
             <div
               key={index}
@@ -60,21 +62,22 @@ const CarsPage: React.FC = () => {
             >
               <div className="flex flex-col justify-between h-full">
                 <div>
-                  <h2 className="font-bold text-[#263033] text-xl mt-4  sm:text-2xl  md:text-2xl lg:text-4xl xl:text-5xl">
+                  <h2 className="font-bold text-[#263033] text-3xl mt-4 lg:text-5xl">
                     {car.name || "No name available"}
                   </h2>
-                  <p className="text-gray-500 mt-3 text-md sm:text-md  md:text-lg  lg:text-xl xl:text-2xl">
+                  <p className="text-gray-500 mt-3 text-2xl lg:text-4xl">
                     Brand: {car.brand || "No brand available"}
                   </p>
-                  <p className="text-gray-500 mt-3 text-sm sm:text-sm  md:text-md  lg:text-lg xl:text-xl">
+                  <p className="text-gray-500 mt-3 text-xl">
                     {car.description || "No description available"}
                   </p>
                 </div>
 
-                <div className="mt-3 text-md sm:text-md  md:text-lg  lg:text-xl xl:text-2xl text-gray-500">
+                <div className="mt-3 text-xl text-gray-500">
                   <p>Seats: {car.seats || "N/A"}</p>
                 </div>
               </div>
+
               <div className="justify-center items-center flex">
                 <img
                   src={car.picture || "/images/placeholder.jpg"}

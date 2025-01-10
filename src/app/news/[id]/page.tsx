@@ -204,13 +204,13 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
           <div className="text-white text-2xl absolute top-4 left-4 mb-4">
             {zoomedGallery.currentIndex + 1}/{zoomedGallery.gallery.length}
           </div>
-          <div className="text-white text-2xl absolute top-4 right-4 mb-4 z-10">
+          <div className="text-white text-2xl absolute top-4 right-20 mb-4 z-10">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowShareOptions(!showShareOptions);
               }}
-              className="bg-blue-500 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600"
+              className="bg-blue-500 z-10 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600"
             >
               <FaShareAlt />
             </button>
@@ -316,6 +316,7 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
               e.stopPropagation();
               goToNextImage();
             }}
+            
           >
             <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
               <svg

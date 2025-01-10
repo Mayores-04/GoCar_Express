@@ -36,8 +36,12 @@ const NewsPage: React.FC = () => {
 
   const goToNextImage = () => {
     if (zoomedGallery) {
-      const nextIndex = (zoomedGallery.currentIndex + 1) % zoomedGallery.gallery.length;
-      setZoomedGallery({ gallery: zoomedGallery.gallery, currentIndex: nextIndex });
+      const nextIndex =
+        (zoomedGallery.currentIndex + 1) % zoomedGallery.gallery.length;
+      setZoomedGallery({
+        gallery: zoomedGallery.gallery,
+        currentIndex: nextIndex,
+      });
     }
   };
 
@@ -46,7 +50,10 @@ const NewsPage: React.FC = () => {
       const prevIndex =
         (zoomedGallery.currentIndex - 1 + zoomedGallery.gallery.length) %
         zoomedGallery.gallery.length;
-      setZoomedGallery({ gallery: zoomedGallery.gallery, currentIndex: prevIndex });
+      setZoomedGallery({
+        gallery: zoomedGallery.gallery,
+        currentIndex: prevIndex,
+      });
     }
   };
 
@@ -83,7 +90,9 @@ const NewsPage: React.FC = () => {
     try {
       const response = await fetch(imageUrl, { mode: "cors" });
       if (!response.ok) {
-        throw new Error(`Failed to fetch the image. Status: ${response.status}`);
+        throw new Error(
+          `Failed to fetch the image. Status: ${response.status}`
+        );
       }
 
       const blob = await response.blob();
@@ -109,7 +118,10 @@ const NewsPage: React.FC = () => {
         <Header />
       </header>
 
-      <div id="ContactPage" className="flex flex-col justify-center items-center bg-[#263033] text-white">
+      <div
+        id="ContactPage"
+        className="flex flex-col justify-center items-center bg-[#263033] text-white"
+      >
         <section className="w-[95%] justify-center py-16 px-6 pt-24">
           <div className="max-w-full mx-auto w-full">
             <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
@@ -119,10 +131,17 @@ const NewsPage: React.FC = () => {
             <div className="flex flex-col gap-8">
               {newsData && Array.isArray(newsData) && newsData.length > 0 ? (
                 newsData.map((news, index) => (
-                  <div key={index} className="bg-white justify-center items-center flex flex-col p-6 rounded-lg shadow-lg transform transition duration-300">
+                  <div
+                    key={index}
+                    className="bg-white justify-center items-center flex flex-col p-6 rounded-lg shadow-lg transform transition duration-300"
+                  >
                     <div className="w-[95%] justify-center items-center">
                       <div className="flex justify-center items-center w-full my-6">
-                        <img src={news.picture} alt={news.title} className="w-full h-auto rounded-md shadow-md" />
+                        <img
+                          src={news.picture}
+                          alt={news.title}
+                          className="w-full h-auto rounded-md shadow-md"
+                        />
                       </div>
                       <h1 className="text-3xl xl:text-5xl lg:text-5xl md:text-3xl text-center font-extrabold text-gray-800 mb-4">
                         {news.title}
@@ -133,20 +152,33 @@ const NewsPage: React.FC = () => {
                       <p className="text-gray-600 mb-4 ">{news.description}</p>
                       <p className="text-gray-500 mb-4 ">{news.date}</p>
                       <p className="text-gray-500 mb-4 ">{news.location}</p>
-                      <p className="text-gray-500 mb-4 ">Duration: {news.duration}</p>
-                      <p className="text-gray-500 mb-4 ">Contact: {news.contact}</p>
+                      <p className="text-gray-500 mb-4 ">
+                        Duration: {news.duration}
+                      </p>
+                      <p className="text-gray-500 mb-4 ">
+                        Contact: {news.contact}
+                      </p>
                     </div>
                     <div className="w-full xl:w-[95%] lg:w-[95%] md:w-[95%] py-8 bg-gray-100 rounded-lg">
-                      <h3 className="text-2xl font-bold text-gray-800 text-left px-6 mb-6">GALLERY: {news.title}</h3>
+                      <h3 className="text-2xl font-bold text-gray-800 text-left px-6 mb-6">
+                        GALLERY: {news.title}
+                      </h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6 px-6">
-                        {news.gallery && Array.isArray(news.gallery) && news.gallery.length > 0 ? (
+                        {news.gallery &&
+                        Array.isArray(news.gallery) &&
+                        news.gallery.length > 0 ? (
                           news.gallery.map((item, galleryIndex) => (
-                            <div key={galleryIndex} className="relative elements overflow-hidden rounded-lg shadow-md">
+                            <div
+                              key={galleryIndex}
+                              className="relative elements overflow-hidden rounded-lg shadow-md"
+                            >
                               <img
                                 src={item.picture}
                                 alt={item.title}
                                 className="w-full h-full object-cover rounded-lg cursor-pointer"
-                                onClick={() => openGallery(news.gallery, galleryIndex)}
+                                onClick={() =>
+                                  openGallery(news.gallery, galleryIndex)
+                                }
                                 draggable={false}
                               />
                             </div>
@@ -165,155 +197,154 @@ const NewsPage: React.FC = () => {
           </div>
         </section>
       </div>
-      {zoomedGallery && (
-        <div
-          className="fixed w-full inset-0 bg-black bg-opacity-80 z-50 flex flex-col justify-center items-center"
-          onClick={closeGallery}
-        >
-          <div className="text-white text-2xl absolute top-4 left-4 mb-4">
-            {zoomedGallery.currentIndex + 1}/{zoomedGallery.gallery.length}
-          </div>
-          <div className="text-white text-2xl absolute top-4 right-4 mb-4 z-10">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowShareOptions(!showShareOptions);
-              }}
-              className="bg-blue-500 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600"
-            >
-              <FaShareAlt />
-            </button>
-
-            {showShareOptions && (
-              <div className="absolute text-sm size-auto top-12 right-0 bg-white text-black p-4 rounded-lg shadow-lg mt-2 flex flex-col gap-2">
+       {zoomedGallery && (
+              <div
+                className="fixed w-full inset-0 bg-black bg-opacity-80 z-50 flex flex-col justify-center items-center"
+                onClick={closeGallery}
+              >
+                <div className="text-white text-2xl absolute top-4 left-4 mb-4">
+                  {zoomedGallery.currentIndex + 1}/{zoomedGallery.gallery.length}
+                </div>
+                <div className="text-white text-2xl absolute top-4 right-20 mb-4 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowShareOptions(!showShareOptions);
+                    }}
+                    className="bg-blue-500 z-10 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600"
+                  >
+                    <FaShareAlt />
+                  </button>
+      
+                  {showShareOptions && (
+                    <div className="absolute text-sm size-auto top-12 right-0 bg-white text-black p-4 rounded-lg shadow-lg mt-2 flex flex-col gap-2">
+                      <button
+                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                        onClick={() =>
+                          handleShare(
+                            "facebook",
+                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                          )
+                        }
+                      >
+                        <FaFacebook /> Share on Facebook
+                      </button>
+                      <button
+                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                        onClick={() =>
+                          openEmailClient(
+                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                          )
+                        }
+                      >
+                        <FaEnvelope /> Share via Email
+                      </button>
+                      <button
+                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                        onClick={() =>
+                          handleShare(
+                            "messenger",
+                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                          )
+                        }
+                      >
+                        <FaFacebookMessenger /> Share via Messenger
+                      </button>
+                      <button
+                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                        onClick={() =>
+                          handleShare(
+                            "save",
+                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                          )
+                        }
+                      >
+                        <FaSave /> Save to Gallery
+                      </button>
+                    </div>
+                  )}
+                </div>
+      
+                <div className="relative h-[70vh] w-[90vw] max-w-4xl mx-auto rounded-lg flex items-center justify-center">
+                  {zoomedGallery.gallery.map((image, idx) => (
+                    <div
+                      key={idx}
+                      className={`${
+                        idx === zoomedGallery.currentIndex ? "block" : "hidden"
+                      } duration-700 ease-in-out`}
+                    >
+                      <img
+                        src={image.picture}
+                        alt={image.title}
+                        draggable={false}
+                        className="block w-full h-full object-contain rounded-lg"
+                      />
+                    </div>
+                  ))}
+                </div>
+      
                 <button
-                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                  onClick={() =>
-                    handleShare(
-                      "facebook",
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                    )
-                  }
+                  type="button"
+                  className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToPreviousImage();
+                  }}
                 >
-                  <FaFacebook /> Share on Facebook
+                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 6 10"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 1 1 5l4 4"
+                      />
+                    </svg>
+                  </span>
                 </button>
+      
                 <button
-                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                  onClick={() =>
-                    openEmailClient(
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                    )
-                  }
+                  type="button"
+                  className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToNextImage();
+                  }}
+                  
                 >
-                  <FaEnvelope /> Share via Email
-                </button>
-                <button
-                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                  onClick={() =>
-                    handleShare(
-                      "messenger",
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                    )
-                  }
-                >
-                  <FaFacebookMessenger /> Share via Messenger
-                </button>
-                <button
-                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                  onClick={() =>
-                    handleShare(
-                      "save",
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                    )
-                  }
-                >
-                  <FaSave /> Save to Gallery
+                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
+                    <svg
+                      className="w-4 h-4 text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 6 10"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="m1 9 4-4-4-4"
+                      />
+                    </svg>
+                  </span>
                 </button>
               </div>
             )}
-          </div>
-
-          <div className="relative h-[70vh] w-[90vw] max-w-4xl mx-auto rounded-lg flex items-center justify-center">
-            {zoomedGallery.gallery.map((image, idx) => (
-              <div
-                key={idx}
-                className={`${
-                  idx === zoomedGallery.currentIndex ? "block" : "hidden"
-                } duration-700 ease-in-out`}
-              >
-                <img
-                  src={image.picture}
-                  alt={image.title}
-                  draggable={false}
-                  className="block w-full h-full object-contain rounded-lg"
-                />
-              </div>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-            onClick={(e) => {
-              e.stopPropagation();
-              goToPreviousImage();
-            }}
-          >
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
-              <svg
-                className="w-4 h-4 text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 1 1 5l4 4"
-                />
-              </svg>
-            </span>
-          </button>
-
-          <button
-            type="button"
-            className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-            onClick={(e) => {
-              e.stopPropagation();
-              goToNextImage();
-            }}
-          >
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
-              <svg
-                className="w-4 h-4 text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m1 9 4-4-4-4"
-                />
-              </svg>
-            </span>
-          </button>
-        </div>
-      )}
-
+      
       <footer>
         <Footer />
       </footer>
     </>
   );
 };
-
-
 
 export default NewsPage;

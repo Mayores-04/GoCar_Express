@@ -3,33 +3,7 @@
 import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-
-const Cars = [
-  {
-    Name: "MG ZS",
-    Brand: "MG",
-    Seats: 5,
-    Picture: "/images/mg_car.jpg",
-    Description:
-      "The MG ZS is a compact SUV offering a blend of style, practicality, and affordability. It features a 1.5-liter engine producing 112 horsepower, with a 0 to 100 km/h time of approximately 10.9 seconds. The car is equipped with modern tech such as a 12.3-inch touchscreen display and advanced safety features.",
-  },
-  // {
-  //   Name: "Toyota Corolla",
-  //   Brand: "Toyota",
-  //   Seats: 5,
-  //   Picture: "/images/image1.png",
-  //   Description:
-  //     "The Toyota Corolla is a reliable and fuel-efficient compact sedan. With a 1.6-liter engine, it offers comfortable ride quality and longevity. The Corolla comes with a modern infotainment system, a touchscreen display, and advanced safety features such as Toyota Safety Sense.",
-  // },
-  // {
-  //   Name: "Honda Civic",
-  //   Brand: "Honda",
-  //   Seats: 5,
-  //   Picture: "/images/image2.png",
-  //   Description:
-  //     "The Honda Civic is a compact car known for its sporty performance and practicality. It features a 1.5-liter engine producing 180 horsepower and 240 Nm of torque. The Civic provides a refined interior with a 9-inch navigation system and a spacious cabin, making it an ideal choice for those who want performance and comfort.",
-  // },
-];
+import { Cars } from "../data/cars";
 
 const CarsPage: React.FC = () => {
   const gridCols = Cars.length === 1 ? "grid-cols-1" : "grid-cols-2";
@@ -48,31 +22,35 @@ const CarsPage: React.FC = () => {
         <div className={`grid ${gridCols} gap-8`}>
           {Cars.map((car, index) => (
             <div
-            key={index}
-            className="bg-white rounded-lg shadow-lg p-6 grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 items-start gap-8"
-          >
-            <div className="flex flex-col justify-between h-full">
-              <div>
-                <h2 className="font-bold text-[#263033] text-3xl mt-4 lg:text-5xl">{car.Name}</h2>
-                <p className="text-gray-500 mt-3 text-2xl lg:text-4xl">Brand: {car.Brand}</p>
-                <p className="text-gray-500 mt-3 text-xl">{car.Description}</p>
+              key={index}
+              className="bg-white rounded-lg shadow-lg p-6 grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 items-start gap-8"
+            >
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <h2 className="font-bold text-[#263033] text-3xl mt-4 lg:text-5xl">
+                    {car.Name}
+                  </h2>
+                  <p className="text-gray-500 mt-3 text-2xl lg:text-4xl">
+                    Brand: {car.Brand}
+                  </p>
+                  <p className="text-gray-500 mt-3 text-xl">
+                    {car.Description}
+                  </p>
+                </div>
+
+                <div className="mt-3 text-xl text-gray-500">
+                  <p>Seats: {car.Seats}</p>
+                </div>
               </div>
-          
-              {/* This section will push the Seats information to the bottom */}
-              <div className="mt-3 text-xl text-gray-500">
-                <p>Seats: {car.Seats}</p>
+
+              <div className="justify-center items-center flex">
+                <img
+                  src={car.Picture || "/images/placeholder.jpg"}
+                  alt={`${car.Name} Image`}
+                  className="w-auto max-h-[550px] object-center rounded-lg"
+                />
               </div>
             </div>
-          
-            <div className="justify-center items-center flex">
-              <img
-                src={car.Picture || "/images/placeholder.jpg"}
-                alt={`${car.Name} Image`}
-                className="w-auto max-h-[550px] object-center rounded-lg"
-              />
-            </div>
-          </div>
-          
           ))}
         </div>
       </section>

@@ -99,7 +99,7 @@ export default function Header() {
         >
           <Link
             href="/#Home"
-            className={`font-semibold ${isActive("/#Home")} hover:text-sky-500`}
+            className={`font-semibold ${isActive("/#Home")}  hover:text-sky-500`}
             onClick={() => handleClick("HOME")}
           >
             HOME

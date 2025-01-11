@@ -21,9 +21,20 @@ const CarsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchCars = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("/api/cars");
-      setCars(response.data.cars || []);
+      
+      const formattedCars = response.data.cars.map((car: any) => ({
+        _id: car._id.$oid,  
+        name: car.name,
+        brand: car.brand,
+        seats: parseInt(car.seats.$numberInt, 10), 
+        picture: car.picture,
+        description: car.description,
+      }));
+
+      setCars(formattedCars);
       setLoading(false);
     } catch (err: any) {
       console.error("Error fetching cars:", err.message);
@@ -31,6 +42,7 @@ const CarsPage: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchCars();

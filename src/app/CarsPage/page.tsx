@@ -24,13 +24,14 @@ const CarsPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/cars");
-      
+
+      // Assuming response structure is valid
       const formattedCars = response.data.cars.map((car: any) => ({
-        _id: car._id.$oid,  
+        _id: car._id,
         name: car.name,
         brand: car.brand,
-        seats: parseInt(car.seats.$numberInt, 10), 
-        picture: car.picture,
+        seats: car.seats,
+        picture: car.picture,  // Cloudinary or another image URL
         description: car.description,
       }));
 
@@ -42,7 +43,6 @@ const CarsPage: React.FC = () => {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     fetchCars();
@@ -67,7 +67,7 @@ const CarsPage: React.FC = () => {
           <span className="text-[#4169e1]">GoCar Express</span> CARS
         </h1>
 
-        <div className={`grid  gap-8`}>
+        <div className="grid gap-8">
           {cars.map((car, index) => (
             <div
               key={index}
@@ -92,11 +92,10 @@ const CarsPage: React.FC = () => {
               </div>
 
               <div className="justify-center items-center flex">
+                {/* Displaying image with next/image */}
                 <Image
-                  // src={car.picture || "/images/placeholder.jpg"}
+                  src={car.picture}  // Make sure car.picture is a valid image URL
                   alt={`${car.name} Image`}
-                  
-                  src={car.picture}  
                   width={500}
                   height={500}
                   className="w-auto max-h-[550px] object-center rounded-lg"

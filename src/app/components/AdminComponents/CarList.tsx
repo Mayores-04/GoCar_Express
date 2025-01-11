@@ -16,7 +16,7 @@ const CarListPage: React.FC = () => {
   const [cars, setCars] = useState<Car[]>([]);
   const [editingCarId, setEditingCarId] = useState<string | null>(null);
   const [editedCar, setEditedCar] = useState<Partial<Car>>({});
-  const [imageFile, setImageFile] = useState<File | null>(null);  // Add imageFile state for selected image
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +42,8 @@ const CarListPage: React.FC = () => {
       setEditedCar({ ...car });
     }
   };
+
+  // Handle saving the updated car details
   const handleSave = async (carId: string) => {
     try {
       const formData = new FormData();
@@ -50,24 +52,28 @@ const CarListPage: React.FC = () => {
       formData.append("brand", editedCar.brand || "");
       formData.append("seats", String(editedCar.seats) || "");
       formData.append("description", editedCar.description || "");
-  
+
       // If there's a new image file, add it to the FormData
       if (imageFile) {
         formData.append("picture", imageFile);
       }
-  
+
       // Send the PUT request with FormData
       const response = await axios.put(`/api/cars/${carId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       console.log("Server response:", response.data);
-  
+
       if (response.data.success) {
         toast.success("Car updated successfully");
+
+        // Update the car list with the updated data
         setCars((prevCars) =>
           prevCars.map((car) =>
-            car._id === carId ? { ...car, ...editedCar, picture: response.data.car.picture } : car
+            car._id === carId
+              ? { ...car, ...editedCar, picture: response.data.car.picture }
+              : car
           )
         );
         setEditingCarId(null);
@@ -81,7 +87,6 @@ const CarListPage: React.FC = () => {
       console.error(err);
     }
   };
-  
 
   // Handle deleting a car
   const handleDelete = async (carId: string) => {
@@ -91,6 +96,8 @@ const CarListPage: React.FC = () => {
       const response = await axios.delete(`/api/cars?id=${carId}`);
       if (response.data.success) {
         toast.success("Car deleted successfully");
+
+        // Remove the deleted car from the list
         setCars((prevCars) => prevCars.filter((car) => car._id !== carId));
       } else {
         toast.error("Error deleting car");
@@ -145,7 +152,7 @@ const CarListPage: React.FC = () => {
   }
 
   return (
-    <div id="CarList" className="flex bg-gray-100 full p-8">
+    <div id="CarList" className="flex bg-gray-100 p-8">
       <div className="bg-white shadow-lg rounded-lg p-8">
         <table className="w-full border-collapse border border-gray-300">
           <thead>
@@ -249,7 +256,7 @@ const CarListPage: React.FC = () => {
                           setEditedCar({});
                           setImageFile(null);
                         }}
-                        className="bg-gray-500 text-white px-4  my-4 py-2 w-full   rounded hover:bg-gray-600"
+                        className="bg-gray-500 text-white px-4 my-4 py-2 w-full rounded hover:bg-gray-600"
                       >
                         Cancel
                       </button>
@@ -258,13 +265,13 @@ const CarListPage: React.FC = () => {
                     <>
                       <button
                         onClick={() => handleEdit(car._id)}
-                        className="bg-yellow-500 text-white px-4  my-4 py-2  w-full rounded hover:bg-yellow-600"
+                        className="bg-yellow-500 text-white px-4 my-4 py-2 w-full rounded hover:bg-yellow-600"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(car._id)}
-                        className="bg-red-500 text-white px-4 py-1  w-full rounded hover:bg-red-600"
+                        className="bg-red-500 text-white px-4 py-1 w-full rounded hover:bg-red-600"
                       >
                         Delete
                       </button>

@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["localhost"], // Add your allowed image domains here
+    domains: ['res.cloudinary.com'], // Add Cloudinary domain here
   },
   webpack: (config) => {
     // Custom Webpack configuration if needed

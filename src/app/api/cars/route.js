@@ -122,3 +122,60 @@ export async function DELETE(request) {
     );
   }
 }
+
+
+export async function PUT(request) {
+  try {
+    await ConnectDB();
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, msg: "Car ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const formData = await request.formData();
+    const updateData = {};
+
+    if (formData.has("name")) updateData.name = formData.get("name").toString();
+    if (formData.has("brand")) updateData.brand = formData.get("brand").toString();
+    if (formData.has("seats")) updateData.seats = parseInt(formData.get("seats").toString());
+    if (formData.has("description"))
+      updateData.description = formData.get("description").toString();
+
+    if (formData.has("picture")) {
+      const buffer = Buffer.from(await formData.get("picture").arrayBuffer());
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.v2.uploader.upload_stream(
+          { resource_type: "auto" },
+          (error, result) => {
+            if (error) reject(error);
+            resolve(result);
+          }
+        ).end(buffer);
+      });
+      updateData.picture = uploadResult.secure_url;
+    }
+
+    const updatedCar = await CarsModel.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!updatedCar) {
+      return NextResponse.json(
+        { success: false, msg: "Car not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, car: updatedCar });
+  } catch (error) {
+    console.error("Error in PUT /api/cars:", error.message);
+    return NextResponse.json(
+      { success: false, msg: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

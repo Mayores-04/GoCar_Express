@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -20,7 +22,6 @@ const CarListPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all cars from the server
   const fetchCars = async () => {
     setLoading(true);
     try {
@@ -34,7 +35,6 @@ const CarListPage: React.FC = () => {
     }
   };
 
-  // Handle editing a car
   const handleEdit = (carId: string) => {
     setEditingCarId(carId);
     const car = cars.find((car) => car._id === carId);
@@ -43,36 +43,33 @@ const CarListPage: React.FC = () => {
     }
   };
 
-  // Handle saving the updated car details
   const handleSave = async (carId: string) => {
+    if (!editedCar.name || !editedCar.brand || !editedCar.seats || !editedCar.description) {
+      toast.error("All fields are required to save the car details.");
+      return;
+    }
+  
     try {
       const formData = new FormData();
-      formData.append("id", carId);  // Ensure you're sending the car ID
-      formData.append("name", editedCar.name || "");
-      formData.append("brand", editedCar.brand || "");
-      formData.append("seats", String(editedCar.seats) || "");
-      formData.append("description", editedCar.description || "");
-
-      // If there's a new image file, add it to the FormData
+      formData.append("name", editedCar.name);
+      formData.append("brand", editedCar.brand);
+      formData.append("seats", String(editedCar.seats));
+      formData.append("description", editedCar.description);
+  
       if (imageFile) {
         formData.append("picture", imageFile);
       }
-
-      // Send the PUT request with FormData
-      const response = await axios.put(`/api/cars/${carId}`, formData, {
+  
+      const response = await axios.put(`/api/cars?id=${carId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      console.log("Server response:", response.data);
-
+  
       if (response.data.success) {
         toast.success("Car updated successfully");
-
-        // Update the car list with the updated data
         setCars((prevCars) =>
           prevCars.map((car) =>
             car._id === carId
-              ? { ...car, ...editedCar, picture: response.data.car.picture }
+              ? { ...car, ...editedCar, picture: response.data.car.picture || car.picture }
               : car
           )
         );
@@ -80,15 +77,14 @@ const CarListPage: React.FC = () => {
         setEditedCar({});
         setImageFile(null);
       } else {
-        toast.error("Error updating car");
+        toast.error(response.data.msg || "Failed to update car.");
       }
-    } catch (err) {
-      toast.error("Error occurred while saving");
-      console.error(err);
+    } catch (error) {
+      console.error("Error updating car:", error);
+      toast.error("An error occurred while saving. Please try again.");
     }
   };
 
-  // Handle deleting a car
   const handleDelete = async (carId: string) => {
     if (!confirm("Are you sure you want to delete this car?")) return;
 
@@ -96,8 +92,6 @@ const CarListPage: React.FC = () => {
       const response = await axios.delete(`/api/cars?id=${carId}`);
       if (response.data.success) {
         toast.success("Car deleted successfully");
-
-        // Remove the deleted car from the list
         setCars((prevCars) => prevCars.filter((car) => car._id !== carId));
       } else {
         toast.error("Error deleting car");
@@ -108,15 +102,11 @@ const CarListPage: React.FC = () => {
     }
   };
 
-  // Handle input changes for car details
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditedCar((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle image upload
   const handleImageUpload = async (file: File) => {
     const formData = new FormData();
     formData.append("image", file);
@@ -138,7 +128,6 @@ const CarListPage: React.FC = () => {
     }
   };
 
-  // Fetch cars when the component mounts
   useEffect(() => {
     fetchCars();
   }, []);

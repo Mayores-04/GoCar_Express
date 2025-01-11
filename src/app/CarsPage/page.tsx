@@ -81,8 +81,10 @@ const CarsPage: React.FC = () => {
 
               <div className="justify-center items-center flex">
                 <Image
-                  src={car.picture || "/images/placeholder.jpg"}
+                  // src={car.picture || "/images/placeholder.jpg"}
                   alt={`${car.name} Image`}
+                  
+                  src={car.picture}  
                   width={500}
                   height={500}
                   className="w-auto max-h-[550px] object-center rounded-lg"

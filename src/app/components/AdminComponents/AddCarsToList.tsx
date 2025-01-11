@@ -70,12 +70,11 @@ const AddCarPage: React.FC = () => {
     formData.append("description", data.description);
     if (image) formData.append("picture", image);
     
-    console.log("Form data:", formData); 
-    
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api/cars";  // Dynamically set the base URL
       if (editingCar) {
         const response = await axios.put(
-          `/api/cars/${editingCar._id}`,
+          `${apiUrl}/${editingCar._id}`,
           formData
         );
 
@@ -86,7 +85,7 @@ const AddCarPage: React.FC = () => {
           toast.error("Error updating car");
         }
       } else {
-        const response = await axios.post("/api/cars", formData);
+        const response = await axios.post(apiUrl, formData);
 
         if (response.data.success) {
           toast.success("Car added successfully");
@@ -178,7 +177,7 @@ const AddCarPage: React.FC = () => {
                 Upload Picture
               </label>
               <div className="flex flex-col xl:flex-row lg:flex-row md:flex-row sm:flex-col justify-center items-center">
-                <div className="w-32 h-24 bg-gray-200 border   mx-4 border-gray-300 rounded-md flex items-center justify-center overflow-hidden">
+                <div className="w-32 h-24 bg-gray-200 border mx-4 border-gray-300 rounded-md flex items-center justify-center overflow-hidden">
                   {image ? (
                     <Image
                       width={140}

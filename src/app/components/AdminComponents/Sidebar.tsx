@@ -1,22 +1,9 @@
-"use client"
-
 import React, { useState } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faHome,
-  faCar,
-  faNewspaper,
-  faChevronUp,
-  faChevronDown,
-} from "@fortawesome/free-solid-svg-icons";
+import { faHome, faCar, faNewspaper, faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
-interface SidebarProps {
-  currentSection: "AddCarsToList" | "CarList";
-  setCurrentSection: React.Dispatch<React.SetStateAction<"AddCarsToList" | "CarList">>;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ currentSection, setCurrentSection }) => {
+const Sidebar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
@@ -66,9 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentSection, setCurrentSection }) 
             onClick={toggleDropdown}
           >
             <FontAwesomeIcon icon={faCar} className="text-xl" />
-            <span
-              className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out"
-            >
+            <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
               Car Management
             </span>
             {isDropdownOpen ? (
@@ -80,24 +65,20 @@ const Sidebar: React.FC<SidebarProps> = ({ currentSection, setCurrentSection }) 
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
-            <ul id="dropdown-cars" className="py-2  space-y-2">
+            <ul id="dropdown-cars" className="py-2 space-y-2">
               <li>
-                <button
-                  onClick={() => setCurrentSection("AddCarsToList")}
-                  className={`flex items-center w-full p-2 text-base font-normal text-gray-300 transition duration-75 rounded-lg group mb-2 hover:bg-gray-700 pl-14 ${
-                    currentSection === "AddCarsToList" ? "bg-gray-700" : ""
-                  }`}
+                <Link
+                  href="/admin/AddCars"
+                  className="flex items-center w-full p-2 text-base font-normal text-gray-300 transition duration-75 rounded-lg group mb-2 hover:bg-gray-700 pl-14"
                 >
                   Add Cars
-                </button>
-                <button
-                  onClick={() => setCurrentSection("CarList")}
-                  className={`flex items-center w-full p-2 text-base font-normal text-gray-300 transition duration-75 rounded-lg group hover:bg-gray-700 pl-14 ${
-                    currentSection === "CarList" ? "bg-gray-700" : ""
-                  }`}
+                </Link>
+                <Link
+                  href="/admin/CarsList"
+                  className="flex items-center w-full p-2 text-base font-normal text-gray-300 transition duration-75 rounded-lg group hover:bg-gray-700 pl-14"
                 >
                   Car List
-                </button>
+                </Link>
               </li>
             </ul>
           )}

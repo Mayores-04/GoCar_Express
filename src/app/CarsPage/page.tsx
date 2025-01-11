@@ -30,7 +30,7 @@ const CarsPage: React.FC = () => {
         name: car.name,
         brand: car.brand,
         seats: car.seats,
-        picture: car.picture, 
+        picture: car.picture,
         description: car.description,
       }));
 
@@ -50,6 +50,9 @@ const CarsPage: React.FC = () => {
   if (loading) {
     return (
       <div>
+        <header>
+          <Header />
+        </header>
         <div className="flex items-center justify-center h-screen">
           <div className="relative">
             <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>

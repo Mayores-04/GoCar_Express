@@ -60,14 +60,18 @@ const AddCarPage: React.FC = () => {
       toast.error("Image is required");
       return;
     }
-
+    
+    console.log("Selected image:", image);  
+    
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("brand", data.brand);
     formData.append("seats", data.seats);
     formData.append("description", data.description);
     if (image) formData.append("picture", image);
-
+    
+    console.log("Form data:", formData); 
+    
     try {
       if (editingCar) {
         const response = await axios.put(

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "../components/AdminComponents/Sidebar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -48,7 +49,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <main className="flex-grow overflow-y-auto ">
           <div className="flex items-center justify-between w-full py-3 max-h-[60px] px-8 border-b border-black">
             <h3 className="font-medium">Admin</h3>
-            <img src={"/images/blueLogo.png"} width={40} alt="" />
+            <Link href={"/#Home"}>
+              <img src={"/images/blueLogo.png"} width={40} alt="Home" />
+            </Link>
           </div>
           {children}
         </main>

@@ -25,13 +25,12 @@ const CarsPage: React.FC = () => {
     try {
       const response = await axios.get("/api/cars");
 
-      // Assuming response structure is valid
       const formattedCars = response.data.cars.map((car: any) => ({
         _id: car._id,
         name: car.name,
         brand: car.brand,
         seats: car.seats,
-        picture: car.picture,  // Cloudinary or another image URL
+        picture: car.picture, 
         description: car.description,
       }));
 
@@ -49,7 +48,16 @@ const CarsPage: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div>
+        <div className="flex items-center justify-center h-screen">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+            <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -94,7 +102,7 @@ const CarsPage: React.FC = () => {
               <div className="justify-center items-center flex">
                 {/* Displaying image with next/image */}
                 <Image
-                  src={car.picture}  // Make sure car.picture is a valid image URL
+                  src={car.picture} // Make sure car.picture is a valid image URL
                   alt={`${car.name} Image`}
                   width={500}
                   height={500}

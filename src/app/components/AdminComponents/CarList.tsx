@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -18,9 +16,11 @@ const CarListPage: React.FC = () => {
   const [cars, setCars] = useState<Car[]>([]);
   const [editingCarId, setEditingCarId] = useState<string | null>(null);
   const [editedCar, setEditedCar] = useState<Partial<Car>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);  // Add imageFile state for selected image
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch all cars from the server
   const fetchCars = async () => {
     setLoading(true);
     try {
@@ -34,6 +34,7 @@ const CarListPage: React.FC = () => {
     }
   };
 
+  // Handle editing a car
   const handleEdit = (carId: string) => {
     setEditingCarId(carId);
     const car = cars.find((car) => car._id === carId);
@@ -41,21 +42,37 @@ const CarListPage: React.FC = () => {
       setEditedCar({ ...car });
     }
   };
-
   const handleSave = async (carId: string) => {
     try {
-      const updatedCar = { ...editedCar, _id: carId };
-      const response = await axios.put(`/api/cars/${carId}`, updatedCar);
-
+      const formData = new FormData();
+      formData.append("id", carId);  // Ensure you're sending the car ID
+      formData.append("name", editedCar.name || "");
+      formData.append("brand", editedCar.brand || "");
+      formData.append("seats", String(editedCar.seats) || "");
+      formData.append("description", editedCar.description || "");
+  
+      // If there's a new image file, add it to the FormData
+      if (imageFile) {
+        formData.append("picture", imageFile);
+      }
+  
+      // Send the PUT request with FormData
+      const response = await axios.put(`/api/cars/${carId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      console.log("Server response:", response.data);
+  
       if (response.data.success) {
         toast.success("Car updated successfully");
         setCars((prevCars) =>
           prevCars.map((car) =>
-            car._id === carId ? { ...car, ...editedCar } : car
+            car._id === carId ? { ...car, ...editedCar, picture: response.data.car.picture } : car
           )
         );
         setEditingCarId(null);
         setEditedCar({});
+        setImageFile(null);
       } else {
         toast.error("Error updating car");
       }
@@ -64,7 +81,9 @@ const CarListPage: React.FC = () => {
       console.error(err);
     }
   };
+  
 
+  // Handle deleting a car
   const handleDelete = async (carId: string) => {
     if (!confirm("Are you sure you want to delete this car?")) return;
 
@@ -82,6 +101,7 @@ const CarListPage: React.FC = () => {
     }
   };
 
+  // Handle input changes for car details
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -89,6 +109,29 @@ const CarListPage: React.FC = () => {
     setEditedCar((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle image upload
+  const handleImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await axios.post("/api/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.imageUrl) {
+        setEditedCar((prev) => ({
+          ...prev,
+          picture: response.data.imageUrl,
+        }));
+      }
+    } catch (err) {
+      toast.error("Error uploading image");
+      console.error(err);
+    }
+  };
+
+  // Fetch cars when the component mounts
   useEffect(() => {
     fetchCars();
   }, []);
@@ -102,7 +145,7 @@ const CarListPage: React.FC = () => {
   }
 
   return (
-    <div id="CarList" className="flex bg-gray-100 full p-8 ">
+    <div id="CarList" className="flex bg-gray-100 full p-8">
       <div className="bg-white shadow-lg rounded-lg p-8">
         <table className="w-full border-collapse border border-gray-300">
           <thead>
@@ -159,12 +202,25 @@ const CarListPage: React.FC = () => {
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
                   <Image
-                    src={car.picture}
+                    src={editedCar.picture || car.picture}
                     alt={car.name}
                     width={100}
                     height={70}
                     className="object-cover"
                   />
+                  {editingCarId === car._id && (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setImageFile(e.target.files[0]);
+                          handleImageUpload(e.target.files[0]);
+                        }
+                      }}
+                      className="mt-2"
+                    />
+                  )}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
                   {editingCarId === car._id ? (
@@ -191,6 +247,7 @@ const CarListPage: React.FC = () => {
                         onClick={() => {
                           setEditingCarId(null);
                           setEditedCar({});
+                          setImageFile(null);
                         }}
                         className="bg-gray-500 text-white px-4  my-4 py-2 w-full   rounded hover:bg-gray-600"
                       >

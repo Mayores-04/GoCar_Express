@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import axios from "axios";
+import Image from "next/image";
 
 interface Car {
   _id: string;
@@ -79,7 +80,7 @@ const CarsPage: React.FC = () => {
               </div>
 
               <div className="justify-center items-center flex">
-                <img
+                <Image
                   src={car.picture || "/images/placeholder.jpg"}
                   alt={`${car.name} Image`}
                   className="w-auto max-h-[550px] object-center rounded-lg"

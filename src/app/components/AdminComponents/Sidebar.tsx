@@ -24,9 +24,7 @@ const Sidebar: React.FC = () => {
       onMouseEnter={() => handleSidebarHover(true)}
       onMouseLeave={() => handleSidebarHover(false)}
     >
-      {/* Sidebar */}
       <div className="fixed top-0 left-0 h-full bg-slate-800 text-white w-16 hover:w-64 overflow-hidden transition-all duration-300 ease-in-out">
-        {/* Logo Section */}
         <div className="flex items-center justify-center py-6 border-b border-gray-700">
           <img
             src="/images/blueLogo.png"
@@ -35,7 +33,6 @@ const Sidebar: React.FC = () => {
           />
         </div>
 
-        {/* Navigation Links */}
         <nav className="mt-4 px-2 space-y-2">
           <Link
             href="/admin"

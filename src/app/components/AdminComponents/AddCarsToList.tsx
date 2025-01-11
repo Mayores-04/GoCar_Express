@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
-import CarList from "@/app/components/AdminComponents/CarList";
 
 interface Car {
   _id: string;
@@ -115,126 +114,126 @@ const AddCarPage: React.FC = () => {
 
   return (
     <div id="AddCarToList" className="flex bg-gray-100">
-      <div className="w-full p-8">
-        <div className="bg-white shadow-lg rounded-lg p-8 mb-10">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            {editingCar ? "Edit Car" : "Add a New Car"}
-          </h1>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="name" className="block font-medium mb-2">
-                  Car Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={data.name}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter car name"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="brand" className="block font-medium mb-2">
-                  Brand
-                </label>
-                <input
-                  type="text"
-                  id="brand"
-                  name="brand"
-                  value={data.brand}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter car brand"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="seats" className="block font-medium mb-2">
-                  Seats
-                </label>
-                <input
-                  type="number"
-                  id="seats"
-                  name="seats"
-                  value={data.seats}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter number of seats"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="image" className="block font-medium mb-2">
-                  Upload Picture
-                </label>
-                <div className="flex items-center space-x-4">
-                  <div className="w-32 h-24 bg-gray-200 border border-gray-300 rounded-md flex items-center justify-center overflow-hidden">
-                    {image ? (
-                      <Image
-                        width={140}
-                        height={100}
-                        src={URL.createObjectURL(image)}
-                        alt="Uploaded Preview"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-500">No Image</span>
-                    )}
-                  </div>
-                  <input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        setImage(e.target.files[0]);
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById("image")?.click()}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none"
-                  >
-                    Choose File
-                  </button>
-                </div>
-              </div>
-            </div>
-
+    <div className="w-full p-8">
+      <div className="bg-white shadow-lg rounded-lg p-8 mb-10">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">
+          {editingCar ? "Edit Car" : "Add a New Car"}
+        </h1>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="description" className="block font-medium mb-2">
-                Description
+              <label htmlFor="name" className="block font-medium mb-2">
+                Car Name
               </label>
-              <textarea
-                id="description"
-                name="description"
-                value={data.description}
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={data.name}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter car description"
+                placeholder="Enter car name"
                 required
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {editingCar ? "Update Car" : "Add Car"}
-            </button>
-          </form>
-        </div>
+            <div>
+              <label htmlFor="brand" className="block font-medium mb-2">
+                Brand
+              </label>
+              <input
+                type="text"
+                id="brand"
+                name="brand"
+                value={data.brand}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter car brand"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="seats" className="block font-medium mb-2">
+                Seats
+              </label>
+              <input
+                type="number"
+                id="seats"
+                name="seats"
+                value={data.seats}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter number of seats"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="image" className="block font-medium mb-2">
+                Upload Picture
+              </label>
+              <div className="flex flex-col xl:flex-row lg:flex-row md:flex-row sm:flex-col justify-center items-center">
+                <div className="w-32 h-24 bg-gray-200 border   mx-4 border-gray-300 rounded-md flex items-center justify-center overflow-hidden">
+                  {image ? (
+                    <Image
+                      width={140}
+                      height={100}
+                      src={URL.createObjectURL(image)}
+                      alt="Uploaded Preview"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-500">No Image</span>
+                  )}
+                </div>
+                <input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setImage(e.target.files[0]);
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("image")?.click()}
+                  className="bg-blue-600 my-4 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none"
+                >
+                  Choose File
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="description" className="block font-medium mb-2">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={data.description}
+              onChange={handleChange}
+              className="w-full border border-gray-300 min-h-16 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter car description"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {editingCar ? "Update Car" : "Add Car"}
+          </button>
+        </form>
       </div>
     </div>
+  </div>
   );
 };
 

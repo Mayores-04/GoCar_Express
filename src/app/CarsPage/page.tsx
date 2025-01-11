@@ -83,6 +83,8 @@ const CarsPage: React.FC = () => {
                 <Image
                   src={car.picture || "/images/placeholder.jpg"}
                   alt={`${car.name} Image`}
+                  width={500}
+                  height={500}
                   className="w-auto max-h-[550px] object-center rounded-lg"
                 />
               </div>

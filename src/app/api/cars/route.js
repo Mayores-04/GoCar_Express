@@ -74,3 +74,38 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE(request) {
+  try {
+    await ConnectDB(); // Ensure the database connection is established.
+
+    // Extract the car ID from the URL
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, msg: "Car ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Attempt to delete the car document
+    const result = await CarsModel.deleteOne({ _id: id });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { success: false, msg: "Car not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, msg: "Car deleted successfully" });
+  } catch (error) {
+    console.error("Error in DELETE /api/cars:", error.message);
+    return NextResponse.json(
+      { success: false, msg: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

@@ -337,7 +337,7 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
           </button>
         </div>
       )}
-
+      
       <footer>
         <Footer />
       </footer>

@@ -168,12 +168,11 @@ const Home: React.FC = () => {
             />
           </div>
         </section>
-
-        <footer>
-          {/* Footer */}
-          <Footer />
-        </footer>
       </main>
+      
+      <footer>
+        <Footer />
+      </footer>
     </>
   );
 };

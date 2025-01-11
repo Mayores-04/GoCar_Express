@@ -197,147 +197,147 @@ const NewsPage: React.FC = () => {
           </div>
         </section>
       </div>
-       {zoomedGallery && (
-              <div
-                className="fixed w-full inset-0 bg-black bg-opacity-80 z-50 flex flex-col justify-center items-center"
-                onClick={closeGallery}
-              >
-                <div className="text-white text-2xl absolute top-4 left-4 mb-4">
-                  {zoomedGallery.currentIndex + 1}/{zoomedGallery.gallery.length}
-                </div>
-                <div className="text-white text-2xl absolute top-4 right-20 mb-4 z-10">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowShareOptions(!showShareOptions);
-                    }}
-                    className="bg-blue-500 z-10 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600"
-                  >
-                    <FaShareAlt />
-                  </button>
-      
-                  {showShareOptions && (
-                    <div className="absolute text-sm size-auto top-12 right-0 bg-white text-black p-4 rounded-lg shadow-lg mt-2 flex flex-col gap-2">
-                      <button
-                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                        onClick={() =>
-                          handleShare(
-                            "facebook",
-                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                          )
-                        }
-                      >
-                        <FaFacebook /> Share on Facebook
-                      </button>
-                      <button
-                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                        onClick={() =>
-                          openEmailClient(
-                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                          )
-                        }
-                      >
-                        <FaEnvelope /> Share via Email
-                      </button>
-                      <button
-                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                        onClick={() =>
-                          handleShare(
-                            "messenger",
-                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                          )
-                        }
-                      >
-                        <FaFacebookMessenger /> Share via Messenger
-                      </button>
-                      <button
-                        className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
-                        onClick={() =>
-                          handleShare(
-                            "save",
-                            zoomedGallery.gallery[zoomedGallery.currentIndex].picture
-                          )
-                        }
-                      >
-                        <FaSave /> Save to Gallery
-                      </button>
-                    </div>
-                  )}
-                </div>
-      
-                <div className="relative h-[70vh] w-[90vw] max-w-4xl mx-auto rounded-lg flex items-center justify-center">
-                  {zoomedGallery.gallery.map((image, idx) => (
-                    <div
-                      key={idx}
-                      className={`${
-                        idx === zoomedGallery.currentIndex ? "block" : "hidden"
-                      } duration-700 ease-in-out`}
-                    >
-                      <img
-                        src={image.picture}
-                        alt={image.title}
-                        draggable={false}
-                        className="block w-full h-full object-contain rounded-lg"
-                      />
-                    </div>
-                  ))}
-                </div>
-      
+      {zoomedGallery && (
+        <div
+          className="fixed w-full inset-0 bg-black bg-opacity-80 z-50 flex flex-col justify-center items-center"
+          onClick={closeGallery}
+        >
+          <div className="text-white text-2xl absolute top-4 left-4 mb-4">
+            {zoomedGallery.currentIndex + 1}/{zoomedGallery.gallery.length}
+          </div>
+          <div className="text-white text-2xl absolute top-4 right-20 mb-4 z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowShareOptions(!showShareOptions);
+              }}
+              className="bg-blue-500 z-10 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600"
+            >
+              <FaShareAlt />
+            </button>
+
+            {showShareOptions && (
+              <div className="absolute text-sm size-auto top-12 right-0 bg-white text-black p-4 rounded-lg shadow-lg mt-2 flex flex-col gap-2">
                 <button
-                  type="button"
-                  className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goToPreviousImage();
-                  }}
+                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                  onClick={() =>
+                    handleShare(
+                      "facebook",
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                    )
+                  }
                 >
-                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
-                    <svg
-                      className="w-4 h-4 text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 6 10"
-                    >
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 1 1 5l4 4"
-                      />
-                    </svg>
-                  </span>
+                  <FaFacebook /> Share on Facebook
                 </button>
-      
                 <button
-                  type="button"
-                  className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goToNextImage();
-                  }}
+                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                  onClick={() =>
+                    openEmailClient(
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                    )
+                  }
                 >
-                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
-                    <svg
-                      className="w-4 h-4 text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 6 10"
-                    >
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m1 9 4-4-4-4"
-                      />
-                    </svg>
-                  </span>
+                  <FaEnvelope /> Share via Email
+                </button>
+                <button
+                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                  onClick={() =>
+                    handleShare(
+                      "messenger",
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                    )
+                  }
+                >
+                  <FaFacebookMessenger /> Share via Messenger
+                </button>
+                <button
+                  className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
+                  onClick={() =>
+                    handleShare(
+                      "save",
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                    )
+                  }
+                >
+                  <FaSave /> Save to Gallery
                 </button>
               </div>
             )}
+          </div>
+
+          <div className="relative h-[70vh] w-[90vw] max-w-4xl mx-auto rounded-lg flex items-center justify-center">
+            {zoomedGallery.gallery.map((image, idx) => (
+              <div
+                key={idx}
+                className={`${
+                  idx === zoomedGallery.currentIndex ? "block" : "hidden"
+                } duration-700 ease-in-out`}
+              >
+                <img
+                  src={image.picture}
+                  alt={image.title}
+                  draggable={false}
+                  className="block w-full h-full object-contain rounded-lg"
+                />
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              goToPreviousImage();
+            }}
+          >
+            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
+              <svg
+                className="w-4 h-4 text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 1 1 5l4 4"
+                />
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              goToNextImage();
+            }}
+          >
+            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50">
+              <svg
+                className="w-4 h-4 text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 9 4-4-4-4"
+                />
+              </svg>
+            </span>
+          </button>
+        </div>
+      )}
       
       <footer>
         <Footer />

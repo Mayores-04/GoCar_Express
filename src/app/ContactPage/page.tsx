@@ -143,8 +143,7 @@ const ContactPage: React.FC = () => {
           </div>
         </section>
       </div>
-
-      {/* Footer */}
+      
       <footer>
         <Footer />
       </footer>

@@ -7,7 +7,7 @@ import Image from "next/image";
 export default function Footer() {
   return (
     <>
-      <footer className="h-auto p-6 md:px-12 flex flex-col md:flex-row items-center md:justify-between bg-gray-100 shadow-md space-y-6 md:space-y-0">
+      <footer className="h-auto  p-6 md:px-12 flex flex-col md:flex-row items-center md:justify-between bg-gray-100 shadow-md space-y-6 md:space-y-0">
         {/* Logo Section */}
         <div className="flex items-center space-x-4">
           <Image

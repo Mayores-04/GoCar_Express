@@ -58,7 +58,7 @@ const CarsPage: React.FC = () => {
           {cars.map((car, index) => (
             <div
               key={index}
-              className="bg-white rounded-lg shadow-lg p-6 grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 items-start gap-8"
+              className="bg-white rounded-lg shadow-lg p-6 grid grid-cols-1 lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1 items-start gap-8"
             >
               <div className="flex flex-col justify-between h-full">
                 <div>

@@ -77,15 +77,14 @@ export default function ReservationPage() {
 
   const [submit, setSubmit] = useState(false);
 
-  const handleFormSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault();  
-    setSubmit(true); 
+  const handleFormSubmit = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    setSubmit(true);
   };
 
   const closeModal = () => {
-    setSubmit(false);  
+    setSubmit(false);
   };
-
 
   if (!isClient) return null;
 
@@ -104,7 +103,10 @@ export default function ReservationPage() {
 
         {/* Reservation Form */}
         <section className="w-full justify-center h-auto items-center flex rounded-md">
-          <form onSubmit={handleFormSubmit} className="w-full bg-white shadow-md rounded-lg p-8">
+          <form
+            onSubmit={handleFormSubmit}
+            className="w-full bg-white shadow-md rounded-lg p-8"
+          >
             {/* Service Selection */}
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -452,28 +454,28 @@ export default function ReservationPage() {
                 Submit Reservation
               </button>
               {/* Modal */}
-      {submit && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg text-center max-w-md">
-            <h2 className="text-lg font-semibold mb-4">
-              Sorry, we are currently working on our backend or data management.
-            </h2>
-            <button
-              onClick={closeModal}
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+              {submit && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg p-6 shadow-lg text-center max-w-md">
+                    <h2 className="text-lg font-semibold mb-4">
+                      Sorry, we are currently working on our backend or data
+                      management.
+                    </h2>
+                    <button
+                      onClick={closeModal}
+                      className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </form>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="bottom-0">
+      
+      <footer>
         <Footer />
       </footer>
     </>

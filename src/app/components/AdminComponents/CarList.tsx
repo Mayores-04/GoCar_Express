@@ -102,7 +102,7 @@ const CarListPage: React.FC = () => {
   }
 
   return (
-    <div className="flex bg-gray-100 full p-8 ">
+    <div id="CarList" className="flex bg-gray-100 full p-8 ">
       <div className="bg-white shadow-lg rounded-lg p-8">
         <h2 className="text-xl font-bold text-gray-800 mb-6">Car List</h2>
         <table className="w-full border-collapse border border-gray-300">

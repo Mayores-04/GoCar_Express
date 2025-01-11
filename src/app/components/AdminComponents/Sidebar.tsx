@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,7 +11,6 @@ import {
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 
-// Define props for Sidebar
 interface SidebarProps {
   currentSection: "AddCarsToList" | "CarList";
   setCurrentSection: React.Dispatch<React.SetStateAction<"AddCarsToList" | "CarList">>;

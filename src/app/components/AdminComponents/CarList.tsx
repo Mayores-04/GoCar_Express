@@ -123,7 +123,6 @@ const CarListPage: React.FC = () => {
         }));
       }
     } catch (err) {
-      toast.error("Error uploading image");
       console.error(err);
     }
   };

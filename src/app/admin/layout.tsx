@@ -47,13 +47,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
         {/* Main Content */}
         <main className="flex-grow overflow-y-auto ">
-          <div className="flex items-center justify-between w-full py-3 max-h-[60px] px-8 border-b border-black">
+          <div className="flex mb-[60px] items-center justify-between w-screen py-3 pr-24 fixed h-[60px]  px-8 border-b border-black">
             <h3 className="font-medium">Admin</h3>
             <Link href={"/#Home"}>
               <img src={"/images/blueLogo.png"} width={40} alt="Home" />
             </Link>
           </div>
-          {children}
+          <div className="mt-[60px]">{children}</div>
         </main>
       </div>
     </>

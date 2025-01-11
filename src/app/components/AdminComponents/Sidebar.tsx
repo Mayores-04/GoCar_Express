@@ -20,7 +20,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div
-      className="relative"
+      className="relative z-50"
       onMouseEnter={() => handleSidebarHover(true)}
       onMouseLeave={() => handleSidebarHover(false)}
     >

@@ -5,12 +5,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const AdminHome: React.FC = () => {
   return (
-    <div className="flex h-screen  bg-gray-100">
+    <div className="flex h-screen bg-gray-100">
       {/* Main Content */}
       <div className="flex-1 p-6">
         
         {/* Header */}
-        <div className="flex items-center justify-between py-3 mb-6 bg-white rounded-lg shadow-md px-8">
+        <div className="flex flex-col xl:flex-row lg:flex-row md:flex-row sm:flex-col items-center justify-between py-3 mb-6 bg-white rounded-lg shadow-md px-8">
           <h1 className="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
           <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
             Settings

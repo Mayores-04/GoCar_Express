@@ -1,17 +1,92 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import { GsapAnimation } from "./hooks/GsapAnimation";
 import FeatureCard from "./components/FeatureCard";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import NewsCard from "./components/NewsCard";
-import { newsData, NewsItem } from "./data/news";
 import Link from "next/link";
+import axios from "axios";
+
+interface NewsItem {
+  _id: string;
+  title: string;
+  picture: string;
+  description: string;
+  date: string;
+  location: string;
+  duration: string;
+  contact: string;
+  gallery: { title: string; date: string; picture: string }[];
+  customerName: string;
+}
 
 const Home: React.FC = () => {
   const headerRef = GsapAnimation();
+
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchNews = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("/api/news");
+  
+      const formattedNews = response.data.news.map((news: any) => ({
+        _id: news._id,
+        title: news.title,
+        picture: news.picture,
+        description: news.description,
+        date: news.date,
+        location: news.location,
+        duration: news.duration,
+        contact: news.contact,
+        gallery: news.gallery?.map((item: any) => ({
+          title: item.title,
+          date: item.date,
+          picture: item.picture,
+        })),
+        customerName: news.customerName,
+      }));
+  
+      setNews(formattedNews);
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Error fetching news:", err.message);
+      setError("Failed to fetch news. Please try again later.");
+      setLoading(false);
+    }
+  };
+  
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+
+  if (loading) {
+    return (
+      <div>
+        <header>
+          <Header />
+        </header>
+        <div className="flex items-center justify-center h-screen">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+            <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
+
   return (
     <>
       <header
@@ -119,21 +194,25 @@ const Home: React.FC = () => {
           </h2>
 
           <div className="flex flex-col w-full justify-center px-8 gap-6 mt-3">
-            {newsData.map((card) => (
-              <NewsCard
-                key={card.id}
-                id={card.id}
-                title={card.title}
-                picture={card.picture}
-                description={card.description}
-                date={card.date}
-                location={card.location}
-                duration={card.duration}
-                contact={card.contact}
-                gallery={card.gallery}
-                customerName={card.customerName}
-              />
-            ))}
+          {news.length > 0 ? (
+              news.map((item) => (
+                <NewsCard
+                  key={item._id}
+                  id={item._id}
+                  title={item.title}
+                  picture={item.picture}
+                  description={item.description}
+                  date={item.date}
+                  location={item.location}
+                  duration={item.duration}
+                  contact={item.contact}
+                  gallery={item.gallery}
+                  customerName={item.customerName}
+                />
+              ))
+            ) : (
+              <p>No news available.</p>
+            )}
           </div>
         </section>
 
@@ -169,7 +248,7 @@ const Home: React.FC = () => {
           </div>
         </section>
       </main>
-      
+
       <footer>
         <Footer />
       </footer>

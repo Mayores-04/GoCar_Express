@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Metadata } from "next";
+import axios from "axios";
 import {
   FaShareAlt,
   FaFacebook,
@@ -11,7 +11,6 @@ import {
 } from "react-icons/fa";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
-import { newsData } from "../../data/news";
 
 interface NewsPageProps {
   params: Promise<{ id: string }>;
@@ -23,15 +22,76 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
     gallery: { picture: string }[];
     currentIndex: number;
   } | null>(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
-  useEffect(() => {
-    params.then((resolvedParams) => setNewsParams(resolvedParams));
-  }, [params]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const news = newsParams
-    ? newsData.find((item) => item.id.toString() === newsParams.id)
-    : null;
+  interface GalleryItem {
+    title: string;
+    date: string;
+    picture: string;
+  }
+
+  interface NewsItem {
+    _id: string;
+    title: string;
+    customerName: string;
+    description: string;
+    date: string;
+    location: string;
+    duration: string;
+    contact: string;
+    picture: string;
+    gallery: GalleryItem[];
+  }
+
+  const [newsData, setNewsData] = useState<NewsItem[]>([]);
+
+  const fetchNews = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("/api/news");
+
+      const formattedNews: NewsItem[] = response.data.news.map((news: any) => ({
+        _id: news._id,
+        title: news.title,
+        customerName: news.customerName,
+        description: news.description,
+        date: news.date,
+        location: news.location,
+        duration: news.duration,
+        contact: news.contact,
+        picture: news.picture,
+        gallery: news.gallery?.map((item: any) => ({
+          title: item.title,
+          date: item.date,
+          picture: item.picture,
+        })) || [],
+      }));
+
+      setNewsData(formattedNews);
+      setLoading(false);
+    } catch (err: any) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      console.error("Error fetching news:", errorMessage);
+      setError("Failed to fetch news. Please try again later.");
+      setLoading(false);
+    }
+  };
+
+  const news = newsParams ? newsData.find((item) => item._id.toString() === newsParams.id) : null;
+
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setNewsParams(resolvedParams);
+    };
+    getParams();
+
+    fetchNews();
+  }, [params]);
 
   const openGallery = (gallery: { picture: string }[], index: number) => {
     setZoomedGallery({ gallery, currentIndex: index });
@@ -44,17 +104,14 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
 
   const goToNextImage = () => {
     if (zoomedGallery) {
-      const nextIndex =
-        (zoomedGallery.currentIndex + 1) % zoomedGallery.gallery.length;
+      const nextIndex = (zoomedGallery.currentIndex + 1) % zoomedGallery.gallery.length;
       setZoomedGallery({ ...zoomedGallery, currentIndex: nextIndex });
     }
   };
 
   const goToPreviousImage = () => {
     if (zoomedGallery) {
-      const prevIndex =
-        (zoomedGallery.currentIndex - 1 + zoomedGallery.gallery.length) %
-        zoomedGallery.gallery.length;
+      const prevIndex = (zoomedGallery.currentIndex - 1 + zoomedGallery.gallery.length) % zoomedGallery.gallery.length;
       setZoomedGallery({ ...zoomedGallery, currentIndex: prevIndex });
     }
   };
@@ -62,24 +119,16 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
   const openEmailClient = (imageUrl: string) => {
     const subject = "Check out this amazing image!";
     const body = `I wanted to share this image with you: ${imageUrl}`;
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
   };
 
   const handleShare = (type: string, imageUrl: string) => {
     if (type === "facebook") {
-      const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        imageUrl
-      )}`;
+      const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(imageUrl)}`;
       window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
     } else if (type === "messenger") {
-      const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(
-        imageUrl
-      )}&app_id=YOUR_APP_ID&redirect_uri=${encodeURIComponent(
-        window.location.href
-      )}`;
+      const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(imageUrl)}&app_id=YOUR_APP_ID&redirect_uri=${encodeURIComponent(window.location.href)}`;
       window.open(messengerShareUrl, "_blank", "noopener,noreferrer");
     } else if (type === "email") {
       openEmailClient(imageUrl);
@@ -91,10 +140,7 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
   const saveImage = async (imageUrl: string) => {
     try {
       const response = await fetch(imageUrl, { mode: "cors" });
-      if (!response.ok)
-        throw new Error(
-          `Failed to fetch the image. Status: ${response.status}`
-        );
+      if (!response.ok) throw new Error(`Failed to fetch the image. Status: ${response.status}`);
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
 
@@ -111,7 +157,9 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
     }
   };
 
-  if (!newsParams) {
+  const toggleDescription = () => setShowFullDescription((prev) => !prev);
+
+  if (loading) {
     return (
       <div className="bg-[#263033] text-white min-h-screen flex items-center justify-center">
         <p>Loading...</p>
@@ -133,10 +181,7 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
         <Header />
       </header>
 
-      <div
-        id="ContactPage"
-        className="flex flex-col justify-center items-center bg-[#263033] text-white"
-      >
+      <div id="NewsPage" className="flex flex-col justify-center items-center bg-[#263033] text-white">
         <section className="w-[95%] justify-center py-16 px-6 pt-24">
           <div className="bg-white justify-center items-center flex flex-col p-6 rounded-lg shadow-lg transform transition duration-300">
             <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
@@ -176,20 +221,24 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
                 GALLERY: {news.title}
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6 px-6">
-                {news.gallery?.map((item, index) => (
-                  <div
-                    key={index}
-                    className="relative elements overflow-hidden rounded-lg shadow-md"
-                  >
-                    <img
-                      src={item.picture}
-                      alt={item.title}
-                      className="w-full h-full object-cover rounded-lg cursor-pointer"
-                      onClick={() => openGallery(news.gallery, index)}
-                      draggable={false}
-                    />
-                  </div>
-                ))}
+                {news.gallery?.length > 0 ? (
+                  news.gallery.map((item, index) => (
+                    <div
+                      key={index}
+                      className="relative elements overflow-hidden rounded-lg shadow-md"
+                    >
+                      <img
+                        src={item.picture}
+                        alt={item.title}
+                        className="w-full h-full object-cover rounded-lg cursor-pointer"
+                        onClick={() => openGallery(news.gallery, index)}
+                        draggable={false}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No images available in the gallery.</p>
+                )}
               </div>
             </div>
           </div>
@@ -337,7 +386,7 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
           </button>
         </div>
       )}
-      
+
       <footer>
         <Footer />
       </footer>

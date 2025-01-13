@@ -260,7 +260,6 @@ const AddNewsPage: React.FC = () => {
             </button>
           </div>
         </div>
-
         {/* Gallery Section */}
         <div>
           <h2 className="text-lg font-medium mb-2">Gallery</h2>

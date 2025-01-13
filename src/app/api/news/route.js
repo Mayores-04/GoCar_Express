@@ -9,118 +9,85 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-
-
-export async function POST(request) {
+export async function POST(req) {
   try {
-    await ConnectDB();
+    const formData = await req.formData();
+    console.log("FormData received:", Array.from(formData.entries()));
 
-    const formData = await request.formData();
-    const image = formData.get("picture");
+    const title = formData.get("title");
+    const customerName = formData.get("customerName");
+    const description = formData.get("description");
+    const date = formData.get("date");
+    const location = formData.get("location");
+    const duration = formData.get("duration");
+    const contact = formData.get("contact");
+    const image = formData.get("main_picture");
 
-    // Validate required fields
-    const requiredFields = [
-      "title",
-      "customerName",
-      "description",
-      "date",
-      "location",
-      "duration",
-      "contact",
-    ];
-    for (const field of requiredFields) {
-      if (!formData.get(field)) {
-        return NextResponse.json(
-          { success: false, msg: `${field} is required` },
-          { status: 400 }
-        );
-      }
+    if (!image) {
+      return NextResponse.json({ msg: "Main image is required" }, { status: 400 });
     }
 
-    // Handle image upload
-    let imageUrl = "";
-    if (image && typeof image.arrayBuffer === "function") {
-      const buffer = Buffer.from(await image.arrayBuffer());
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.v2.uploader.upload_stream(
-          { resource_type: "auto" },
-          (error, result) => {
-            if (error) reject(error);
-            resolve(result);
-          }
-        ).end(buffer);
-      });
-      imageUrl = uploadResult.secure_url;
-    }
-
-    // Handling the gallery data
-    const galleryField = formData.get("gallery");
-    let gallery = [];
-    if (galleryField) {
-      for (let i = 0; i < 10; i++) {
-        const title = formData.get(`gallery[${i}][title]`);
-        const date = formData.get(`gallery[${i}][date]`);
-        const picture = formData.get(`gallery[${i}][picture]`);
-
-        console.log("Gallery Item", { title, date, picture }); // Log the gallery item
-
-        if (title || date || picture) {
-          let galleryItem = {
-            title: title || "",
-            date: date || "",
-            picture: null,
-          };
-
-          if (picture) {
-            try {
-              console.log("Uploading picture", picture); // Log the picture being uploaded
-              const uploadResult = await new Promise((resolve, reject) => {
-                cloudinary.v2.uploader.upload_stream(
-                  { resource_type: "auto" },
-                  (error, result) => {
-                    if (error) reject(error);
-                    resolve(result);
-                  }
-                ).end(picture.stream()); // Ensure stream is passed here
-              });
-              galleryItem.picture = uploadResult.secure_url;
-            } catch (error) {
-              console.error("Error uploading picture:", error.message);
-            }
-          }
-
-          gallery.push(galleryItem);
+    // Upload the main image to Cloudinary
+    const buffer = Buffer.from(await image.arrayBuffer());
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.v2.uploader.upload_stream(
+        { resource_type: "auto" },
+        (error, result) => {
+          if (error) reject(error);
+          resolve(result);
         }
+      ).end(buffer);
+    });
+    const pictureUrl = uploadResult.secure_url;
+
+    // Process gallery items
+    const galleryItems = [];
+    for (let i = 0; formData.has(`gallery[${i}][gallery_picture]`); i++) {
+      const galleryTitle = formData.get(`gallery[${i}][title]`);
+      const galleryDate = formData.get(`gallery[${i}][date]`);
+      const galleryImage = formData.get(`gallery[${i}][gallery_picture]`);
+
+      if (galleryTitle && galleryDate && galleryImage) {
+        const galleryBuffer = Buffer.from(await galleryImage.arrayBuffer());
+        const galleryUploadResult = await new Promise((resolve, reject) => {
+          cloudinary.v2.uploader.upload_stream(
+            { resource_type: "auto" },
+            (error, result) => {
+              if (error) reject(error);
+              resolve(result);
+            }
+          ).end(galleryBuffer);
+        });
+        galleryItems.push({
+          title: galleryTitle,
+          date: galleryDate,
+          picture: galleryUploadResult.secure_url,
+        });
       }
     }
 
-    // Construct the news data object
-    const newsData = {
-      title: formData.get("title").toString(),
-      customerName: formData.get("customerName").toString(),
-      description: formData.get("description").toString(),
-      date: formData.get("date").toString(),
-      location: formData.get("location").toString(),
-      duration: formData.get("duration").toString(),
-      contact: formData.get("contact").toString(),
-      picture: imageUrl,
-      gallery, // Ensure gallery is included here
-    };
+    // Save to MongoDB
+    await ConnectDB();
+    const news = new NewsModel({
+      title,
+      customerName,
+      description,
+      date,
+      location,
+      duration,
+      contact,
+      picture: pictureUrl,
+      gallery: galleryItems,
+    });
 
-    // Save to the database
-    const createdNews = await NewsModel.create(newsData);
+    await news.save();
 
-    return NextResponse.json({ success: true, news: createdNews });
+    return NextResponse.json({ msg: "News added successfully" }, { status: 200 });
   } catch (error) {
-    console.error("Error in POST /api/news:", error.message);
-    return NextResponse.json(
-      { success: false, msg: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("Error saving news:", error.message);
+    return NextResponse.json({ msg: "Failed to add news", error: error.message }, { status: 500 });
   }
 }
-
-
 export async function PUT(request) {
   try {
     await ConnectDB();
@@ -138,7 +105,7 @@ export async function PUT(request) {
     const formData = await request.formData();
     const updateData = {};
 
-    // Collect fields for update
+    // Update basic fields
     if (formData.has("title")) updateData.title = formData.get("title").toString();
     if (formData.has("customerName")) updateData.customerName = formData.get("customerName").toString();
     if (formData.has("description")) updateData.description = formData.get("description").toString();
@@ -147,24 +114,9 @@ export async function PUT(request) {
     if (formData.has("duration")) updateData.duration = formData.get("duration").toString();
     if (formData.has("contact")) updateData.contact = formData.get("contact").toString();
 
-    // Update gallery if provided
-    if (formData.has("gallery")) {
-      try {
-        updateData.gallery = JSON.parse(formData.get("gallery").toString());
-        if (!Array.isArray(updateData.gallery)) {
-          throw new Error("Gallery must be an array.");
-        }
-      } catch (error) {
-        return NextResponse.json(
-          { success: false, msg: "Invalid gallery format. It should be valid JSON." },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Handle picture upload
-    if (formData.has("picture")) {
-      const buffer = Buffer.from(await formData.get("picture").arrayBuffer());
+    // Handle main picture upload
+    if (formData.has("main_picture")) {
+      const buffer = Buffer.from(await formData.get("main_picture").arrayBuffer());
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.v2.uploader.upload_stream(
           { resource_type: "auto" },
@@ -175,6 +127,35 @@ export async function PUT(request) {
         ).end(buffer);
       });
       updateData.picture = uploadResult.secure_url;
+    }
+
+    // Process gallery updates
+    if (formData.has("gallery")) {
+      const updatedGallery = [];
+      for (let i = 0; formData.has(`gallery[${i}][gallery_picture]`); i++) {
+        const galleryTitle = formData.get(`gallery[${i}][title]`);
+        const galleryDate = formData.get(`gallery[${i}][date]`);
+        const galleryImage = formData.get(`gallery[${i}][gallery_picture]`);
+        if (galleryTitle && galleryDate && galleryImage) {
+          const galleryBuffer = Buffer.from(await galleryImage.arrayBuffer());
+          const galleryUploadResult = await new Promise((resolve, reject) => {
+            cloudinary.v2.uploader.upload_stream(
+              { resource_type: "auto" },
+              (error, result) => {
+                if (error) reject(error);
+                resolve(result);
+              }
+            ).end(galleryBuffer);
+          });
+
+          updatedGallery.push({
+            title: galleryTitle,
+            date: galleryDate,
+            picture: galleryUploadResult.secure_url,
+          });
+        }
+      }
+      updateData.gallery = updatedGallery;
     }
 
     const updatedNews = await NewsModel.findByIdAndUpdate(id, updateData, { new: true });

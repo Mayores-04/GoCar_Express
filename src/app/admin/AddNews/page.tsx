@@ -4,9 +4,25 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 
+interface FormData {
+  title: string;
+  customerName: string;
+  description: string;
+  date: string;
+  location: string;
+  duration: string;
+  contact: string;
+}
+
+interface GalleryItem {
+  title: string;
+  date: string;
+  picture: File | null;
+}
+
 const AddNewsPage: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     customerName: "",
     description: "",
@@ -16,69 +32,37 @@ const AddNewsPage: React.FC = () => {
     contact: "",
   });
 
-  const [galleryItems, setGalleryItems] = useState<
-    { title: string; date: string; picture: File | null }[]
-  >([]);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
 
-  const [message, setMessage] = useState("");
-
-  // Handle form field changes
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle gallery changes
-  const handleGalleryChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleGalleryChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setGalleryItems((prev) =>
-      prev.map((item, idx) =>
-        idx === index ? { ...item, [name]: value } : item
-      )
+      prev.map((item, idx) => (idx === index ? { ...item, [name]: value } : item))
     );
   };
 
-  // Handle gallery image upload
-  const handleGalleryImageChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleGalleryImageChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     setGalleryItems((prev) =>
-      prev.map((item, idx) =>
-        idx === index ? { ...item, picture: file } : item
-      )
+      prev.map((item, idx) => (idx === index ? { ...item, picture: file } : item))
     );
   };
 
-  // Add new gallery item
   const addGalleryItem = () => {
     setGalleryItems((prev) => [...prev, { title: "", date: "", picture: null }]);
   };
 
-  // Remove gallery item
   const removeGalleryItem = (index: number) => {
     setGalleryItems((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  // Filter valid gallery items for submission
-  const filterValidGalleryItems = () =>
-    galleryItems.filter((item) => item.title && item.date && item.picture);
-
-  // Submit the form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validGalleryItems = filterValidGalleryItems();
-
-    if (!validGalleryItems.length) {
-      toast.error("At least one valid gallery item is required.");
-      return;
-    }
 
     const formPayload = new FormData();
     formPayload.append("title", formData.title);
@@ -90,14 +74,14 @@ const AddNewsPage: React.FC = () => {
     formPayload.append("contact", formData.contact);
 
     if (image) {
-      formPayload.append("picture", image);
+      formPayload.append("main_picture", image);
     }
 
-    validGalleryItems.forEach((item, index) => {
-      formPayload.append(`gallery[${index}][title]`, item.title);
-      formPayload.append(`gallery[${index}][date]`, item.date);
-      if (item.picture) {
-        formPayload.append(`gallery[${index}][picture]`, item.picture);
+    galleryItems.forEach((item, index) => {
+      if (item.title && item.date && item.picture) {
+        formPayload.append(`gallery[${index}][title]`, item.title);
+        formPayload.append(`gallery[${index}][date]`, item.date);
+        formPayload.append(`gallery[${index}][gallery_picture]`, item.picture);
       }
     });
 
@@ -126,10 +110,11 @@ const AddNewsPage: React.FC = () => {
         toast.error(`Error: ${data.msg || "Failed to add news"}`);
       }
     } catch (error) {
+      toast.error("Error submitting form.");
       console.error("Error submitting form:", error);
-      setMessage("Error: Failed to submit the form.");
     }
   };
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-2xl font-bold mb-6">Add News Update</h1>
@@ -235,9 +220,11 @@ const AddNewsPage: React.FC = () => {
             placeholder="Enter contact information"
           />
         </div>
+
+        {/* Upload Picture */}
         <div>
           <label htmlFor="image" className="block font-medium mb-2">
-            Upload Picture
+            Upload Main Picture
           </label>
           <div className="flex items-center space-x-4">
             <div className="w-32 h-24 bg-gray-200 border border-gray-300 rounded-md flex items-center justify-center overflow-hidden">
@@ -273,8 +260,9 @@ const AddNewsPage: React.FC = () => {
             </button>
           </div>
         </div>
-                {/* Gallery Section */}
-                <div>
+
+        {/* Gallery Section */}
+        <div>
           <h2 className="text-lg font-medium mb-2">Gallery</h2>
           {galleryItems.map((item, index) => (
             <div key={index} className="mb-4 space-y-2">
@@ -285,6 +273,7 @@ const AddNewsPage: React.FC = () => {
                 value={item.title}
                 onChange={(e) => handleGalleryChange(index, e)}
                 className="w-full border border-gray-300 rounded px-4 py-2"
+                required
               />
               <input
                 type="date"
@@ -292,11 +281,13 @@ const AddNewsPage: React.FC = () => {
                 value={item.date}
                 onChange={(e) => handleGalleryChange(index, e)}
                 className="w-full border border-gray-300 rounded px-4 py-2"
+                required
               />
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => handleGalleryImageChange(index, e)}
+                required
               />
               <button
                 type="button"
@@ -315,23 +306,15 @@ const AddNewsPage: React.FC = () => {
             Add Gallery Item
           </button>
         </div>
+
         {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          Add News
+          Submit
         </button>
       </form>
-      {message && (
-        <div
-          className={`mt-4 text-center ${
-            message.startsWith("Error") ? "text-red-600" : "text-green-600"
-          }`}
-        >
-          {message}
-        </div>
-      )}
     </div>
   );
 };

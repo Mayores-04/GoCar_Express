@@ -34,7 +34,7 @@ const Home: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/news");
-  
+
       const formattedNews = response.data.news.map((news: any) => ({
         _id: news._id,
         title: news.title,
@@ -51,7 +51,7 @@ const Home: React.FC = () => {
         })),
         customerName: news.customerName,
       }));
-  
+
       setNews(formattedNews);
       setLoading(false);
     } catch (err: any) {
@@ -60,28 +60,10 @@ const Home: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     fetchNews();
   }, []);
-
-
-  if (loading) {
-    return (
-      <div>
-        <header>
-          <Header />
-        </header>
-        <div className="flex items-center justify-center h-screen">
-          <div className="relative">
-            <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
-            <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return <p className="text-red-500">{error}</p>;
@@ -194,7 +176,7 @@ const Home: React.FC = () => {
           </h2>
 
           <div className="flex flex-col w-full justify-center px-8 gap-6 mt-3">
-          {news.length > 0 ? (
+            {news.length > 0 ? (
               news.map((item) => (
                 <NewsCard
                   key={item._id}
@@ -210,8 +192,18 @@ const Home: React.FC = () => {
                   customerName={item.customerName}
                 />
               ))
-            ) : (
-              <p>No news available.</p>
+            ) : loading && (
+              <div>
+                <header>
+                  <Header />
+                </header>
+                <div className="flex items-center justify-center">
+                  <div className="relative">
+                    <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                    <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </section>

@@ -10,90 +10,113 @@ import {
 } from "react-icons/fa";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { newsData } from "../data/news";
+import axios from "axios";
 
-type GalleryItem = {
+interface GalleryItem {
+  title: string;
+  date: string;
+  picture: string;
+}
+
+interface NewsItem {
+  _id: string;
   title: string;
   picture: string;
+  description: string;
   date: string;
-};
+  location: string;
+  duration: string;
+  contact: string;
+  gallery: GalleryItem[];
+  customerName: string;
+}
 
 const NewsPage: React.FC = () => {
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("/api/news");
+
+        const formattedNews: NewsItem[] = response.data.news.map(
+          (item: any) => ({
+            _id: item._id,
+            title: item.title,
+            picture: item.picture,
+            description: item.description,
+            date: item.date,
+            location: item.location,
+            duration: item.duration,
+            contact: item.contact,
+            gallery: item.gallery?.map((galleryItem: any) => ({
+              title: galleryItem.title,
+              date: galleryItem.date,
+              picture: galleryItem.picture,
+            })),
+            customerName: item.customerName,
+          })
+        );
+
+        setNews(formattedNews);
+      } catch (err: any) {
+        console.error("Error fetching news:", err.message);
+        setError("Failed to fetch news. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
   const [zoomedGallery, setZoomedGallery] = useState<{
     gallery: GalleryItem[];
     currentIndex: number;
   } | null>(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
-  const openGallery = (gallery: GalleryItem[], index: number) => {
-    setZoomedGallery({ gallery, currentIndex: index });
-  };
-
-  const closeGallery = () => {
-    setZoomedGallery(null);
-    setShowShareOptions(false);
-  };
-
-  const goToNextImage = () => {
-    if (zoomedGallery) {
-      const nextIndex =
-        (zoomedGallery.currentIndex + 1) % zoomedGallery.gallery.length;
-      setZoomedGallery({
-        gallery: zoomedGallery.gallery,
-        currentIndex: nextIndex,
-      });
-    }
-  };
-
-  const goToPreviousImage = () => {
-    if (zoomedGallery) {
-      const prevIndex =
-        (zoomedGallery.currentIndex - 1 + zoomedGallery.gallery.length) %
-        zoomedGallery.gallery.length;
-      setZoomedGallery({
-        gallery: zoomedGallery.gallery,
-        currentIndex: prevIndex,
-      });
-    }
-  };
-
-  const openEmailClient = (imageUrl: string) => {
-    const subject = "Check out this amazing image!";
-    const body = `I wanted to share this image with you: ${imageUrl}`;
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
-  };
-
   const handleShare = (type: string, imageUrl: string) => {
-    if (type === "facebook") {
-      const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        imageUrl
-      )}`;
-      window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
-    } else if (type === "messenger") {
-      const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(
-        imageUrl
-      )}&app_id=YOUR_APP_ID&redirect_uri=${encodeURIComponent(
-        window.location.href
-      )}`;
-      window.open(messengerShareUrl, "_blank", "noopener,noreferrer");
-    } else if (type === "email") {
-      openEmailClient(imageUrl);
-    } else if (type === "save") {
-      saveImage(imageUrl);
+    const encodedImageUrl = encodeURIComponent(imageUrl);
+    switch (type) {
+      case "facebook": {
+        const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedImageUrl}`;
+        window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
+        break;
+      }
+      case "messenger": {
+        const appId = "YOUR_APP_ID"; // Replace with your actual Facebook App ID
+        const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodedImageUrl}&app_id=${appId}&redirect_uri=${encodeURIComponent(
+          window.location.href
+        )}`;
+        window.open(messengerShareUrl, "_blank", "noopener,noreferrer");
+        break;
+      }
+      case "email": {
+        const subject = "Check out this amazing image!";
+        const body = `I wanted to share this image with you: ${imageUrl}`;
+        const mailtoLink = `mailto:?subject=${encodeURIComponent(
+          subject
+        )}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoLink;
+        break;
+      }
+      case "save": {
+        saveImage(imageUrl);
+        break;
+      }
+      default:
+        console.warn("Unsupported share type:", type);
     }
   };
 
   const saveImage = async (imageUrl: string) => {
     try {
       const response = await fetch(imageUrl, { mode: "cors" });
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch the image. Status: ${response.status}`
-        );
-      }
+      if (!response.ok) throw new Error("Failed to fetch the image");
 
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
@@ -112,6 +135,55 @@ const NewsPage: React.FC = () => {
     }
   };
 
+  const goToNextImage = () => {
+    setZoomedGallery((prev) => {
+      if (!prev) return null;
+      const nextIndex = (prev.currentIndex + 1) % prev.gallery.length;
+      return { ...prev, currentIndex: nextIndex };
+    });
+  };
+
+  const goToPreviousImage = () => {
+    setZoomedGallery((prev) => {
+      if (!prev) return null;
+      const prevIndex =
+        (prev.currentIndex - 1 + prev.gallery.length) % prev.gallery.length;
+      return { ...prev, currentIndex: prevIndex };
+    });
+  };
+
+  const openGallery = (gallery: GalleryItem[], index: number) => {
+    setZoomedGallery({ gallery, currentIndex: index });
+  };
+
+  const closeGallery = () => {
+    setZoomedGallery(null);
+    setShowShareOptions(false);
+  };
+
+  const openEmailClient = (imageUrl: string) => {
+    const subject = "Check out this amazing image!";
+    const body = `I wanted to share this image with you: ${imageUrl}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="relative">
+          <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+          <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
   return (
     <>
       <header>
@@ -129,8 +201,8 @@ const NewsPage: React.FC = () => {
             </h1>
 
             <div className="flex flex-col gap-8">
-              {newsData && Array.isArray(newsData) && newsData.length > 0 ? (
-                newsData.map((news, index) => (
+              {news && Array.isArray(news) && news.length > 0 ? (
+                news.map((item, index) => (
                   <div
                     key={index}
                     className="bg-white justify-center items-center flex flex-col p-6 rounded-lg shadow-lg transform transition duration-300"
@@ -138,47 +210,47 @@ const NewsPage: React.FC = () => {
                     <div className="w-[95%] justify-center items-center">
                       <div className="flex justify-center items-center w-full my-6">
                         <img
-                          src={news.picture}
-                          alt={news.title}
+                          src={item.picture}
+                          alt={item.title}
                           className="w-full h-auto rounded-md shadow-md"
                         />
                       </div>
                       <h1 className="text-3xl xl:text-5xl lg:text-5xl md:text-3xl text-center font-extrabold text-gray-800 mb-4">
-                        {news.title}
+                        {item.title}
                       </h1>
                       <h2 className="text-xl xl:text-3xl lg:text-3xl md:text-2xl text-left font-semibold text-gray-800 mb-4">
-                        {news.customerName} {news.title}
+                        {item.customerName} {item.title}
                       </h2>
-                      <p className="text-gray-600 mb-4 ">{news.description}</p>
-                      <p className="text-gray-500 mb-4 ">{news.date}</p>
-                      <p className="text-gray-500 mb-4 ">{news.location}</p>
+                      <p className="text-gray-600 mb-4 ">{item.description}</p>
+                      <p className="text-gray-500 mb-4 ">{item.date}</p>
+                      <p className="text-gray-500 mb-4 ">{item.location}</p>
                       <p className="text-gray-500 mb-4 ">
-                        Duration: {news.duration}
+                        Duration: {item.duration}
                       </p>
                       <p className="text-gray-500 mb-4 ">
-                        Contact: {news.contact}
+                        Contact: {item.contact}
                       </p>
                     </div>
                     <div className="w-full xl:w-[95%] lg:w-[95%] md:w-[95%] py-8 bg-gray-100 rounded-lg">
                       <h3 className="text-2xl font-bold text-gray-800 text-left px-6 mb-6">
-                        GALLERY: {news.title}
+                        GALLERY: {item.title}
                       </h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6 px-6">
-                        {news.gallery &&
-                        Array.isArray(news.gallery) &&
-                        news.gallery.length > 0 ? (
-                          news.gallery.map((item, galleryIndex) => (
+                        {item.gallery &&
+                        Array.isArray(item.gallery) &&
+                        item.gallery.length > 0 ? (
+                          item.gallery.map((galleryItem, galleryIndex) => (
                             <div
                               key={galleryIndex}
                               className="relative elements overflow-hidden rounded-lg shadow-md"
                             >
                               <img
-                                src={item.picture}
-                                alt={item.title}
+                                src={galleryItem.picture}
+                                alt={galleryItem.title}
                                 className="w-full h-full object-cover rounded-lg cursor-pointer"
-                                onClick={() =>
-                                  openGallery(news.gallery, galleryIndex)
-                                }
+                                onClick={() => {
+                                  openGallery(item.gallery, galleryIndex);
+                                }}
                                 draggable={false}
                               />
                             </div>
@@ -338,7 +410,7 @@ const NewsPage: React.FC = () => {
           </button>
         </div>
       )}
-      
+
       <footer>
         <Footer />
       </footer>

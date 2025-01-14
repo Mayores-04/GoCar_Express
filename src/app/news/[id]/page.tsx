@@ -16,85 +16,68 @@ interface NewsPageProps {
   params: Promise<{ id: string }>;
 }
 
+interface GalleryItem {
+  title: string;
+  date: string;
+  gallery_picture: string;
+}
+
+interface NewsItem {
+  _id: string;
+  title: string;
+  main_picture: string;
+  description: string;
+  date: string;
+  location: string;
+  duration: string;
+  contact: string;
+  gallery: GalleryItem[];
+  customerName: string;
+}
+
 const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
   const [newsParams, setNewsParams] = useState<{ id: string } | null>(null);
   const [zoomedGallery, setZoomedGallery] = useState<{
     gallery: { picture: string }[];
     currentIndex: number;
   } | null>(null);
-  const [showFullDescription, setShowFullDescription] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  interface GalleryItem {
-    title: string;
-    date: string;
-    picture: string;
-  }
-
-  interface NewsItem {
-    _id: string;
-    title: string;
-    customerName: string;
-    description: string;
-    date: string;
-    location: string;
-    duration: string;
-    contact: string;
-    picture: string;
-    gallery: GalleryItem[];
-  }
-
   const [newsData, setNewsData] = useState<NewsItem[]>([]);
 
-  const fetchNews = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("/api/news");
-
-      const formattedNews: NewsItem[] = response.data.news.map((news: any) => ({
-        _id: news._id,
-        title: news.title,
-        customerName: news.customerName,
-        description: news.description,
-        date: news.date,
-        location: news.location,
-        duration: news.duration,
-        contact: news.contact,
-        picture: news.picture,
-        gallery: news.gallery?.map((item: any) => ({
-          title: item.title,
-          date: item.date,
-          picture: item.picture,
-        })) || [],
-      }));
-
-      setNewsData(formattedNews);
-      setLoading(false);
-    } catch (err: any) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-      console.error("Error fetching news:", errorMessage);
-      setError("Failed to fetch news. Please try again later.");
-      setLoading(false);
-    }
-  };
-
-  const news = newsParams ? newsData.find((item) => item._id.toString() === newsParams.id) : null;
-
   useEffect(() => {
-    const getParams = async () => {
-      const resolvedParams = await params;
-      setNewsParams(resolvedParams);
-    };
-    getParams();
+    const fetchNewsAndParams = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("/api/news");
+        console.log(response.data.news);
+        setNewsData(response.data.news);
 
-    fetchNews();
+        const resolvedParams = await params;
+        setNewsParams(resolvedParams);
+      } catch (err: any) {
+        console.error("Error fetching news:", err.message);
+        setError("Failed to fetch news. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNewsAndParams();
   }, [params]);
 
-  const openGallery = (gallery: { picture: string }[], index: number) => {
-    setZoomedGallery({ gallery, currentIndex: index });
+  const news = newsParams
+    ? newsData.find((item) => item._id.toString() === newsParams.id)
+    : null;
+
+  const openGallery = (gallery: GalleryItem[], index: number) => {
+    setZoomedGallery({
+      gallery: gallery.map((item) => ({ picture: item.gallery_picture })),
+      currentIndex: index,
+    });
   };
 
   const closeGallery = () => {
@@ -104,14 +87,17 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
 
   const goToNextImage = () => {
     if (zoomedGallery) {
-      const nextIndex = (zoomedGallery.currentIndex + 1) % zoomedGallery.gallery.length;
+      const nextIndex =
+        (zoomedGallery.currentIndex + 1) % zoomedGallery.gallery.length;
       setZoomedGallery({ ...zoomedGallery, currentIndex: nextIndex });
     }
   };
 
   const goToPreviousImage = () => {
     if (zoomedGallery) {
-      const prevIndex = (zoomedGallery.currentIndex - 1 + zoomedGallery.gallery.length) % zoomedGallery.gallery.length;
+      const prevIndex =
+        (zoomedGallery.currentIndex - 1 + zoomedGallery.gallery.length) %
+        zoomedGallery.gallery.length;
       setZoomedGallery({ ...zoomedGallery, currentIndex: prevIndex });
     }
   };
@@ -119,16 +105,24 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
   const openEmailClient = (imageUrl: string) => {
     const subject = "Check out this amazing image!";
     const body = `I wanted to share this image with you: ${imageUrl}`;
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
   };
 
   const handleShare = (type: string, imageUrl: string) => {
     if (type === "facebook") {
-      const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(imageUrl)}`;
+      const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        imageUrl
+      )}`;
       window.open(facebookShareUrl, "_blank", "noopener,noreferrer");
     } else if (type === "messenger") {
-      const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(imageUrl)}&app_id=YOUR_APP_ID&redirect_uri=${encodeURIComponent(window.location.href)}`;
+      const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(
+        imageUrl
+      )}&app_id=YOUR_APP_ID&redirect_uri=${encodeURIComponent(
+        window.location.href
+      )}`;
       window.open(messengerShareUrl, "_blank", "noopener,noreferrer");
     } else if (type === "email") {
       openEmailClient(imageUrl);
@@ -140,7 +134,10 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
   const saveImage = async (imageUrl: string) => {
     try {
       const response = await fetch(imageUrl, { mode: "cors" });
-      if (!response.ok) throw new Error(`Failed to fetch the image. Status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(
+          `Failed to fetch the image. Status: ${response.status}`
+        );
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
 
@@ -157,12 +154,18 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
     }
   };
 
-  const toggleDescription = () => setShowFullDescription((prev) => !prev);
-
   if (loading) {
     return (
-      <div className="bg-[#263033] text-white min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div>
+        <header>
+          <Header />
+        </header>
+        <div className="flex items-center h-screen justify-center">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+            <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -181,7 +184,10 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
         <Header />
       </header>
 
-      <div id="NewsPage" className="flex flex-col justify-center items-center bg-[#263033] text-white">
+      <div
+        id="NewsPage"
+        className="flex flex-col justify-center items-center bg-[#263033] text-white"
+      >
         <section className="w-[95%] justify-center py-16 px-6 pt-24">
           <div className="bg-white justify-center items-center flex flex-col p-6 rounded-lg shadow-lg transform transition duration-300">
             <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
@@ -190,7 +196,7 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
             <div className="w-[95%] justify-center items-center">
               <div className="flex justify-center items-center w-full mb-6">
                 <img
-                  src={news.picture}
+                  src={news.main_picture}
                   alt={news.title}
                   className="w-full h-auto rounded-md shadow-md"
                 />
@@ -228,7 +234,7 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
                       className="relative elements overflow-hidden rounded-lg shadow-md"
                     >
                       <img
-                        src={item.picture}
+                        src={item.gallery_picture}
                         alt={item.title}
                         className="w-full h-full object-cover rounded-lg cursor-pointer"
                         onClick={() => openGallery(news.gallery, index)}
@@ -237,7 +243,9 @@ const NewsPerId: React.FC<NewsPageProps> = ({ params }) => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">No images available in the gallery.</p>
+                  <p className="text-gray-500">
+                    No images available in the gallery.
+                  </p>
                 )}
               </div>
             </div>

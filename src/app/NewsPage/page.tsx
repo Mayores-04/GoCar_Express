@@ -15,13 +15,13 @@ import axios from "axios";
 interface GalleryItem {
   title: string;
   date: string;
-  picture: string;
+  gallery_picture: string;
 }
 
 interface NewsItem {
   _id: string;
   title: string;
-  picture: string;
+  main_picture: string;
   description: string;
   date: string;
   location: string;
@@ -36,32 +36,13 @@ const NewsPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
       try {
         const response = await axios.get("/api/news");
-
-        const formattedNews: NewsItem[] = response.data.news.map(
-          (item: any) => ({
-            _id: item._id,
-            title: item.title,
-            picture: item.picture,
-            description: item.description,
-            date: item.date,
-            location: item.location,
-            duration: item.duration,
-            contact: item.contact,
-            gallery: item.gallery?.map((galleryItem: any) => ({
-              title: galleryItem.title,
-              date: galleryItem.date,
-              picture: galleryItem.picture,
-            })),
-            customerName: item.customerName,
-          })
-        );
-
-        setNews(formattedNews);
+        setNews(response.data.news);
       } catch (err: any) {
         console.error("Error fetching news:", err.message);
         setError("Failed to fetch news. Please try again later.");
@@ -72,6 +53,7 @@ const NewsPage: React.FC = () => {
 
     fetchNews();
   }, []);
+  
 
   const [zoomedGallery, setZoomedGallery] = useState<{
     gallery: GalleryItem[];
@@ -88,7 +70,7 @@ const NewsPage: React.FC = () => {
         break;
       }
       case "messenger": {
-        const appId = "YOUR_APP_ID"; // Replace with your actual Facebook App ID
+        const appId = "YOUR_APP_ID";  
         const messengerShareUrl = `https://www.facebook.com/dialog/send?link=${encodedImageUrl}&app_id=${appId}&redirect_uri=${encodeURIComponent(
           window.location.href
         )}`;
@@ -170,12 +152,18 @@ const NewsPage: React.FC = () => {
     window.location.href = mailtoLink;
   };
 
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="relative">
-          <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
-          <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+      <div>
+        <header>
+          <Header />
+        </header>
+        <div className="flex items-center h-screen justify-center">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+            <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+          </div>
         </div>
       </div>
     );
@@ -210,7 +198,7 @@ const NewsPage: React.FC = () => {
                     <div className="w-[95%] justify-center items-center">
                       <div className="flex justify-center items-center w-full my-6">
                         <img
-                          src={item.picture}
+                          src={item.main_picture}
                           alt={item.title}
                           className="w-full h-auto rounded-md shadow-md"
                         />
@@ -245,7 +233,7 @@ const NewsPage: React.FC = () => {
                               className="relative elements overflow-hidden rounded-lg shadow-md"
                             >
                               <img
-                                src={galleryItem.picture}
+                                src={galleryItem.gallery_picture}
                                 alt={galleryItem.title}
                                 className="w-full h-full object-cover rounded-lg cursor-pointer"
                                 onClick={() => {
@@ -295,7 +283,7 @@ const NewsPage: React.FC = () => {
                   onClick={() =>
                     handleShare(
                       "facebook",
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].gallery_picture
                     )
                   }
                 >
@@ -305,7 +293,7 @@ const NewsPage: React.FC = () => {
                   className="flex items-center gap-2 py-2 px-4 hover:bg-gray-200 rounded"
                   onClick={() =>
                     openEmailClient(
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].gallery_picture
                     )
                   }
                 >
@@ -316,7 +304,7 @@ const NewsPage: React.FC = () => {
                   onClick={() =>
                     handleShare(
                       "messenger",
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].gallery_picture
                     )
                   }
                 >
@@ -327,7 +315,7 @@ const NewsPage: React.FC = () => {
                   onClick={() =>
                     handleShare(
                       "save",
-                      zoomedGallery.gallery[zoomedGallery.currentIndex].picture
+                      zoomedGallery.gallery[zoomedGallery.currentIndex].gallery_picture
                     )
                   }
                 >
@@ -346,7 +334,7 @@ const NewsPage: React.FC = () => {
                 } duration-700 ease-in-out`}
               >
                 <img
-                  src={image.picture}
+                  src={image.gallery_picture}
                   alt={image.title}
                   draggable={false}
                   className="block w-full h-full object-contain rounded-lg"

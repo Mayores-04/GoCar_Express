@@ -3,14 +3,16 @@ import ConnectDB from "@/lib/config/db";
 import NewsModel from "@/lib/models/NewsModel";
 import cloudinary from "cloudinary";
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
+
 export async function POST(req) {
   try {
+    await ConnectDB();
+
     const formData = await req.formData();
     console.log("FormData received:", Array.from(formData.entries()));
 
@@ -23,8 +25,13 @@ export async function POST(req) {
     const contact = formData.get("contact");
     const image = formData.get("main_picture");
 
-    if (!image) {
-      return NextResponse.json({ msg: "Main image is required" }, { status: 400 });
+    // Check if the image is valid
+    if (!image || typeof image.arrayBuffer !== "function") {
+      console.error("Image is missing or invalid.");
+      return NextResponse.json(
+        { success: false, msg: "Image file is missing or invalid" },
+        { status: 400 }
+      );
     }
 
     // Upload the main image to Cloudinary
@@ -38,6 +45,7 @@ export async function POST(req) {
         }
       ).end(buffer);
     });
+    
     const pictureUrl = uploadResult.secure_url;
 
     // Process gallery items
@@ -46,28 +54,38 @@ export async function POST(req) {
       const galleryTitle = formData.get(`gallery[${i}][title]`);
       const galleryDate = formData.get(`gallery[${i}][date]`);
       const galleryImage = formData.get(`gallery[${i}][gallery_picture]`);
-
+    
       if (galleryTitle && galleryDate && galleryImage) {
+        // Convert galleryImage to a Buffer
         const galleryBuffer = Buffer.from(await galleryImage.arrayBuffer());
-        const galleryUploadResult = await new Promise((resolve, reject) => {
-          cloudinary.v2.uploader.upload_stream(
-            { resource_type: "auto" },
-            (error, result) => {
-              if (error) reject(error);
-              resolve(result);
-            }
-          ).end(galleryBuffer);
-        });
-        galleryItems.push({
-          title: galleryTitle,
-          date: galleryDate,
-          picture: galleryUploadResult.secure_url,
-        });
+    
+        try {
+          // Upload to Cloudinary
+          const galleryUploadResult = await new Promise((resolve, reject) => {
+            cloudinary.v2.uploader.upload_stream(
+              { resource_type: "auto" },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            ).end(galleryBuffer);
+          });
+    
+          // Save uploaded image's URL along with other info
+          galleryItems.push({
+            title: galleryTitle,
+            date: galleryDate,
+            gallery_picture: galleryUploadResult.secure_url,
+          });
+        } catch (error) {
+          console.error(`Failed to upload gallery image: ${error.message}`);
+        }
       }
     }
 
+    console.log("Gallery items:", galleryItems);
+    
     // Save to MongoDB
-    await ConnectDB();
     const news = new NewsModel({
       title,
       customerName,
@@ -76,7 +94,7 @@ export async function POST(req) {
       location,
       duration,
       contact,
-      picture: pictureUrl,
+      main_picture: pictureUrl,
       gallery: galleryItems,
     });
 

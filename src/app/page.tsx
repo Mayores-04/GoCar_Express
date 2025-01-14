@@ -10,16 +10,22 @@ import NewsCard from "./components/NewsCard";
 import Link from "next/link";
 import axios from "axios";
 
+interface GalleryItem {
+  title: string;
+  date: string;
+  gallery_picture: string;
+}
+
 interface NewsItem {
   _id: string;
   title: string;
-  picture: string;
+  main_picture: string;
   description: string;
   date: string;
   location: string;
   duration: string;
   contact: string;
-  gallery: { title: string; date: string; picture: string }[];
+  gallery: GalleryItem[];
   customerName: string;
 }
 
@@ -30,38 +36,20 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNews = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("/api/news");
-
-      const formattedNews = response.data.news.map((news: any) => ({
-        _id: news._id,
-        title: news.title,
-        picture: news.picture,
-        description: news.description,
-        date: news.date,
-        location: news.location,
-        duration: news.duration,
-        contact: news.contact,
-        gallery: news.gallery?.map((item: any) => ({
-          title: item.title,
-          date: item.date,
-          picture: item.picture,
-        })),
-        customerName: news.customerName,
-      }));
-
-      setNews(formattedNews);
-      setLoading(false);
-    } catch (err: any) {
-      console.error("Error fetching news:", err.message);
-      setError("Failed to fetch news. Please try again later.");
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchNews = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("/api/news");
+        setNews(response.data.news);
+      } catch (err: any) {
+        console.error("Error fetching news:", err.message);
+        setError("Failed to fetch news. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchNews();
   }, []);
 
@@ -163,8 +151,8 @@ const Home: React.FC = () => {
 
         {/* Latest News Section */}
         <section id="NewsSection" className="text-center py-16 px-6 w-full">
-          <h1 className="text-left px-6 text-gray-600 elements text-xl md:text-[25px] lg:text-[50px] xl:text-[60px] font-bold leading-tight">
-            <span className=" text-[#4169e1] ">GoCar Express</span> Group News
+          <h1 className="text-left mb-4 px-6 text-gray-600 text-xl md:text-[25px] lg:text-[50px] xl:text-[60px] font-bold">
+            <span className=" text-[#4169e1]">GoCar Express</span> Group News
           </h1>
           <h2 className="elements p-4 px-8 items-left justify-center text-left">
             <Link
@@ -180,19 +168,18 @@ const Home: React.FC = () => {
               news.map((item) => (
                 <NewsCard
                   key={item._id}
-                  id={item._id}
+                  _id={item._id} 
                   title={item.title}
-                  picture={item.picture}
+                  main_picture={item.main_picture}
                   description={item.description}
                   date={item.date}
                   location={item.location}
-                  duration={item.duration}
-                  contact={item.contact}
-                  gallery={item.gallery}
-                  customerName={item.customerName}
+                  duration={item.duration}  
+                  contact={item.contact} 
+                  gallery={item.gallery} 
                 />
               ))
-            ) : loading && (
+            ) : (
               <div>
                 <header>
                   <Header />

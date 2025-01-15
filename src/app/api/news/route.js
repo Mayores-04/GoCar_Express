@@ -106,6 +106,7 @@ export async function POST(req) {
     return NextResponse.json({ msg: "Failed to add news", error: error.message }, { status: 500 });
   }
 }
+
 export async function PUT(request) {
   try {
     await ConnectDB();

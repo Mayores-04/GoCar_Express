@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 
@@ -14,6 +14,23 @@ interface FormData {
   contact: string;
 }
 
+interface NewsItem {
+  _id: string;
+  title: string;
+  customerName: string;
+  description: string;
+  date: string;
+  location: string;
+  duration: string;
+  contact: string;
+  main_picture: string;
+  gallery: {
+    title: string;
+    date: string;
+    gallery_picture: string;
+  }[];
+}
+
 interface GalleryItem {
   title: string;
   date: string;
@@ -21,6 +38,7 @@ interface GalleryItem {
 }
 
 const AddNewsPage: React.FC = () => {
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [image, setImage] = useState<File | null>(null);
   const [formData, setFormData] = useState<FormData>({
     title: "",
@@ -33,28 +51,121 @@ const AddNewsPage: React.FC = () => {
   });
 
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const fetchNews = async () => {
+    try {
+      const response = await fetch("/api/news");
+      const data = await response.json();
+      if (data.success) {
+        setNewsList(data.news);
+      } else {
+        toast.error("Failed to fetch news");
+      }
+    } catch (error) {
+      console.error("Error fetching news:", error);
+      toast.error("Error fetching news");
+    }
+  };
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const handleEdit = (news: NewsItem) => {
+    setFormData({
+      title: news.title,
+      customerName: news.customerName,
+      description: news.description,
+      date: news.date,
+      location: news.location,
+      duration: news.duration,
+      contact: news.contact,
+    });
+    setImage(null);
+    setGalleryItems(
+      news.gallery.map((item) => ({
+        title: item.title,
+        date: item.date,
+        picture: null,
+      }))
+    );
+    setEditId(news._id);
+  };
+
+  const handleCancelEdit = () => {
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      customerName: "",
+      description: "",
+      date: "",
+      location: "",
+      duration: "",
+      contact: "",
+    });
+    setImage(null);
+    setGalleryItems([]);
+    setEditId(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this news item?")) return;
+
+    try {
+      const response = await fetch(`/api/news?id=${id}`, { method: "DELETE" });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("News deleted successfully!");
+        fetchNews();
+      } else {
+        toast.error(data.msg || "Failed to delete news");
+      }
+    } catch (error) {
+      console.error("Error deleting news:", error);
+      toast.error("Error deleting news");
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleGalleryChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { name, value } = e.target;
     setGalleryItems((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, [name]: value } : item))
+      prev.map((item, idx) =>
+        idx === index ? { ...item, [name]: value } : item
+      )
     );
   };
 
-  const handleGalleryImageChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryImageChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files ? e.target.files[0] : null;
     setGalleryItems((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, picture: file } : item))
+      prev.map((item, idx) =>
+        idx === index ? { ...item, picture: file } : item
+      )
     );
   };
 
   const addGalleryItem = () => {
-    setGalleryItems((prev) => [...prev, { title: "", date: "", picture: null }]);
+    setGalleryItems((prev) => [
+      ...prev,
+      { title: "", date: "", picture: null },
+    ]);
   };
 
   const removeGalleryItem = (index: number) => {
@@ -116,8 +227,12 @@ const AddNewsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-2xl font-bold mb-6">Add News Update</h1>
+    <div>
+    <div className=" m-6 mt-20 p-6 bg-white shadow-md rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">
+        {editId ? "Edit News Update" : "Add News Update"}
+      </h1>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Main Form Fields */}
         <div>
@@ -311,9 +426,49 @@ const AddNewsPage: React.FC = () => {
           type="submit"
           className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          Submit
+          {editId ? "Update News" : "Submit"}
         </button>
       </form>
+ 
+    </div>
+         {/* News List */}
+         <div className="mb-4 mt-10 p-4 m-6 bg-gray-100 rounded-lg shadow-md">
+        <h2 className="text-xl font-bold mb-4">News List</h2>
+        {newsList.map((news) => (
+          <div
+            key={news._id}
+            className="border border-gray-300 rounded-lg p-4 mb-4 flex justify-between items-center"
+          >
+            <div>
+              <h3 className="font-bold">{news.title}</h3>
+              <p className="text-sm text-gray-600">{news.description}</p>
+            </div>
+            <div className="flex space-x-4">
+              {editId === news._id ? (
+                <button
+                  onClick={handleCancelEdit}
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleEdit(news)}
+                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                >
+                  Edit
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(news._id)}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -110,6 +110,16 @@ const AddCarPage: React.FC = () => {
     setImage(null); 
   };
 
+  const handleCancelEdit = () => {
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setEditingCar(null);
+    setData({ name: "", brand: "", seats: "", description: "" });
+    setImage(null);
+  };
+  
   useEffect(() => {
     fetchCars();
   }, []);
@@ -244,15 +254,26 @@ const AddCarPage: React.FC = () => {
               />
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               className="w-full bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {editingCar ? "Update Car" : "Add Car"}
             </button>
+            {editingCar && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="w-full mt-4 bg-gray-600 text-white rounded-lg px-4 py-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                Cancel
+              </button>
+            )}
           </form>
         </div>
-        <div>
+         {/* Cars List */}
+         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Cars List</h2>
           <ul>
             {cars.map((car) => (
@@ -263,12 +284,21 @@ const AddCarPage: React.FC = () => {
                     <p>{car.brand}</p>
                   </div>
                   <div>
-                    <button
-                      onClick={() => handleEdit(car)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      Edit
-                    </button>
+                    {editingCar?._id === car._id ? (
+                      <button
+                        onClick={handleCancelEdit}
+                        className="text-gray-600 hover:text-gray-700"
+                      >
+                        Cancel
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEdit(car)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                 </div>
               </li>

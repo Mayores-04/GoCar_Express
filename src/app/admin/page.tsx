@@ -1,10 +1,14 @@
 "use client";
+
+import React from "react";
 import AdminHome from "./AdminDashboard/page";
-import React from 'react';
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+
 const AdminDashboardPage = () => {
   return (
-        <AdminHome /> 
+    <>
+      <AdminHome />
+    </>
   );
 };
 

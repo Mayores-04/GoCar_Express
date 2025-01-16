@@ -6,6 +6,7 @@ import Sidebar from "../components/AdminComponents/Sidebar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
+import { AdminSettings } from "../components/AdminComponents/AdminSettings";
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -53,9 +54,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <main className="flex-grow overflow-y-auto">
           <div className="flex mb-[60px] items-center z-40 bg-white justify-between w-screen py-3 pr-24 fixed h-[60px] px-8 border-b border-black">
             <h3 className="font-medium">Admin</h3>
-            <Link href={"/#Home"}>
-              <img src={"/images/blueLogo.png"} width={40} alt="Home" />
-            </Link>
+
+            {/* <Link href={"/#Home"}> */}
+              {/* <img src={"/images/blueLogo.png"} width={40} alt="Home" /> */}
+              <AdminSettings />
+            {/* </Link> */}
           </div>
           <div className="mt-[60px]">{children}</div>
         </main>

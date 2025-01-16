@@ -41,13 +41,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <ToastContainer theme="dark" />
       <div className="flex h-screen bg-gray-100 overflow-hidden">
         {/* Sidebar */}
-        <div className="flex-none w-16">
+        <div className="flex-none w-16 z-50">  
           <Sidebar />
         </div>
 
         {/* Main Content */}
         <main className="flex-grow overflow-y-auto ">
-          <div className="flex mb-[60px] items-center z-50 bg-white justify-between w-screen py-3 pr-24 fixed h-[60px]  px-8 border-b border-black">
+          <div className="flex mb-[60px] items-center z-40 bg-white justify-between w-screen py-3 pr-24 fixed h-[60px]  px-8 border-b border-black">
             <h3 className="font-medium">Admin</h3>
             <Link href={"/#Home"}>
               <img src={"/images/blueLogo.png"} width={40} alt="Home" />

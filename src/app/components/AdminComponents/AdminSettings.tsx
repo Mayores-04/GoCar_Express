@@ -32,16 +32,16 @@ export const AdminSettings = () => {
               href={"/#Home"}
               className="flex items-center gap-2 px-4 py-2 rounded hover:bg-slate-300"
             >
-              <FontAwesomeIcon icon={faHome} className="text-lg" />
+              <FontAwesomeIcon icon={faHome} className="text-2xl" />
               <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
                 User Side
               </span>
             </Link>
             <Link
-                href={`/admin/AdminManagement?token=${token}`}
-              className="flex items-center gap-2 px-5 py-2 rounded hover:bg-slate-300"
+                href={`/admin/AdminManager?token=${token}`}
+              className="flex items-center gap-3 px-5 py-2  rounded hover:bg-slate-300"
             >
-              <FontAwesomeIcon icon={faPlusSquare} className="text-lg" />
+              <FontAwesomeIcon icon={faPlusSquare} className="text-2xl" />
               <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
                 Add Admin
               </span>

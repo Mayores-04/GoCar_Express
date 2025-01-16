@@ -1,20 +1,27 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome, faCar, faNewspaper, faChevronUp, faChevronDown, faBook, faClipboardList } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faCar, faNewspaper, faChevronUp, faChevronDown, faClipboardList } from "@fortawesome/free-solid-svg-icons";
 
 const Sidebar: React.FC = () => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isCarDropdownOpen, setIsCarDropdownOpen] = useState(false);
+  const [isReservedDropdownOpen, setIsReservedDropdownOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen((prev) => !prev);
+  const toggleCarDropdown = () => {
+    setIsCarDropdownOpen((prev) => !prev);
   };
+
+  const toggleReservedDropdown = () => {
+    setIsReservedDropdownOpen((prev) => !prev);
+  };
+
 
   const handleSidebarHover = (hovered: boolean) => {
     setIsSidebarHovered(hovered);
     if (!hovered) {
-      setIsDropdownOpen(false);
+      setIsCarDropdownOpen(false);
+      setIsReservedDropdownOpen(false);
     }
   };
 
@@ -46,15 +53,15 @@ const Sidebar: React.FC = () => {
           </Link>
           <button
             type="button"
-            className="flex items-center gap-5 px-4 py-2 rounded hover:bg-slate-700"
+            className="flex items-center gap-5 px-4 py-2 rounded hover:bg-slate-700 "
             aria-controls="dropdown-cars"
-            onClick={toggleDropdown}
+            onClick={toggleCarDropdown}
           >
             <FontAwesomeIcon icon={faCar} className="text-xl" />
             <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
               Car Management
             </span>
-            {isDropdownOpen ? (
+            {isCarDropdownOpen ? (
               <FontAwesomeIcon icon={faChevronUp} className="w-6 h-6" />
             ) : (
               <FontAwesomeIcon icon={faChevronDown} className="w-6 h-6" />
@@ -62,7 +69,7 @@ const Sidebar: React.FC = () => {
           </button>
 
           {/* Dropdown Menu */}
-          {isDropdownOpen && (
+          {isCarDropdownOpen && (
             <ul id="dropdown-cars" className="py-2 space-y-2">
               <li>
                 <Link
@@ -90,7 +97,7 @@ const Sidebar: React.FC = () => {
               News Management
             </span>
           </Link>
-          <Link
+          {/* <Link
             href={`/admin/Reservations?token=${token}`}
             className="flex items-center gap-5 px-4 py-2 ml-1 rounded hover:bg-slate-700"
           >
@@ -98,7 +105,39 @@ const Sidebar: React.FC = () => {
             <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
               Reservations
             </span>
-          </Link>
+          </Link> */}
+
+          <button
+            type="button"
+            className="flex items-center gap-5 px-4 py-2 rounded hover:bg-slate-700 "
+            aria-controls="dropdown-cars"
+            onClick={toggleReservedDropdown}
+          >
+            <FontAwesomeIcon icon={faCar} className="text-xl" />
+            <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
+              Reservations
+            </span>
+            {isReservedDropdownOpen ? (
+              <FontAwesomeIcon icon={faChevronUp} className="w-6 h-6" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="w-6 h-6" />
+            )}
+          </button>
+
+          {/* Dropdown Menu */}
+          {isReservedDropdownOpen && (
+            <ul id="dropdown-cars" className="py-2 space-y-2">
+              <li>
+                <Link
+                  href={`/admin/ReservedList?token=${token}`}
+                  className="flex items-center w-full p-2 text-base font-normal text-gray-300 transition duration-75 rounded-lg group hover:bg-gray-700 pl-14"
+                >
+                  Reserved List
+                </Link>
+              </li>
+            </ul>
+          )}
+
         </nav>
 
         {/* Footer Section */}

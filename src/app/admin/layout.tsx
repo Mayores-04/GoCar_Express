@@ -1,11 +1,10 @@
 "use client";
 
 import React, { ReactNode, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname  } from "next/navigation";
 import Sidebar from "../components/AdminComponents/Sidebar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Link from "next/link";
 import { AdminSettings } from "../components/AdminComponents/AdminSettings";
 
 type AdminLayoutProps = {
@@ -13,8 +12,24 @@ type AdminLayoutProps = {
 };
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);  
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const [pageTitle, setPageTitle] = useState<string>("Dashboard");
+
+  useEffect(() => {
+    const routeToTitleMap: { [key: string]: string } = {
+      "/admin": "Dashboard",
+      "/admin/AddCars": "Car Management - Add Cars",
+      "/admin/CarsList": "Car Management - Car List",
+      "/admin/AddNews": "News Management",
+      "/admin/ReservedList": "Reservation - Reserved List",
+    };
+
+    const title = routeToTitleMap[pathname] || "Unknown Page";
+    setPageTitle(title);
+  }, [pathname]);
+
 
   useEffect(() => {
     const validateToken = () => {
@@ -53,12 +68,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         {/* Main Content */}
         <main className="flex-grow overflow-y-auto">
           <div className="flex mb-[60px] items-center z-40 bg-white justify-between w-screen py-3 pr-24 fixed h-[60px] px-8 border-b border-black">
-            <h3 className="font-medium">Admin</h3>
-
-            {/* <Link href={"/#Home"}> */}
-              {/* <img src={"/images/blueLogo.png"} width={40} alt="Home" /> */}
-              <AdminSettings />
-            {/* </Link> */}
+            <h3 className="font-medium">Admin {pageTitle}</h3>
+            <AdminSettings />
           </div>
           <div className="mt-[60px]">{children}</div>
         </main>

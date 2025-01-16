@@ -12,18 +12,15 @@ type AdminLayoutProps = {
 };
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Track authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);  
   const router = useRouter();
 
   useEffect(() => {
     const validateToken = () => {
-      // Access the token from the URL query parameter
       const token = new URLSearchParams(window.location.search).get("token");
-      // Access the secret key from environment variables
       const SECRET_KEY =
         process.env.NEXT_PUBLIC_SECRET_KEY || "fallback_secret_key";
 
-      // Validate the token
       if (token === SECRET_KEY) {
         setIsAuthenticated(true);
       } else {
@@ -35,12 +32,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     validateToken();
   }, [router]);
 
-  // Render a loading placeholder while authentication is being determined
   if (isAuthenticated === null) {
     return <div>Loading...</div>;
   }
 
-  // If authentication fails, return null to prevent rendering
   if (!isAuthenticated) {
     return null;
   }

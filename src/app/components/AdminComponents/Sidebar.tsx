@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome, faCar, faNewspaper, faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faCar, faNewspaper, faChevronUp, faChevronDown, faBook, faClipboardList } from "@fortawesome/free-solid-svg-icons";
 
 const Sidebar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -18,6 +18,7 @@ const Sidebar: React.FC = () => {
     }
   };
 
+  const token = process.env.NEXT_PUBLIC_SECRET_KEY;
   return (
     <div
       className="relative z-50"
@@ -35,7 +36,7 @@ const Sidebar: React.FC = () => {
 
         <nav className="mt-4 px-2 space-y-2">
           <Link
-            href="/admin"
+            href={`/admin?token=${token}`}
             className="flex items-center gap-5 px-4 py-2 rounded hover:bg-slate-700"
           >
             <FontAwesomeIcon icon={faHome} className="text-xl" />
@@ -65,13 +66,13 @@ const Sidebar: React.FC = () => {
             <ul id="dropdown-cars" className="py-2 space-y-2">
               <li>
                 <Link
-                  href="/admin/AddCars"
+                  href={`/admin/AddCars?token=${token}`}
                   className="flex items-center w-full p-2 text-base font-normal text-gray-300 transition duration-75 rounded-lg group mb-2 hover:bg-gray-700 pl-14"
                 >
                   Add Cars
                 </Link>
                 <Link
-                  href="/admin/CarsList"
+                  href={`/admin/CarsList?token=${token}`}
                   className="flex items-center w-full p-2 text-base font-normal text-gray-300 transition duration-75 rounded-lg group hover:bg-gray-700 pl-14"
                 >
                   Car List
@@ -81,12 +82,21 @@ const Sidebar: React.FC = () => {
           )}
 
           <Link
-            href="/admin/AddNews"
+            href={`/admin/AddNews?token=${token}`}
             className="flex items-center gap-5 px-4 py-2 rounded hover:bg-slate-700"
           >
             <FontAwesomeIcon icon={faNewspaper} className="text-xl" />
             <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
               News Management
+            </span>
+          </Link>
+          <Link
+            href={`/admin/Reservations?token=${token}`}
+            className="flex items-center gap-5 px-4 py-2 ml-1 rounded hover:bg-slate-700"
+          >
+            <FontAwesomeIcon icon={faClipboardList} className="text-xl" />
+            <span className="opacity-100 whitespace-nowrap transition-opacity duration-300 ease-in-out">
+              Reservations
             </span>
           </Link>
         </nav>

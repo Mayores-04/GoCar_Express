@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import ConnectDB from "@/lib/config/db";
 import RentalActivityModel from "@/lib/models/RentalActivityModel";
 import CarsModel from "@/lib/models/CarsModel";   
-import mongoose from 'mongoose';
 
 export async function POST(request) {
   try {

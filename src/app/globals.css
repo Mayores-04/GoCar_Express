@@ -95,3 +95,9 @@ scrollbar-width: none;
   background-color: #f39c12; /* Change to your desired color */
   color: white;
 }
+
+/* Remove the default blue color for selected day */
+.react-calendar__tile--active {
+  background-color: transparent !important;
+  color: inherit !important; /* Keep the text color */
+}

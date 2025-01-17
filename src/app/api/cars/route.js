@@ -96,7 +96,6 @@ export async function GET() {
     const totalCarsOnService = cars.filter(
       (car) => car.carstatus === "On Service"
     ).length;
-    
 
     console.log(totalCarsAvailable);
     return NextResponse.json({

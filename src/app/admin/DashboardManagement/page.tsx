@@ -178,7 +178,6 @@ const AdminDashboardManagement = () => {
       setCars(response.data.cars || []);
       setLoading(false);
     } catch (err: any) {
-      console.error("Error fetching cars:", err.message);
       setError("Failed to fetch cars. Please try again later.");
       setLoading(false);
     }

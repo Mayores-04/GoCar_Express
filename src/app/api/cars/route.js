@@ -12,7 +12,7 @@ cloudinary.config({
 
 export async function POST(request) {
   try {
-    await ConnectDB();  
+    await ConnectDB();
 
     const formData = await request.formData();
     const timestamp = Date.now();
@@ -33,35 +33,39 @@ export async function POST(request) {
 
     // Upload image to Cloudinary
     const result = await new Promise((resolve, reject) => {
-      cloudinary.v2.uploader.upload_stream(
-        { resource_type: "auto" }, 
-        (error, uploadResult) => {
+      cloudinary.v2.uploader
+        .upload_stream({ resource_type: "auto" }, (error, uploadResult) => {
           if (error) {
             reject(error);
           } else {
             resolve(uploadResult);
           }
-        }
-      ).end(buffer);
+        })
+        .end(buffer);
     });
 
-    // Create the car data
+    console.log("FormData:", {
+      name: formData.get("name"),
+      brand: formData.get("brand"),
+      seats: formData.get("seats"),
+      price: formData.get("price"),
+      carstatus: formData.get("carstatus"),
+      description: formData.get("description"),
+    });
+
+    console.log("Cloudinary Upload Result:", result);
+
     const CarData = {
       name: formData.get("name")?.toString() || "",
       brand: formData.get("brand")?.toString() || "",
-      seats: formData.get("seats")?.toString() || "",
-      picture: result.secure_url,  // URL from Cloudinary
+      seats: parseInt(formData.get("seats")?.toString() || "0"),
+      price: parseFloat(formData.get("price")?.toString() || "0"),
+      picture: result.secure_url, // URL from Cloudinary
+      carstatus: formData.get("carstatus")?.toString() || "",
       description: formData.get("description")?.toString() || "",
     };
 
-    // Validate car data fields
-    if (!CarData.name || !CarData.brand || !CarData.seats || !CarData.description) {
-      return NextResponse.json(
-        { success: false, msg: "All fields are required" },
-        { status: 400 }
-      );
-    }
-
+    console.log(CarData);
     // Save car data to the database
     await CarsModel.create(CarData);
 
@@ -77,10 +81,33 @@ export async function POST(request) {
 
 export async function GET() {
   try {
-    await ConnectDB();  
+    await ConnectDB();
 
     const cars = await CarsModel.find();
-    return NextResponse.json({ cars });
+    
+    // Calculate totals
+    const totalCars = cars.length;
+    const carsNotAvailable = cars.filter(
+      (car) => car.carstatus === "Not Available"
+    ).length;
+    const totalCarsAvailable = cars.filter(
+      (car) => car.carstatus === "Available"
+    ).length;
+    const totalCarsOnService = cars.filter(
+      (car) => car.carstatus === "On Service"
+    ).length;
+    
+
+    console.log(totalCarsAvailable);
+    return NextResponse.json({
+      success: true,
+      cars,
+      totalCars,
+      carsNotAvailable,
+      totalCarsAvailable,
+      totalCarsOnService
+    });
+    // return NextResponse.json({ cars });
   } catch (error) {
     console.error("Error in GET /api/cars:", error.message);
     return NextResponse.json(
@@ -113,7 +140,10 @@ export async function DELETE(request) {
       );
     }
 
-    return NextResponse.json({ success: true, msg: "Car deleted successfully" });
+    return NextResponse.json({
+      success: true,
+      msg: "Car deleted successfully",
+    });
   } catch (error) {
     console.error("Error in DELETE /api/cars:", error.message);
     return NextResponse.json(
@@ -122,7 +152,6 @@ export async function DELETE(request) {
     );
   }
 }
-
 
 export async function PUT(request) {
   try {
@@ -141,27 +170,34 @@ export async function PUT(request) {
     const formData = await request.formData();
     const updateData = {};
 
+    if (formData.has("carstatus"))
+      updateData.carstatus = formData.get("carstatus").toString();
     if (formData.has("name")) updateData.name = formData.get("name").toString();
-    if (formData.has("brand")) updateData.brand = formData.get("brand").toString();
-    if (formData.has("seats")) updateData.seats = parseInt(formData.get("seats").toString());
+    if (formData.has("brand"))
+      updateData.brand = formData.get("brand").toString();
+    if (formData.has("seats"))
+      updateData.seats = parseInt(formData.get("seats").toString());
+    if (formData.has("price"))
+      updateData.seats = parseInt(formData.get("price").toString());
     if (formData.has("description"))
       updateData.description = formData.get("description").toString();
 
     if (formData.has("picture")) {
       const buffer = Buffer.from(await formData.get("picture").arrayBuffer());
       const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.v2.uploader.upload_stream(
-          { resource_type: "auto" },
-          (error, result) => {
+        cloudinary.v2.uploader
+          .upload_stream({ resource_type: "auto" }, (error, result) => {
             if (error) reject(error);
             resolve(result);
-          }
-        ).end(buffer);
+          })
+          .end(buffer);
       });
       updateData.picture = uploadResult.secure_url;
     }
 
-    const updatedCar = await CarsModel.findByIdAndUpdate(id, updateData, { new: true });
+    const updatedCar = await CarsModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     if (!updatedCar) {
       return NextResponse.json(

@@ -84,3 +84,14 @@ scrollbar-width: none;
     transform: rotate(360deg);
   }
 }
+
+.custom-calendar .highlighted-date {
+  background-color: #bfdbfe; /* Light blue */
+  border-radius: 50%;
+}
+
+/* Add this to your global styles or component-specific styles */
+.custom-calendar .highlighted-date {
+  background-color: #f39c12; /* Change to your desired color */
+  color: white;
+}

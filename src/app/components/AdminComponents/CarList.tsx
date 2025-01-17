@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -7,9 +7,11 @@ import Image from "next/image";
 
 interface Car {
   _id: string;
+  carstatus: string;
   name: string;
   brand: string;
   seats: number;
+  price: number;
   picture: string;
   description: string;
 }
@@ -39,37 +41,51 @@ const CarListPage: React.FC = () => {
     setEditingCarId(carId);
     const car = cars.find((car) => car._id === carId);
     if (car) {
-      setEditedCar({ ...car });
+      setEditedCar({ ...car,
+        carstatus: car.carstatus || "Available",
+       });
     }
   };
 
   const handleSave = async (carId: string) => {
-    if (!editedCar.name || !editedCar.brand || !editedCar.seats || !editedCar.description) {
+    if (
+      !editedCar.carstatus ||
+      !editedCar.name ||
+      !editedCar.brand ||
+      !editedCar.seats ||
+      !editedCar.description
+    ) {
       toast.error("All fields are required to save the car details.");
       return;
     }
-  
+
     try {
       const formData = new FormData();
+      formData.append("carstatus", editedCar.carstatus);
       formData.append("name", editedCar.name);
       formData.append("brand", editedCar.brand);
       formData.append("seats", String(editedCar.seats));
+      formData.append("price", String(editedCar.price));
       formData.append("description", editedCar.description);
-  
+
       if (imageFile) {
         formData.append("picture", imageFile);
       }
-  
+
       const response = await axios.put(`/api/cars?id=${carId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       if (response.data.success) {
         toast.success("Car updated successfully");
         setCars((prevCars) =>
           prevCars.map((car) =>
             car._id === carId
-              ? { ...car, ...editedCar, picture: response.data.car.picture || car.picture }
+              ? {
+                  ...car,
+                  ...editedCar,
+                  picture: response.data.car.picture || car.picture,
+                }
               : car
           )
         );
@@ -102,9 +118,20 @@ const CarListPage: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEditedCar((prev) => ({ ...prev, [name]: value }));
+  // const handleInputChange = (
+  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  // ) => {
+  //   const { name, value } = e.target;
+  //   setEditedCar((prev) => ({ ...prev, [name]: value }));
+  // };
+
+  const handleInputChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = event.target;
+    setEditedCar((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleImageUpload = async (file: File) => {
@@ -154,9 +181,12 @@ const CarListPage: React.FC = () => {
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
+              <th className="border border-gray-300 px-4 py-2">Status</th>
+              <th className="border border-gray-300 px-4 py-2">CarId</th>
               <th className="border border-gray-300 px-4 py-2">Name</th>
               <th className="border border-gray-300 px-4 py-2">Brand</th>
               <th className="border border-gray-300 px-4 py-2">Seats</th>
+              <th className="border border-gray-300 px-4 py-2">Price</th>
               <th className="border border-gray-300 px-4 py-2">Picture</th>
               <th className="border border-gray-300 px-4 py-2">Description</th>
               <th className="border border-gray-300 px-4 py-2">Actions</th>
@@ -165,6 +195,28 @@ const CarListPage: React.FC = () => {
           <tbody>
             {cars.map((car) => (
               <tr key={car._id} className="text-center">
+                <td className="border border-gray-300 px-4 py-2">
+                  {editingCarId === car._id ? (
+                     <select
+                      id="carstatus"
+                      name="carstatus"
+                      value={editedCar.carstatus}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Not Available">Not Available</option>
+                      <option value="On Service">On Service</option>
+                    </select>
+                  ) : (
+                    car.carstatus
+                  )}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                    <h1 className="w-full border border-gray-300 px-2 py-1 rounded-lg">
+                      {car._id}
+                    </h1>
+                </td>
                 <td className="border border-gray-300 px-4 py-2">
                   {editingCarId === car._id ? (
                     <input
@@ -202,6 +254,19 @@ const CarListPage: React.FC = () => {
                     />
                   ) : (
                     car.seats
+                  )}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {editingCarId === car._id ? (
+                    <input
+                      type="number"
+                      name="price"
+                      value={editedCar.price || ""}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 px-2 py-1 rounded-lg"
+                    />
+                  ) : (
+                    car.price
                   )}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">

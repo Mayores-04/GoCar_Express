@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome, faCar, faNewspaper, faChevronUp, faChevronDown, faClipboardList } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faCar, faNewspaper, faChevronUp, faChevronDown, faClipboardList, faMoneyBill, faDashboard } from "@fortawesome/free-solid-svg-icons";
 
 const Sidebar: React.FC = () => {
   const [isCarDropdownOpen, setIsCarDropdownOpen] = useState(false);

@@ -24,6 +24,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       "/admin/CarsList": "Car Management - Car List",
       "/admin/AddNews": "News Management",
       "/admin/ReservedList": "Reservation - Reserved List",
+      "/admin/DashboardManagement": "Dashboard Management",
     };
 
     const title = routeToTitleMap[pathname] || "Unknown Page";

@@ -7,25 +7,31 @@ import Image from "next/image";
 
 interface Car {
   _id: string;
+  carstatus: string;
   name: string;
   brand: string;
   seats: number;
   picture: string;
   description: string;
+  price: number;
 }
 
 const AddCarPage: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
   const [data, setData] = useState<{
+    carstatus: string;
     name: string;
     brand: string;
     seats: string;
     description: string;
+    price: string;
   }>({
+    carstatus: "Available",
     name: "",
     brand: "",
     seats: "",
     description: "",
+    price: "",
   });
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,10 +39,11 @@ const AddCarPage: React.FC = () => {
   const [editingCar, setEditingCar] = useState<Car | null>(null);
 
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
-    const name = event.target.name;
-    const value = event.target.value;
+    const { name, value } = event.target;
     setData((prevData) => ({ ...prevData, [name]: value }));
   };
 
@@ -62,9 +69,11 @@ const AddCarPage: React.FC = () => {
     }
 
     const formData = new FormData();
+    formData.append("carstatus", data.carstatus);
     formData.append("name", data.name);
     formData.append("brand", data.brand);
     formData.append("seats", data.seats);
+    formData.append("price", data.price);
     formData.append("description", data.description);
     if (image) formData.append("picture", image);
 
@@ -89,7 +98,14 @@ const AddCarPage: React.FC = () => {
       }
 
       setImage(null);
-      setData({ name: "", brand: "", seats: "", description: "" });
+      setData({
+        carstatus: "Available",
+        name: "",
+        brand: "",
+        seats: "",
+        description: "",
+        price: "",
+      });
       fetchCars();
     } catch (error) {
       toast.error("Error occurred while saving");
@@ -102,12 +118,14 @@ const AddCarPage: React.FC = () => {
   const handleEdit = (car: Car) => {
     setEditingCar(car);
     setData({
+      carstatus: car.carstatus,
       name: car.name,
       brand: car.brand,
       seats: car.seats.toString(),
       description: car.description,
+      price: car.price.toString(),
     });
-    setImage(null); 
+    setImage(null);
   };
 
   const handleCancelEdit = () => {
@@ -116,14 +134,20 @@ const AddCarPage: React.FC = () => {
 
   const resetForm = () => {
     setEditingCar(null);
-    setData({ name: "", brand: "", seats: "", description: "" });
+    setData({
+      carstatus: "Available",
+      name: "",
+      brand: "",
+      seats: "",
+      description: "",
+      price: "",
+    });
     setImage(null);
   };
-  
+
   useEffect(() => {
     fetchCars();
   }, []);
-
 
   if (loading) {
     return (
@@ -151,6 +175,24 @@ const AddCarPage: React.FC = () => {
           </h1>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="carstatus" className="block font-medium mb-2">
+                  Car Status
+                </label>
+                <select
+                  id="carstatus"
+                  name="carstatus"
+                  value={data.carstatus} 
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Available">Available</option>
+                  <option value="Not Available">Not Available</option>
+                  <option value="On Service">On Service</option>
+                </select>
+              </div>
+
               <div>
                 <label htmlFor="name" className="block font-medium mb-2">
                   Car Name
@@ -195,6 +237,22 @@ const AddCarPage: React.FC = () => {
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter number of seats"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="price" className="block font-medium mb-2">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={data.price}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter the price"
                   required
                 />
               </div>
@@ -272,12 +330,15 @@ const AddCarPage: React.FC = () => {
             )}
           </form>
         </div>
-         {/* Cars List */}
-         <div>
+        {/* Cars List */}
+        <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Cars List</h2>
           <ul>
             {cars.map((car) => (
-              <li key={car._id} className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md">
+              <li
+                key={car._id}
+                className="mb-4 p-4 bg-gray-100 rounded-lg shadow-md"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold">{car.name}</h3>

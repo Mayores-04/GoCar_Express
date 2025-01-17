@@ -8,11 +8,9 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useRouter } from "next/navigation";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
-// Register the necessary components for Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface Totals {
@@ -22,7 +20,7 @@ interface Totals {
   totalCarsOnService: number;
   totalCarsRented: number;
   revenue: number;
-  cars: any[]; // Assuming the car data will be stored here
+  cars: any[];  
 }
 
 const AdminHome: React.FC = () => {
@@ -39,12 +37,6 @@ const AdminHome: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isClient, setIsClient] = useState(false); // Track if we're on the client
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
-
-  const router = useRouter();
-
-  useEffect(() => {
-    setIsClient(true); // Set to true once client-side rendering is initialized
-  }, []);
 
   const fetchTotals = async () => {
     try {
@@ -91,15 +83,6 @@ const AdminHome: React.FC = () => {
       toast.error("Failed to fetch rentals. Please try again.");
     }
   };
-
-  useEffect(() => {
-    if (isClient) {
-      fetchTotals();
-      fetchRentals();
-    }
-  }, [isClient]);
-
-  const token = process.env.NEXT_PUBLIC_SECRET_KEY;
 
   // Filter rentals based on the selected month
   const rentalsForSelectedMonth = rentals.filter((rental) => {
@@ -159,11 +142,6 @@ const AdminHome: React.FC = () => {
     ],
   };
 
-  // Disable all dates for selection
-  const tileDisabled = ({ date }: { date: Date }) => {
-    return true; // Disable all dates
-  };
-
   const pieChartOptions = {
     responsive: true,
     plugins: {
@@ -177,7 +155,14 @@ const AdminHome: React.FC = () => {
       },
     },
   };
+  
+  useEffect(() => {
+    setIsClient(true); 
+    fetchTotals();
+    fetchRentals(); 
+  }, []);
 
+  const token = process.env.NEXT_PUBLIC_SECRET_KEY;
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="flex-1 p-6">

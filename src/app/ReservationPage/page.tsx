@@ -37,7 +37,9 @@ type RenterInfo = {
 };
 
 export default function ReservationPage() {
-const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(null);
+  const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(
+    null
+  );
 
   const [isClient, setIsClient] = useState(false);
   const [numberOfPassengers, setNumberOfPassengers] = useState(1);
@@ -115,13 +117,13 @@ const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(nu
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     // Validation: Ensure all required fields are filled
     if (!rulesAccepted || !damageAgreementAccepted) {
       toast.error("Please accept all agreements before submitting.");
       return;
     }
-  
+
     const requiredFields = [
       renterInfo.fullName,
       renterInfo.dateOfBirth,
@@ -130,45 +132,46 @@ const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(nu
       renterInfo.email,
       renterInfo.driverLicense,
     ];
-  
+
     if (requiredFields.some((field) => field.trim() === "")) {
       toast.error("Please fill all renter's details.");
       return;
     }
-  
+
     // Ensure `timeTravelDuration` is present in `additionalDetails`
     if (!additionalDetails?.timeOrDuration) {
       toast.error("Time travel duration is required.");
       return;
     }
-  
+
     const passengerRequiredFields = passengerDetails.every(
       (passenger) =>
         passenger.fullName.trim() !== "" && passenger.dateOfBirth.trim() !== ""
     );
-  
+
     if (!passengerRequiredFields) {
       toast.error("Please fill all passenger details.");
       return;
     }
-  
-    const formattedPickupLocation = service === "With Driver" ? pickupLocation : null;
-  
+
+    const formattedPickupLocation =
+      service === "With Driver" ? pickupLocation : null;
+
     const reservationData = {
       service,
       renterInfo,
       ownDriverInfo: service === "Without Driver" ? null : ownDriverInfo,
+      numberOfPassengers,
       passengerDetails,
       additionalDetails: {
         ...additionalDetails,
-        timeTravelDuration: additionalDetails?.timeOrDuration, // Correct field name here
+        timeTravelDuration: additionalDetails?.timeOrDuration,
       },
       pickupLocation: formattedPickupLocation,
     };
-  
-    // Logging the reservationData for debugging purposes
+
     console.log("Data to be sent to the server:", reservationData);
-  
+
     try {
       const response = await fetch("/api/reservations", {
         method: "POST",
@@ -177,25 +180,25 @@ const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(nu
         },
         body: JSON.stringify(reservationData),
       });
-  
-      // Check if the response is successful
+      // Read response body once
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.msg || "An error occurred while making the reservation.");
+        throw new Error(
+          responseData?.msg || "An error occurred while making the reservation."
+        );
       }
-  
-      // Log the response after the request completes
-      console.log("Response:", await response.json());
-  
-      // Show success message
+
+      // Log and display success
+      console.log("Response:", responseData);
       toast.success("Reservation created successfully!");
     } catch (error: any) {
       console.error("Error in handleFormSubmit:", error);
-      const errorMessage = error.message || "An error occurred while making the reservation.";
-      toast.error(errorMessage);
+      toast.error(
+        error.message || "An error occurred while making the reservation."
+      );
     }
   };
-  
 
   if (!isClient) return null;
 
@@ -399,6 +402,7 @@ const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(nu
                 value={numberOfPassengers}
                 onChange={(e) => updatePassengerCount(Number(e.target.value))}
               >
+                <option value={0}>0</option>
                 <option value={1}>1</option>
                 <option value={2}>2</option>
                 <option value={3}>3</option>

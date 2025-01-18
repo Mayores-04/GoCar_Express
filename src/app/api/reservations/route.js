@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import ConnectDB from "@/lib/config/db";
 import ReservationModel from "@/lib/models/ReservationModel";
+import { toast } from 'react-toastify';
 
 export async function POST(request) {
   try {
@@ -47,6 +48,7 @@ export async function POST(request) {
     };
 
     // Log the structured data for debugging
+    
     console.log("Structured reservation data:", reservationData);
 
     const newReservation = await ReservationModel.create(reservationData);
@@ -60,8 +62,6 @@ export async function POST(request) {
     );
   }
 }
-
-
 
 // Handle GET request to fetch all reservations
 export async function GET() {

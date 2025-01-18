@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
+// Define types for the reservation data
 interface RenterInfo {
   fullName: string;
   phoneNumber: string;
@@ -44,7 +45,7 @@ const ReservationTable: React.FC = () => {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const response = await fetch("/api/reservation");
+        const response = await fetch("/api/reservations");
         const data = await response.json();
         if (data.success) {
           setReservations(data.reservations);
@@ -139,9 +140,9 @@ const ReservationTable: React.FC = () => {
                       {/* Driver Information */}
                       <div>
                         <strong>Driver Information:</strong>
-                        <p>Full Name: {reservation.ownDriverInfo.fullName}</p>
-                        <p>License: {reservation.ownDriverInfo.licenseNumber}</p>
-                        <p>Phone: {reservation.ownDriverInfo.phoneNumber}</p>
+                        <p>Full Name: {reservation.ownDriverInfo.fullName || "N/A"}</p>
+                        <p>License: {reservation.ownDriverInfo.licenseNumber || "N/A"}</p>
+                        <p>Phone: {reservation.ownDriverInfo.phoneNumber || "N/A"}</p>
                       </div>
                       {/* Passenger Details */}
                       {reservation.passengerDetails.map((passenger, i) => (
@@ -152,7 +153,7 @@ const ReservationTable: React.FC = () => {
                           <p>Relationship: {passenger.relationship}</p>
                           <p>Authorized Driver: {passenger.authorizedDriver ? "Yes" : "No"}</p>
                           {passenger.authorizedDriver && (
-                            <p>Driver's License: {passenger.driverLicense}</p>
+                            <p>Driver's License: {passenger.driverLicense || "N/A"}</p>
                           )}
                         </div>
                       ))}

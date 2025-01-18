@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import axios from "axios";
 import "leaflet/dist/leaflet.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MapWithNoSSR = dynamic(() => import("../components/MapComponent"), {
   ssr: false,
@@ -18,90 +21,158 @@ type Passenger = {
   driverLicense: string;
 };
 
+type DriverInfo = {
+  fullName: string;
+  licenseNumber: string;
+  phoneNumber: string;
+};
+
+type RenterInfo = {
+  fullName: string;
+  dateOfBirth: string;
+  address: string;
+  phoneNumber: string;
+  email: string;
+  driverLicense: string;
+};
+
 export default function ReservationPage() {
   const [isClient, setIsClient] = useState(false);
-  const [service, setService] = useState("With Driver");
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
   const [numberOfPassengers, setNumberOfPassengers] = useState(1);
-
-  useEffect(() => {
-    setPassengerDetails(
-      Array.from({ length: numberOfPassengers }, (_, index) => ({
-        ...passengerDetails[index],
-        fullName: passengerDetails[index]?.fullName || "",
-        dateOfBirth: passengerDetails[index]?.dateOfBirth || "",
-        relationship: passengerDetails[index]?.relationship || "",
-        authorizedDriver: passengerDetails[index]?.authorizedDriver || "No",
-      }))
-    );
-  }, [numberOfPassengers]);
-
-  const [passengerDetails, setPassengerDetails] = useState(
-    Array.from({ length: numberOfPassengers }, () => ({
-      fullName: "",
-      dateOfBirth: "",
-      relationship: "",
-      authorizedDriver: "No",
-      driverLicense: "",
-    }))
-  );
-
-  const handlePassengerChange = (
-    index: number,
-    field: keyof Passenger,
-    value: string
-  ) => {
-    const updatedPassengers = [...passengerDetails];
-    updatedPassengers[index][field] = value;
-    setPassengerDetails(updatedPassengers);
-  };
-
-  const [ownDriverInfo, setOwnDriverInfo] = useState({
+  const [passengerDetails, setPassengerDetails] = useState<Passenger[]>([
+    { fullName: "", dateOfBirth: "", relationship: "", authorizedDriver: "No", driverLicense: "" },
+  ]);
+  const [service, setService] = useState<"With Driver" | "Without Driver">("With Driver");
+  const [ownDriverInfo, setOwnDriverInfo] = useState<DriverInfo>({
     fullName: "",
     licenseNumber: "",
     phoneNumber: "",
   });
+  const [renterInfo, setRenterInfo] = useState<RenterInfo>({
+    fullName: "",
+    dateOfBirth: "",
+    address: "",
+    phoneNumber: "",
+    email: "",
+    driverLicense: "",
+  });
+  const [additionalDetails, setAdditionalDetails] = useState({
+    timeOrDuration: "",
+  });
+  const [pickupLocation, setPickupLocation] = useState<string>("");
+  const [rulesAccepted, setRulesAccepted] = useState(false);
+  const [damageAgreementAccepted, setDamageAgreementAccepted] = useState(false);
 
-  const handleOwnDriverChange = (
-    field: keyof typeof ownDriverInfo,
-    value: string
-  ) => {
-    setOwnDriverInfo({
-      ...ownDriverInfo,
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Update the number of passengers and adjust the passenger details
+  const updatePassengerCount = (count: number) => {
+    setNumberOfPassengers(count);
+    setPassengerDetails((prev) => {
+      const updated = [...prev];
+      if (count > prev.length) {
+        while (updated.length < count) {
+          updated.push({
+            fullName: "",
+            dateOfBirth: "",
+            relationship: "",
+            authorizedDriver: "No",
+            driverLicense: "",
+          });
+        }
+      } else {
+        updated.length = count;
+      }
+      return updated;
+    });
+  };
+
+  // Handle changes in passenger details
+  const handlePassengerChange = (index: number, field: keyof Passenger, value: string) => {
+    setPassengerDetails((prev) =>
+      prev.map((passenger, i) =>
+        i === index ? { ...passenger, [field]: value } : passenger
+      )
+    );
+  };
+
+  // Handle changes in renter's info
+  const handleRenterInfoChange = (field: keyof RenterInfo, value: string) => {
+    setRenterInfo({
+      ...renterInfo,
       [field]: value,
     });
   };
 
-  const [submit, setSubmit] = useState(false);
-
-  const handleFormSubmit = (e: { preventDefault: () => void }) => {
+  // Handle form submission
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmit(true);
-  };
 
-  const closeModal = () => {
-    setSubmit(false);
+    // Validate that all agreements are accepted
+    if (!rulesAccepted || !damageAgreementAccepted) {
+      alert("Please accept all agreements before submitting.");
+      return;
+    }
+
+    // Validate required fields (renter and passenger details)
+    const requiredFields = [
+      renterInfo.fullName,
+      renterInfo.dateOfBirth,
+      renterInfo.address,
+      renterInfo.phoneNumber,
+      renterInfo.email,
+      renterInfo.driverLicense,
+    ];
+    if (requiredFields.some((field) => field.trim() === "")) {
+      alert("Please fill all renter's details.");
+      return;
+    }
+
+    const passengerRequiredFields = passengerDetails.every(
+      (passenger) => passenger.fullName.trim() !== "" && passenger.dateOfBirth.trim() !== ""
+    );
+    if (!passengerRequiredFields) {
+      alert("Please fill all passenger details.");
+      return;
+    }
+
+    // Prepare reservation data
+    const reservationData = {
+      service,
+      renterInfo,
+      ownDriverInfo: service === "Without Driver" ? ownDriverInfo : null,
+      passengerDetails,
+      additionalDetails,
+      pickupLocation: service === "With Driver" ? pickupLocation : null,
+    };
+
+    try {
+      const response = await axios.post("/api/reservation", reservationData);
+      if (response.status === 201) {
+        toast.success("Reservation submitted successfully!");
+      } else {
+        toast.error("Failed to submit reservation. Please try again.");
+      }
+    } catch (error) {
+      toast.error("An error occurred while submitting your reservation.");
+    }
   };
 
   if (!isClient) return null;
 
   return (
     <>
-      {/* Header */}
       <header className="z-1000">
         <Header />
       </header>
 
-      {/* Main Content */}
       <main className="py-16 pt-24 px-8 justify-center bg-[#263033] w-full items-center">
         <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
           <span className="text-[#4169e1]">GoCar Express</span> Reservation
         </h1>
 
-        {/* Reservation Form */}
         <section className="w-full justify-center h-auto items-center flex rounded-md">
           <form
             onSubmit={handleFormSubmit}
@@ -109,63 +180,67 @@ export default function ReservationPage() {
           >
             {/* Service Selection */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                Services We Offer
-              </h2>
-              <label className="block mb-2 text-gray-600">
-                Select Service:
-              </label>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">Services We Offer</h2>
+              <label className="block mb-2 text-gray-600">Select Service:</label>
               <select
                 className="w-full p-2 border rounded"
                 value={service}
-                onChange={(e) => setService(e.target.value)}
+                onChange={(e) =>
+                  setService(e.target.value as "With Driver" | "Without Driver")
+                }
               >
                 <option>With Driver</option>
                 <option>Without Driver</option>
               </select>
+
+              {/* Driver Information (Shown for "Without Driver") */}
               {service === "Without Driver" && (
                 <div className="mt-6 bg-gray-100 p-4 rounded-lg">
-                  <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                    Driver Information
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-700 mb-4">Driver Information</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Full Name */}
                     <div>
-                      <label className="block mb-2 text-gray-600">
-                        Driver's Full Name
-                      </label>
+                      <label className="block mb-2 text-gray-600">Driver's Full Name</label>
                       <input
                         type="text"
                         value={ownDriverInfo.fullName}
                         onChange={(e) =>
-                          handleOwnDriverChange("fullName", e.target.value)
+                          setOwnDriverInfo({
+                            ...ownDriverInfo,
+                            fullName: e.target.value,
+                          })
                         }
                         placeholder="First Name Last Name"
                         className="w-full p-2 border rounded"
                       />
                     </div>
+                    {/* License Number */}
                     <div>
-                      <label className="block mb-2 text-gray-600">
-                        Driver's License Number
-                      </label>
+                      <label className="block mb-2 text-gray-600">Driver's License Number</label>
                       <input
                         type="text"
                         value={ownDriverInfo.licenseNumber}
                         onChange={(e) =>
-                          handleOwnDriverChange("licenseNumber", e.target.value)
+                          setOwnDriverInfo({
+                            ...ownDriverInfo,
+                            licenseNumber: e.target.value,
+                          })
                         }
                         placeholder="License Number"
                         className="w-full p-2 border rounded"
                       />
                     </div>
+                    {/* Phone Number */}
                     <div>
-                      <label className="block mb-2 text-gray-600">
-                        Driver's Phone Number
-                      </label>
+                      <label className="block mb-2 text-gray-600">Driver's Phone Number</label>
                       <input
                         type="tel"
                         value={ownDriverInfo.phoneNumber}
                         onChange={(e) =>
-                          handleOwnDriverChange("phoneNumber", e.target.value)
+                          setOwnDriverInfo({
+                            ...ownDriverInfo,
+                            phoneNumber: e.target.value,
+                          })
                         }
                         placeholder="Phone Number"
                         className="w-full p-2 border rounded"
@@ -178,61 +253,82 @@ export default function ReservationPage() {
 
             {/* Renter Information */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                Renter Information
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">Renter Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Full Name */}
                 <div>
                   <label className="block mb-2 text-gray-600">Full Name</label>
                   <input
                     type="text"
+                    value={renterInfo.fullName}
+                    onChange={(e) =>
+                      handleRenterInfoChange("fullName", e.target.value)
+                    }
                     placeholder="First Name Last Name"
                     className="w-full p-2 border rounded"
                   />
                 </div>
+                {/* Date of Birth */}
                 <div>
-                  <label className="block mb-2 text-gray-600">
-                    Date of Birth
-                  </label>
-                  <input type="date" className="w-full p-2 border rounded" />
-                </div>
-                <div>
-                  <label className="block mb-2 text-gray-600">
-                    Residential Address
-                  </label>
+                  <label className="block mb-2 text-gray-600">Date of Birth</label>
                   <input
-                    type="text"
-                    placeholder="Street, City, State, ZIP"
+                    type="date"
+                    value={renterInfo.dateOfBirth}
+                    onChange={(e) =>
+                      handleRenterInfoChange("dateOfBirth", e.target.value)
+                    }
                     className="w-full p-2 border rounded"
                   />
                 </div>
+                {/* Address */}
                 <div>
-                  <label className="block mb-2 text-gray-600">
-                    Phone Number
-                  </label>
+                  <label className="block mb-2 text-gray-600">Address</label>
+                  <input
+                    type="text"
+                    value={renterInfo.address}
+                    onChange={(e) =>
+                      handleRenterInfoChange("address", e.target.value)
+                    }
+                    placeholder="Address"
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                {/* Phone Number */}
+                <div>
+                  <label className="block mb-2 text-gray-600">Phone Number</label>
                   <input
                     type="tel"
-                    placeholder="+63"
+                    value={renterInfo.phoneNumber}
+                    onChange={(e) =>
+                      handleRenterInfoChange("phoneNumber", e.target.value)
+                    }
+                    placeholder="Phone Number"
                     className="w-full p-2 border rounded"
                   />
                 </div>
+                {/* Email */}
                 <div>
-                  <label className="block mb-2 text-gray-600">
-                    Email Address
-                  </label>
+                  <label className="block mb-2 text-gray-600">Email</label>
                   <input
                     type="email"
-                    placeholder="example@domain.com"
+                    value={renterInfo.email}
+                    onChange={(e) =>
+                      handleRenterInfoChange("email", e.target.value)
+                    }
+                    placeholder="Email"
                     className="w-full p-2 border rounded"
                   />
                 </div>
+                {/* Driver License */}
                 <div>
-                  <label className="block mb-2 text-gray-600">
-                    Driver's License
-                  </label>
+                  <label className="block mb-2 text-gray-600">Driver's License</label>
                   <input
                     type="text"
-                    placeholder="License Number, State, Expiry Date"
+                    value={renterInfo.driverLicense}
+                    onChange={(e) =>
+                      handleRenterInfoChange("driverLicense", e.target.value)
+                    }
+                    placeholder="Driver's License"
                     className="w-full p-2 border rounded"
                   />
                 </div>
@@ -247,7 +343,7 @@ export default function ReservationPage() {
               <select
                 className="w-full p-2 border rounded"
                 value={numberOfPassengers}
-                onChange={(e) => setNumberOfPassengers(Number(e.target.value))}
+                onChange={(e) => updatePassengerCount(Number(e.target.value))}
               >
                 <option value={1}>1</option>
                 <option value={2}>2</option>
@@ -270,6 +366,7 @@ export default function ReservationPage() {
                     Passenger {index + 1}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Full Name */}
                     <div>
                       <label className="block mb-2 text-gray-600">
                         Full Name
@@ -288,6 +385,8 @@ export default function ReservationPage() {
                         className="w-full p-2 border rounded"
                       />
                     </div>
+
+                    {/* Date of Birth */}
                     <div>
                       <label className="block mb-2 text-gray-600">
                         Date of Birth
@@ -305,6 +404,8 @@ export default function ReservationPage() {
                         className="w-full p-2 border rounded"
                       />
                     </div>
+
+                    {/* Relationship to Renter */}
                     <div>
                       <label className="block mb-2 text-gray-600">
                         Relationship to Renter
@@ -323,6 +424,8 @@ export default function ReservationPage() {
                         className="w-full p-2 border rounded"
                       />
                     </div>
+
+                    {/* Authorized Driver */}
                     <div>
                       <label className="block mb-2 text-gray-600">
                         Authorized Driver
@@ -343,7 +446,7 @@ export default function ReservationPage() {
                       </select>
                     </div>
 
-                    {/* Conditionally render the Driver's License input if authorized driver is "Yes" */}
+                    {/* Conditionally render Driver's License input */}
                     {passenger.authorizedDriver === "Yes" && (
                       <div className="col-span-2">
                         <label className="block mb-2 text-gray-600">
@@ -369,112 +472,70 @@ export default function ReservationPage() {
               ))}
             </div>
 
-            {/* Additional Information */}
+            {/* Additional Details */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                Additional Details
-              </h2>
-              <div>
-                <label className="block mb-2 text-gray-600">
-                  Time/Travel Duration
-                </label>
+              <label className="block mb-2 text-gray-600">Additional Details</label>
+              <textarea
+                value={additionalDetails.timeOrDuration}
+                onChange={(e) =>
+                  setAdditionalDetails({
+                    ...additionalDetails,
+                    timeOrDuration: e.target.value,
+                  })
+                }
+                placeholder="Time or Duration"
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            {/* Pickup Location (Shown for "With Driver") */}
+            {service === "With Driver" && (
+              <div className="mb-6">
+                <label className="block mb-2 text-gray-600">Pickup Location</label>
                 <input
                   type="text"
-                  placeholder="Enter details"
+                  value={pickupLocation}
+                  onChange={(e) => setPickupLocation(e.target.value)}
+                  placeholder="Pickup Location"
                   className="w-full p-2 border rounded"
                 />
+                <MapWithNoSSR />
               </div>
-            </div>
+            )}
 
-            {/* Pickup Location Section */}
+            {/* Agreement */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                Pickup Location
-              </h2>
-              {service === "With Driver" ? (
-                <div style={{ height: "400px", width: "100%" }}>
-                  <MapWithNoSSR />
-                </div>
-              ) : (
-                <div>
-                  <p className="text-gray-600 mb-8">
-                    Your pickup location is fixed at:
-                  </p>
-                  <iframe
-                    id="location"
-                    src="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=0002 Lot B Guadalupe St. DM7&amp;t=h&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
-                    width="100%"
-                    height="450"
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="rounded-md mt-6"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Rules and Regulations */}
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                Rules and Regulations
-              </h2>
-              <div className="flex items-center mb-4">
-                <input type="checkbox" className="mr-2" />
-                <label htmlFor="terms" className="text-gray-600">
-                  I agree to the
-                  <a
-                    href="/terms"
-                    className="text-blue-600 hover:underline ml-1"
-                  >
-                    Terms & Conditions
-                  </a>
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                <label className="text-gray-600">
-                  I consent to the{" "}
-                  <a
-                    href="/terms"
-                    className="text-blue-600 hover:underline ml-1"
-                  >
-                    Damage Responsibility Agreement
-                  </a>
-                </label>
-              </div>
+              <label className="inline-flex items-center text-gray-600">
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  checked={rulesAccepted}
+                  onChange={(e) => setRulesAccepted(e.target.checked)}
+                />
+                I accept the rental rules
+              </label>
+              <br />
+              <label className="inline-flex items-center text-gray-600">
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  checked={damageAgreementAccepted}
+                  onChange={(e) => setDamageAgreementAccepted(e.target.checked)}
+                />
+                I accept the damage agreement
+              </label>
             </div>
 
             {/* Submit Button */}
-            <div className="mt-8">
-              <button
-                type="submit"
-                className="w-full bg-[#4169e1] text-white py-2 px-4 rounded hover:bg-[#3658c7]"
-              >
+            <div className="mb-4">
+              <button type="submit" className="w-full py-2 px-4 bg-[#4169e1] text-white rounded-lg">
                 Submit Reservation
               </button>
-              {/* Modal */}
-              {submit && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div className="bg-white rounded-lg p-6 shadow-lg text-center max-w-md">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Sorry, we are currently working on our backend or data
-                      management.
-                    </h2>
-                    <button
-                      onClick={closeModal}
-                      className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </form>
         </section>
       </main>
-      
+
       <footer>
         <Footer />
       </footer>

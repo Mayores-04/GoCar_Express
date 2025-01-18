@@ -1,11 +1,5 @@
-import React, { useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  LayersControl,
-} from "react-leaflet";
+import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents, LayersControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -14,16 +8,18 @@ const customIcon = L.icon({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],  
-  iconAnchor: [12.5, 41],  
+  iconSize: [25, 41],
+  iconAnchor: [12.5, 41],
 });
 
-const MapComponent = () => {
-  const [markerLocation, setMarkerLocation] = useState<[number, number] | null>(
-    null
-  );
-  const [userLocation] = useState<[number, number]>([12.8797, 121.774]);
+type MapComponentProps = {
+  setLocation: React.Dispatch<React.SetStateAction<[number, number] | null>>;
+  pickupLocation: [number, number] | null;
+};
+
+const MapComponent: React.FC<MapComponentProps> = ({ setLocation, pickupLocation }) => {
   const [locationName, setLocationName] = useState<string | null>(null);
+  const [userLocation] = useState<[number, number]>([12.8797, 121.774]); // Default to Philippines for demonstration
 
   const fetchLocationName = async (lat: number, lng: number) => {
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
@@ -41,21 +37,19 @@ const MapComponent = () => {
     useMapEvents({
       click(e) {
         const { lat, lng } = e.latlng;
-        setMarkerLocation([lat, lng]);
+        setLocation([lat, lng]);
         fetchLocationName(lat, lng);
       },
     });
 
-    return markerLocation ? (
-      <Marker position={markerLocation} icon={customIcon}></Marker>
+    return pickupLocation ? (
+      <Marker position={pickupLocation} icon={customIcon}></Marker>
     ) : null;
   };
 
   return (
     <div>
-      <p className="text-gray-600 mb-4">
-        Click on the map to specify your location:
-      </p>
+      <p className="text-gray-600 mb-4">Click on the map to specify your location:</p>
       <div className="w-full h-64 border rounded">
         <MapContainer
           className="z-0"
@@ -86,17 +80,10 @@ const MapComponent = () => {
       </div>
 
       <div className="mt-4">
-        <label className="block text-gray-600">
-          Selected Location:
-        </label>
-        {markerLocation ? (
+        <label className="block text-gray-600">Selected Location:</label>
+        {pickupLocation ? (
           <div>
-            {/* <p className="text-gray-800">
-              Latitude: {markerLocation[0]}, Longitude: {markerLocation[1]}
-            </p> */}
-            <p className="text-gray-800 text-sm">
-              Location Name: {locationName || "Fetching..."}
-            </p>
+            <p className="text-gray-800 text-sm">Location Name: {locationName || "Fetching..."}</p>
           </div>
         ) : (
           <p className="text-gray-600">No location selected yet.</p>

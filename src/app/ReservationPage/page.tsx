@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import axios from "axios";
 import "leaflet/dist/leaflet.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const MapWithNoSSR = dynamic(() => import("../components/MapComponent"), {
   ssr: false,
@@ -37,12 +37,22 @@ type RenterInfo = {
 };
 
 export default function ReservationPage() {
+const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(null);
+
   const [isClient, setIsClient] = useState(false);
   const [numberOfPassengers, setNumberOfPassengers] = useState(1);
   const [passengerDetails, setPassengerDetails] = useState<Passenger[]>([
-    { fullName: "", dateOfBirth: "", relationship: "", authorizedDriver: "No", driverLicense: "" },
+    {
+      fullName: "",
+      dateOfBirth: "",
+      relationship: "",
+      authorizedDriver: "No",
+      driverLicense: "",
+    },
   ]);
-  const [service, setService] = useState<"With Driver" | "Without Driver">("With Driver");
+  const [service, setService] = useState<"With Driver" | "Without Driver">(
+    "With Driver"
+  );
   const [ownDriverInfo, setOwnDriverInfo] = useState<DriverInfo>({
     fullName: "",
     licenseNumber: "",
@@ -59,7 +69,6 @@ export default function ReservationPage() {
   const [additionalDetails, setAdditionalDetails] = useState({
     timeOrDuration: "",
   });
-  const [pickupLocation, setPickupLocation] = useState<string>("");
   const [rulesAccepted, setRulesAccepted] = useState(false);
   const [damageAgreementAccepted, setDamageAgreementAccepted] = useState(false);
 
@@ -67,7 +76,6 @@ export default function ReservationPage() {
     setIsClient(true);
   }, []);
 
-  // Update the number of passengers and adjust the passenger details
   const updatePassengerCount = (count: number) => {
     setNumberOfPassengers(count);
     setPassengerDetails((prev) => {
@@ -89,8 +97,11 @@ export default function ReservationPage() {
     });
   };
 
-  // Handle changes in passenger details
-  const handlePassengerChange = (index: number, field: keyof Passenger, value: string) => {
+  const handlePassengerChange = (
+    index: number,
+    field: keyof Passenger,
+    value: string
+  ) => {
     setPassengerDetails((prev) =>
       prev.map((passenger, i) =>
         i === index ? { ...passenger, [field]: value } : passenger
@@ -98,25 +109,19 @@ export default function ReservationPage() {
     );
   };
 
-  // Handle changes in renter's info
   const handleRenterInfoChange = (field: keyof RenterInfo, value: string) => {
-    setRenterInfo({
-      ...renterInfo,
-      [field]: value,
-    });
+    setRenterInfo({ ...renterInfo, [field]: value });
   };
 
-  // Handle form submission
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate that all agreements are accepted
+  
+    // Validation: Ensure all required fields are filled
     if (!rulesAccepted || !damageAgreementAccepted) {
-      alert("Please accept all agreements before submitting.");
+      toast.error("Please accept all agreements before submitting.");
       return;
     }
-
-    // Validate required fields (renter and passenger details)
+  
     const requiredFields = [
       renterInfo.fullName,
       renterInfo.dateOfBirth,
@@ -125,40 +130,72 @@ export default function ReservationPage() {
       renterInfo.email,
       renterInfo.driverLicense,
     ];
+  
     if (requiredFields.some((field) => field.trim() === "")) {
-      alert("Please fill all renter's details.");
+      toast.error("Please fill all renter's details.");
       return;
     }
-
+  
+    // Ensure `timeTravelDuration` is present in `additionalDetails`
+    if (!additionalDetails?.timeOrDuration) {
+      toast.error("Time travel duration is required.");
+      return;
+    }
+  
     const passengerRequiredFields = passengerDetails.every(
-      (passenger) => passenger.fullName.trim() !== "" && passenger.dateOfBirth.trim() !== ""
+      (passenger) =>
+        passenger.fullName.trim() !== "" && passenger.dateOfBirth.trim() !== ""
     );
+  
     if (!passengerRequiredFields) {
-      alert("Please fill all passenger details.");
+      toast.error("Please fill all passenger details.");
       return;
     }
-
-    // Prepare reservation data
+  
+    const formattedPickupLocation = service === "With Driver" ? pickupLocation : null;
+  
     const reservationData = {
       service,
       renterInfo,
-      ownDriverInfo: service === "Without Driver" ? ownDriverInfo : null,
+      ownDriverInfo: service === "Without Driver" ? null : ownDriverInfo,
       passengerDetails,
-      additionalDetails,
-      pickupLocation: service === "With Driver" ? pickupLocation : null,
+      additionalDetails: {
+        ...additionalDetails,
+        timeTravelDuration: additionalDetails?.timeOrDuration, // Correct field name here
+      },
+      pickupLocation: formattedPickupLocation,
     };
-
+  
+    // Logging the reservationData for debugging purposes
+    console.log("Data to be sent to the server:", reservationData);
+  
     try {
-      const response = await axios.post("/api/reservation", reservationData);
-      if (response.status === 201) {
-        toast.success("Reservation submitted successfully!");
-      } else {
-        toast.error("Failed to submit reservation. Please try again.");
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reservationData),
+      });
+  
+      // Check if the response is successful
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.msg || "An error occurred while making the reservation.");
       }
-    } catch (error) {
-      toast.error("An error occurred while submitting your reservation.");
+  
+      // Log the response after the request completes
+      console.log("Response:", await response.json());
+  
+      // Show success message
+      toast.success("Reservation created successfully!");
+    } catch (error: any) {
+      console.error("Error in handleFormSubmit:", error);
+      const errorMessage = error.message || "An error occurred while making the reservation.";
+      toast.error(errorMessage);
     }
   };
+  
 
   if (!isClient) return null;
 
@@ -180,8 +217,12 @@ export default function ReservationPage() {
           >
             {/* Service Selection */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Services We Offer</h2>
-              <label className="block mb-2 text-gray-600">Select Service:</label>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                Services We Offer
+              </h2>
+              <label className="block mb-2 text-gray-600">
+                Select Service:
+              </label>
               <select
                 className="w-full p-2 border rounded"
                 value={service}
@@ -196,11 +237,14 @@ export default function ReservationPage() {
               {/* Driver Information (Shown for "Without Driver") */}
               {service === "Without Driver" && (
                 <div className="mt-6 bg-gray-100 p-4 rounded-lg">
-                  <h2 className="text-xl font-semibold text-gray-700 mb-4">Driver Information</h2>
+                  <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                    Driver Information
+                  </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Full Name */}
                     <div>
-                      <label className="block mb-2 text-gray-600">Driver's Full Name</label>
+                      <label className="block mb-2 text-gray-600">
+                        Driver's Full Name
+                      </label>
                       <input
                         type="text"
                         value={ownDriverInfo.fullName}
@@ -214,9 +258,10 @@ export default function ReservationPage() {
                         className="w-full p-2 border rounded"
                       />
                     </div>
-                    {/* License Number */}
                     <div>
-                      <label className="block mb-2 text-gray-600">Driver's License Number</label>
+                      <label className="block mb-2 text-gray-600">
+                        Driver's License Number
+                      </label>
                       <input
                         type="text"
                         value={ownDriverInfo.licenseNumber}
@@ -230,9 +275,10 @@ export default function ReservationPage() {
                         className="w-full p-2 border rounded"
                       />
                     </div>
-                    {/* Phone Number */}
                     <div>
-                      <label className="block mb-2 text-gray-600">Driver's Phone Number</label>
+                      <label className="block mb-2 text-gray-600">
+                        Driver's Phone Number
+                      </label>
                       <input
                         type="tel"
                         value={ownDriverInfo.phoneNumber}
@@ -253,9 +299,10 @@ export default function ReservationPage() {
 
             {/* Renter Information */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Renter Information</h2>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                Renter's Information
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Full Name */}
                 <div>
                   <label className="block mb-2 text-gray-600">Full Name</label>
                   <input
@@ -264,13 +311,14 @@ export default function ReservationPage() {
                     onChange={(e) =>
                       handleRenterInfoChange("fullName", e.target.value)
                     }
-                    placeholder="First Name Last Name"
+                    placeholder="John Doe"
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                {/* Date of Birth */}
                 <div>
-                  <label className="block mb-2 text-gray-600">Date of Birth</label>
+                  <label className="block mb-2 text-gray-600">
+                    Date of Birth
+                  </label>
                   <input
                     type="date"
                     value={renterInfo.dateOfBirth}
@@ -280,7 +328,8 @@ export default function ReservationPage() {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                {/* Address */}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
                   <label className="block mb-2 text-gray-600">Address</label>
                   <input
@@ -289,13 +338,14 @@ export default function ReservationPage() {
                     onChange={(e) =>
                       handleRenterInfoChange("address", e.target.value)
                     }
-                    placeholder="Address"
+                    placeholder="123 Main St"
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                {/* Phone Number */}
                 <div>
-                  <label className="block mb-2 text-gray-600">Phone Number</label>
+                  <label className="block mb-2 text-gray-600">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     value={renterInfo.phoneNumber}
@@ -306,29 +356,33 @@ export default function ReservationPage() {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                {/* Email */}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label className="block mb-2 text-gray-600">Email</label>
+                  <label className="block mb-2 text-gray-600">
+                    Email Address
+                  </label>
                   <input
                     type="email"
                     value={renterInfo.email}
                     onChange={(e) =>
                       handleRenterInfoChange("email", e.target.value)
                     }
-                    placeholder="Email"
+                    placeholder="john.doe@example.com"
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                {/* Driver License */}
                 <div>
-                  <label className="block mb-2 text-gray-600">Driver's License</label>
+                  <label className="block mb-2 text-gray-600">
+                    Driver's License
+                  </label>
                   <input
                     type="text"
                     value={renterInfo.driverLicense}
                     onChange={(e) =>
                       handleRenterInfoChange("driverLicense", e.target.value)
                     }
-                    placeholder="Driver's License"
+                    placeholder="Driver's License Number"
                     className="w-full p-2 border rounded"
                   />
                 </div>
@@ -472,10 +526,13 @@ export default function ReservationPage() {
               ))}
             </div>
 
-            {/* Additional Details */}
+            {/* Additional Information */}
             <div className="mb-6">
-              <label className="block mb-2 text-gray-600">Additional Details</label>
-              <textarea
+              <label className="block mb-2 text-gray-600">
+                Additional Details (Time/Duration)
+              </label>
+              <input
+                type="text"
                 value={additionalDetails.timeOrDuration}
                 onChange={(e) =>
                   setAdditionalDetails({
@@ -483,52 +540,52 @@ export default function ReservationPage() {
                     timeOrDuration: e.target.value,
                   })
                 }
-                placeholder="Time or Duration"
                 className="w-full p-2 border rounded"
               />
             </div>
-
-            {/* Pickup Location (Shown for "With Driver") */}
-            {service === "With Driver" && (
-              <div className="mb-6">
-                <label className="block mb-2 text-gray-600">Pickup Location</label>
-                <input
-                  type="text"
-                  value={pickupLocation}
-                  onChange={(e) => setPickupLocation(e.target.value)}
-                  placeholder="Pickup Location"
-                  className="w-full p-2 border rounded"
-                />
-                <MapWithNoSSR />
-              </div>
-            )}
-
-            {/* Agreement */}
+            {/* Agreements */}
             <div className="mb-6">
-              <label className="inline-flex items-center text-gray-600">
+              <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  className="mr-2"
                   checked={rulesAccepted}
-                  onChange={(e) => setRulesAccepted(e.target.checked)}
+                  onChange={() => setRulesAccepted(!rulesAccepted)}
+                  className="w-4 h-4"
                 />
-                I accept the rental rules
+                <span>I accept the rental terms and conditions</span>
               </label>
-              <br />
-              <label className="inline-flex items-center text-gray-600">
+              <label className="flex items-center space-x-2 mt-2">
                 <input
                   type="checkbox"
-                  className="mr-2"
                   checked={damageAgreementAccepted}
-                  onChange={(e) => setDamageAgreementAccepted(e.target.checked)}
+                  onChange={() =>
+                    setDamageAgreementAccepted(!damageAgreementAccepted)
+                  }
+                  className="w-4 h-4"
                 />
-                I accept the damage agreement
+                <span>I accept responsibility for any damages</span>
               </label>
             </div>
 
+            {/* Map Component for Pickup Location */}
+            {service === "With Driver" && (
+              <div className="mb-6">
+                <label className="block mb-2 text-gray-600">
+                  Pickup Location
+                </label>
+                <MapWithNoSSR
+                  setLocation={setPickupLocation}
+                  pickupLocation={pickupLocation}
+                />
+              </div>
+            )}
+
             {/* Submit Button */}
-            <div className="mb-4">
-              <button type="submit" className="w-full py-2 px-4 bg-[#4169e1] text-white rounded-lg">
+            <div className="mb-6">
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg"
+              >
                 Submit Reservation
               </button>
             </div>

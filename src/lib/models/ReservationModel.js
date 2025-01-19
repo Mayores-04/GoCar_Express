@@ -33,19 +33,7 @@ const ReservationSchema = new mongoose.Schema({
   additionalDetails: {
     timeTravelDuration: { type: String, required: true },
   },
-  pickupLocation: { type: String }, // Optional, will be set based on the service type
-});
-
-// Pre-save middleware to adjust data before saving
-ReservationSchema.pre("save", function(next) {
-  // If the service is "With Driver", ensure pickupLocation is set or defaulted
-  if (this.service === "With Driver" && !this.pickupLocation) {
-    this.pickupLocation = "Default Pickup Location";  // Set a default value if pickupLocation is not provided
-  } else if (this.service === "Without Driver") {
-    // Nullify ownDriverInfo if service is "Without Driver"
-    this.ownDriverInfo = null;
-  }
-  next();
+  pickupLocation: { type: String },  
 });
 
 const ReservationModel = mongoose.models.Reservation || mongoose.model("Reservation", ReservationSchema);

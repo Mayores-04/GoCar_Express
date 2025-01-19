@@ -55,11 +55,13 @@ export default function ReservationPage() {
   const [service, setService] = useState<"With Driver" | "Without Driver">(
     "With Driver"
   );
+
   const [ownDriverInfo, setOwnDriverInfo] = useState<DriverInfo>({
     fullName: "",
     licenseNumber: "",
     phoneNumber: "",
   });
+
   const [renterInfo, setRenterInfo] = useState<RenterInfo>({
     fullName: "",
     dateOfBirth: "",
@@ -117,62 +119,68 @@ export default function ReservationPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validation: Ensure all required fields are filled
-    if (!rulesAccepted || !damageAgreementAccepted) {
-      toast.error("Please accept all agreements before submitting.");
-      return;
-    }
-
-    const requiredFields = [
-      renterInfo.fullName,
-      renterInfo.dateOfBirth,
-      renterInfo.address,
-      renterInfo.phoneNumber,
-      renterInfo.email,
-      renterInfo.driverLicense,
-    ];
-
-    if (requiredFields.some((field) => field.trim() === "")) {
-      toast.error("Please fill all renter's details.");
-      return;
-    }
-
-    // Ensure `timeTravelDuration` is present in `additionalDetails`
-    if (!additionalDetails?.timeOrDuration) {
-      toast.error("Time travel duration is required.");
-      return;
-    }
-
-    const passengerRequiredFields = passengerDetails.every(
-      (passenger) =>
-        passenger.fullName.trim() !== "" && passenger.dateOfBirth.trim() !== ""
-    );
-
-    if (!passengerRequiredFields) {
-      toast.error("Please fill all passenger details.");
-      return;
-    }
-
-    const formattedPickupLocation =
-      service === "With Driver" ? pickupLocation : null;
-
-    const reservationData = {
-      service,
-      renterInfo,
-      ownDriverInfo: service === "Without Driver" ? null : ownDriverInfo,
-      numberOfPassengers,
-      passengerDetails,
-      additionalDetails: {
-        ...additionalDetails,
-        timeTravelDuration: additionalDetails?.timeOrDuration,
-      },
-      pickupLocation: formattedPickupLocation,
-    };
-
-    console.log("Data to be sent to the server:", reservationData);
-
+  
     try {
+      // Validation: Ensure all agreements are accepted
+      if (!rulesAccepted || !damageAgreementAccepted) {
+        toast.error("Please accept all agreements before submitting.");
+        return;
+      }
+  
+      // Validation: Ensure all required renter fields are filled
+      const renterRequiredFields = [
+        renterInfo?.fullName,
+        renterInfo?.dateOfBirth,
+        renterInfo?.address,
+        renterInfo?.phoneNumber,
+        renterInfo?.email,
+        renterInfo?.driverLicense,
+      ];
+  
+      if (renterRequiredFields.some((field) => !field || field.trim() === "")) {
+        toast.error("Please fill in all renter's details.");
+        return;
+      }
+  
+      // Validation: Ensure `timeOrDuration` is provided
+      if (!additionalDetails?.timeOrDuration) {
+        toast.error("Time travel duration is required.");
+        return;
+      }
+  
+      // Validation: Ensure passenger details are complete
+      const allPassengersValid = passengerDetails.every(
+        (passenger) =>
+          passenger?.fullName?.trim() !== "" &&
+          passenger?.dateOfBirth?.trim() !== ""
+      );
+  
+      if (!allPassengersValid) {
+        toast.error("Please fill in all passenger details.");
+        return;
+      }
+  
+      // Format pickup location based on the selected service
+      const formattedPickupLocation =
+        service === "With Driver" ? pickupLocation : null;
+  
+      // Prepare reservation data
+      const reservationData = {
+        service,
+        renterInfo,
+        ownDriverInfo: service === "Without Driver" ? ownDriverInfo : ownDriverInfo,
+        numberOfPassengers,
+        passengerDetails,
+        additionalDetails: {
+          ...additionalDetails,
+          timeTravelDuration: additionalDetails?.timeOrDuration,
+        },
+        pickupLocation: formattedPickupLocation,
+      };
+  
+      console.log("Data to be sent to the server:", reservationData);
+  
+      // Make API request
       const response = await fetch("/api/reservations", {
         method: "POST",
         headers: {
@@ -180,25 +188,27 @@ export default function ReservationPage() {
         },
         body: JSON.stringify(reservationData),
       });
-      // Read response body once
+  
       const responseData = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(
           responseData?.msg || "An error occurred while making the reservation."
         );
       }
-
-      // Log and display success
+  
+      // Log and display success message
       console.log("Response:", responseData);
       toast.success("Reservation created successfully!");
     } catch (error: any) {
+      // Handle errors gracefully
       console.error("Error in handleFormSubmit:", error);
       toast.error(
         error.message || "An error occurred while making the reservation."
       );
     }
   };
+  
 
   if (!isClient) return null;
 
@@ -571,8 +581,7 @@ export default function ReservationPage() {
               </label>
             </div>
 
-            {/* Map Component for Pickup Location */}
-            {service === "With Driver" && (
+            {service === "With Driver" ? (
               <div className="mb-6">
                 <label className="block mb-2 text-gray-600">
                   Pickup Location
@@ -580,6 +589,22 @@ export default function ReservationPage() {
                 <MapWithNoSSR
                   setLocation={setPickupLocation}
                   pickupLocation={pickupLocation}
+                />
+              </div>
+            ) : (
+              <div className="mb-6">
+                <label className="block mb-2 text-gray-600">
+                  Pickup Location
+                </label>
+                <iframe
+                  id="location"
+                  src="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=0002 Lot B Guadalupe St. DM7&amp;t=h&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+                  width="100%"
+                  height="450"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="rounded-md mt-6"
                 />
               </div>
             )}

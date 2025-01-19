@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import ConnectDB from "@/lib/config/db";
 import ReservationModel from "@/lib/models/ReservationModel";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 export async function POST(request) {
   try {
@@ -14,25 +14,31 @@ export async function POST(request) {
     console.log("Received reservation data:", formData);
 
     // Ensure `authorizedDriver` is a boolean
-    const transformedPassengerDetails = formData.passengerDetails.map((passenger) => ({
-      ...passenger,
-      authorizedDriver: passenger.authorizedDriver === "Yes", // Convert to boolean (true/false)
-    }));
+    const transformedPassengerDetails = formData.passengerDetails.map(
+      (passenger) => ({
+        ...passenger,
+        authorizedDriver: passenger.authorizedDriver === "Yes", // Convert to boolean (true/false)
+      })
+    );
 
     // Convert `pickupLocation` to a string if it's an array
-    const pickupLocation =
-      Array.isArray(formData.pickupLocation) ? formData.pickupLocation.join(",") : formData.pickupLocation;
+    const pickupLocation = Array.isArray(formData.pickupLocation)
+      ? formData.pickupLocation.join(",")
+      : formData.pickupLocation;
 
     // Structure reservationData
     const reservationData = {
-      car: "6789f3819dc5bed2f7e8f0ec" || "",  // Example car ID; replace with dynamic value if needed
+      car: "6789f3819dc5bed2f7e8f0ec" || "",  
       service: formData.service || "",
       rentalDuration: parseInt(formData.rentalDuration || "0", 10),
-      ownDriverInfo: formData.service === "Without Driver" ? null : {
-        fullName: formData.ownDriverInfo?.fullName || "",
-        licenseNumber: formData.ownDriverInfo?.licenseNumber || "",
-        phoneNumber: formData.ownDriverInfo?.phoneNumber || "",
-      },
+      ownDriverInfo:
+      formData.service === "Without Driver"
+        ? {
+            fullName: formData.ownDriverInfo?.fullName || "",
+            licenseNumber: formData.ownDriverInfo?.licenseNumber || "",
+            phoneNumber: formData.ownDriverInfo?.phoneNumber || "",
+          }
+        : { fullName: "", licenseNumber: "", phoneNumber: "" },
       renterInfo: {
         fullName: formData.renterInfo?.fullName || "",
         dateOfBirth: new Date(formData.renterInfo?.dateOfBirth || ""),
@@ -44,20 +50,33 @@ export async function POST(request) {
       numberOfPassengers: parseInt(formData.numberOfPassengers || "0", 10),
       passengerDetails: transformedPassengerDetails,
       additionalDetails: formData.additionalDetails || {},
-      pickupLocation: pickupLocation,  // Ensure it's a string
+      pickupLocation: pickupLocation, // Ensure it's a string
     };
 
     // Log the structured data for debugging
+
+    console.log("Transformed ownDriverInfo:", {
+      fullName: formData.ownDriverInfo?.fullName || "",
+      licenseNumber: formData.ownDriverInfo?.licenseNumber || "",
+      phoneNumber: formData.ownDriverInfo?.phoneNumber || "",
+    });
     
     console.log("Structured reservation data:", reservationData);
 
     const newReservation = await ReservationModel.create(reservationData);
-
-    return NextResponse.json({ msg: "Reservation added successfully", reservation: newReservation }, { status: 200 });
+    console.log("Saved Reservation:", newReservation);
+    return NextResponse.json(
+      { msg: "Reservation added successfully", reservation: newReservation },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error in POST /api/reservation:", error.message);
     return NextResponse.json(
-      { success: false, msg: "Failed to add reservation", error: error.message },
+      {
+        success: false,
+        msg: "Failed to add reservation",
+        error: error.message,
+      },
       { status: 500 }
     );
   }
@@ -99,7 +118,9 @@ export async function PUT(request) {
 
     const updateData = {
       ...(formData.has("car") && { car: formData.get("car").toString() }),
-      ...(formData.has("service") && { service: formData.get("service").toString() }),
+      ...(formData.has("service") && {
+        service: formData.get("service").toString(),
+      }),
       ...(formData.has("rentalDuration") && {
         rentalDuration: parseInt(formData.get("rentalDuration").toString(), 10),
       }),
@@ -121,7 +142,10 @@ export async function PUT(request) {
         },
       }),
       ...(formData.has("numberOfPassengers") && {
-        numberOfPassengers: parseInt(formData.get("numberOfPassengers").toString(), 10),
+        numberOfPassengers: parseInt(
+          formData.get("numberOfPassengers").toString(),
+          10
+        ),
       }),
       ...(formData.has("passengerDetails") && {
         passengerDetails: JSON.parse(formData.get("passengerDetails")),
@@ -137,18 +161,25 @@ export async function PUT(request) {
     // Validate service-specific logic
     if (updateData.service === "With Driver" && !updateData.pickupLocation) {
       return NextResponse.json(
-        { success: false, msg: "Pickup location is required for service 'With Driver'." },
+        {
+          success: false,
+          msg: "Pickup location is required for service 'With Driver'.",
+        },
         { status: 400 }
       );
     }
 
     if (updateData.service === "Without Driver" && updateData.ownDriverInfo) {
-      updateData.ownDriverInfo = null;  // Remove ownDriverInfo if the service is "Without Driver"
+      updateData.ownDriverInfo = null; // Remove ownDriverInfo if the service is "Without Driver"
     }
 
-    const updatedReservation = await ReservationModel.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    const updatedReservation = await ReservationModel.findByIdAndUpdate(
+      id,
+      updateData,
+      {
+        new: true,
+      }
+    );
 
     if (!updatedReservation) {
       return NextResponse.json(
@@ -157,7 +188,10 @@ export async function PUT(request) {
       );
     }
 
-    return NextResponse.json({ success: true, reservation: updatedReservation });
+    return NextResponse.json({
+      success: true,
+      reservation: updatedReservation,
+    });
   } catch (error) {
     console.error("Error in PUT /api/reservation:", error.message);
     return NextResponse.json(
@@ -191,7 +225,10 @@ export async function DELETE(request) {
       );
     }
 
-    return NextResponse.json({ success: true, msg: "Reservation deleted successfully." });
+    return NextResponse.json({
+      success: true,
+      msg: "Reservation deleted successfully.",
+    });
   } catch (error) {
     console.error("Error in DELETE /api/reservation:", error.message);
     return NextResponse.json(

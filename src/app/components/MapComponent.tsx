@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, LayersControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -13,23 +13,26 @@ const customIcon = L.icon({
 });
 
 type MapComponentProps = {
-  setLocation: React.Dispatch<React.SetStateAction<[number, number] | null>>;
-  pickupLocation: [number, number] | null;
+  setLocation: (locationName: string) => void;
+  pickupLocation: string;
 };
 
-const MapComponent: React.FC<MapComponentProps> = ({ setLocation, pickupLocation }) => {
-  const [locationName, setLocationName] = useState<string | null>(null);
-  const [userLocation] = useState<[number, number]>([12.8797, 121.774]); // Default to Philippines for demonstration
+const MapComponent: React.FC<MapComponentProps> = ({
+  setLocation,
+  pickupLocation,
+}) => {
+  const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
 
   const fetchLocationName = async (lat: number, lng: number) => {
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
     try {
       const response = await fetch(url);
       const data = await response.json();
-      setLocationName(data.display_name || "Unknown location");
+      const locationName = data.display_name || "Unknown location";
+      setLocation(locationName); // Update location name in parent
     } catch (error) {
       console.error("Error fetching location name:", error);
-      setLocationName("Unable to retrieve location name");
+      setLocation("Unable to retrieve location name");
     }
   };
 
@@ -37,14 +40,12 @@ const MapComponent: React.FC<MapComponentProps> = ({ setLocation, pickupLocation
     useMapEvents({
       click(e) {
         const { lat, lng } = e.latlng;
-        setLocation([lat, lng]);
-        fetchLocationName(lat, lng);
+        setMarkerPosition([lat, lng]); // Set the marker position
+        fetchLocationName(lat, lng); // Fetch and update location name
       },
     });
 
-    return pickupLocation ? (
-      <Marker position={pickupLocation} icon={customIcon}></Marker>
-    ) : null;
+    return markerPosition ? <Marker position={markerPosition} icon={customIcon} /> : null;
   };
 
   return (
@@ -53,20 +54,17 @@ const MapComponent: React.FC<MapComponentProps> = ({ setLocation, pickupLocation
       <div className="w-full h-64 border rounded">
         <MapContainer
           className="z-0"
-          center={userLocation}
+          center={[12.8797, 121.774]} // Default to Philippines
           zoom={6}
           style={{ height: "100%", width: "100%" }}
         >
           <LayersControl position="topright">
-            {/* Base Layer for the map */}
             <LayersControl.BaseLayer checked name="Standard">
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
             </LayersControl.BaseLayer>
-
-            {/* Terrain Map */}
             <LayersControl.BaseLayer name="Terrain">
               <TileLayer
                 url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
@@ -74,20 +72,14 @@ const MapComponent: React.FC<MapComponentProps> = ({ setLocation, pickupLocation
               />
             </LayersControl.BaseLayer>
           </LayersControl>
-
           <LocationSelector />
         </MapContainer>
       </div>
-
       <div className="mt-4">
         <label className="block text-gray-600">Selected Location:</label>
-        {pickupLocation ? (
-          <div>
-            <p className="text-gray-800 text-sm">Location Name: {locationName || "Fetching..."}</p>
-          </div>
-        ) : (
-          <p className="text-gray-600">No location selected yet.</p>
-        )}
+        <p className="text-gray-800 text-sm">
+          {pickupLocation || "No location selected yet."}
+        </p>
       </div>
     </div>
   );

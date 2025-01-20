@@ -182,7 +182,7 @@ const CarListPage: React.FC = () => {
           <thead>
             <tr className="bg-gray-200">
               <th className="border border-gray-300 px-4 py-2">Status</th>
-              <th className="border border-gray-300 px-4 py-2">CarId</th>
+              {/* <th className="border border-gray-300 px-4 py-2">CarId</th> */}
               <th className="border border-gray-300 px-4 py-2">Name</th>
               <th className="border border-gray-300 px-4 py-2">Brand</th>
               <th className="border border-gray-300 px-4 py-2">Seats</th>
@@ -212,11 +212,11 @@ const CarListPage: React.FC = () => {
                     car.carstatus
                   )}
                 </td>
-                <td className="border border-gray-300 px-4 py-2">
+                {/* <td className="border border-gray-300 px-4 py-2">
                     <h1 className="w-full border border-gray-300 px-2 py-1 rounded-lg">
                       {car._id}
                     </h1>
-                </td>
+                </td> */}
                 <td className="border border-gray-300 px-4 py-2">
                   {editingCarId === car._id ? (
                     <input

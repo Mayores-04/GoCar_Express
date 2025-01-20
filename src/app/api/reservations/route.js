@@ -1,27 +1,22 @@
 import { NextResponse } from "next/server";
 import ConnectDB from "@/lib/config/db";
 import ReservationModel from "@/lib/models/ReservationModel";
-import { toast } from "react-toastify";
 
 export async function POST(request) {
   try {
     await ConnectDB();
 
-    // Parse the JSON body from the request
     const formData = await request.json();
 
-    // Log the raw data from the client for debugging
     console.log("Received reservation data:", formData);
 
-    // Ensure `authorizedDriver` is a boolean
     const transformedPassengerDetails = formData.passengerDetails.map(
       (passenger) => ({
         ...passenger,
-        authorizedDriver: passenger.authorizedDriver === "Yes", // Convert to boolean (true/false)
+        authorizedDriver: passenger.authorizedDriver === "Yes",  
       })
     );
 
-    // Convert `pickupLocation` to a string if it's an array
     const pickupLocation = Array.isArray(formData.pickupLocation)
       ? formData.pickupLocation.join(",")
       : formData.pickupLocation;
@@ -50,17 +45,9 @@ export async function POST(request) {
       numberOfPassengers: parseInt(formData.numberOfPassengers || "0", 10),
       passengerDetails: transformedPassengerDetails,
       additionalDetails: formData.additionalDetails || {},
-      pickupLocation: pickupLocation, // Ensure it's a string
+      pickupLocation: pickupLocation,  
     };
 
-    // Log the structured data for debugging
-
-    console.log("Transformed ownDriverInfo:", {
-      fullName: formData.ownDriverInfo?.fullName || "",
-      licenseNumber: formData.ownDriverInfo?.licenseNumber || "",
-      phoneNumber: formData.ownDriverInfo?.phoneNumber || "",
-    });
-    
     console.log("Structured reservation data:", reservationData);
 
     const newReservation = await ReservationModel.create(reservationData);
@@ -82,7 +69,6 @@ export async function POST(request) {
   }
 }
 
-// Handle GET request to fetch all reservations
 export async function GET() {
   try {
     await ConnectDB();
@@ -99,7 +85,6 @@ export async function GET() {
   }
 }
 
-// Handle PUT request to update a reservation
 export async function PUT(request) {
   try {
     await ConnectDB();

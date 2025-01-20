@@ -40,6 +40,7 @@ const AdminHome: React.FC = () => {
 
   const fetchTotals = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("/api/cars");
       if (response.data.success) {
         setTotals({

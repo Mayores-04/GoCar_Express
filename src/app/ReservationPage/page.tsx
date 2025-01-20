@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import MapComponent from "../components/MapComponent";
 
 const MapWithNoSSR = dynamic(() => import("../components/MapComponent"), {
   ssr: false,
@@ -37,9 +38,7 @@ type RenterInfo = {
 };
 
 export default function ReservationPage() {
-  const [pickupLocation, setPickupLocation] = useState<[number, number] | null>(
-    null
-  );
+  const [pickupLocation, setPickupLocation] = useState<string>("");
 
   const [isClient, setIsClient] = useState(false);
   const [numberOfPassengers, setNumberOfPassengers] = useState(1);
@@ -119,14 +118,14 @@ export default function ReservationPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
       // Validation: Ensure all agreements are accepted
       if (!rulesAccepted || !damageAgreementAccepted) {
         toast.error("Please accept all agreements before submitting.");
         return;
       }
-  
+
       // Validation: Ensure all required renter fields are filled
       const renterRequiredFields = [
         renterInfo?.fullName,
@@ -136,39 +135,40 @@ export default function ReservationPage() {
         renterInfo?.email,
         renterInfo?.driverLicense,
       ];
-  
+
       if (renterRequiredFields.some((field) => !field || field.trim() === "")) {
         toast.error("Please fill in all renter's details.");
         return;
       }
-  
+
       // Validation: Ensure `timeOrDuration` is provided
       if (!additionalDetails?.timeOrDuration) {
         toast.error("Time travel duration is required.");
         return;
       }
-  
+
       // Validation: Ensure passenger details are complete
       const allPassengersValid = passengerDetails.every(
         (passenger) =>
           passenger?.fullName?.trim() !== "" &&
           passenger?.dateOfBirth?.trim() !== ""
       );
-  
+
       if (!allPassengersValid) {
         toast.error("Please fill in all passenger details.");
         return;
       }
-  
+
       // Format pickup location based on the selected service
       const formattedPickupLocation =
         service === "With Driver" ? pickupLocation : null;
-  
+
       // Prepare reservation data
       const reservationData = {
         service,
         renterInfo,
-        ownDriverInfo: service === "Without Driver" ? ownDriverInfo : ownDriverInfo,
+        ownDriverInfo:
+          service === "Without Driver" ? ownDriverInfo : ownDriverInfo,
         numberOfPassengers,
         passengerDetails,
         additionalDetails: {
@@ -177,9 +177,9 @@ export default function ReservationPage() {
         },
         pickupLocation: formattedPickupLocation,
       };
-  
+
       console.log("Data to be sent to the server:", reservationData);
-  
+
       // Make API request
       const response = await fetch("/api/reservations", {
         method: "POST",
@@ -188,15 +188,15 @@ export default function ReservationPage() {
         },
         body: JSON.stringify(reservationData),
       });
-  
+
       const responseData = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(
           responseData?.msg || "An error occurred while making the reservation."
         );
       }
-  
+
       // Log and display success message
       console.log("Response:", responseData);
       toast.success("Reservation created successfully!");
@@ -208,7 +208,6 @@ export default function ReservationPage() {
       );
     }
   };
-  
 
   if (!isClient) return null;
 
@@ -586,8 +585,8 @@ export default function ReservationPage() {
                 <label className="block mb-2 text-gray-600">
                   Pickup Location
                 </label>
-                <MapWithNoSSR
-                  setLocation={setPickupLocation}
+                <MapComponent
+                  setLocation={(setPickupLocation)}
                   pickupLocation={pickupLocation}
                 />
               </div>

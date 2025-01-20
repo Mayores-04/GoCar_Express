@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import ReactDOMServer from 'react-dom/server';
+import EmailApprovalSender from "@/app/emails/EmailApprovalSender";
 import { toast } from "react-toastify";
+import EmailCancellationSender from "@/app/emails/EmailCancellationSender";
 
 interface RenterInfo {
   fullName: string;
@@ -68,29 +71,109 @@ const ReservationTable: React.FC = () => {
     setExpandedReservationId((prevId) => (prevId === reservationId ? null : reservationId));
   };
 
-  // Approve a reservation
   const handleApprove = async (reservation: Reservation) => {
     try {
-      console.log(`Approving reservation for ${reservation.renterInfo.email}`);
-      // Simulated email logic
-      toast.success(`Reservation approved for ${reservation.renterInfo.fullName}`);
+      const { renterInfo } = reservation;
+  
+      if (!renterInfo) {
+        toast.error("No renter information available.");
+        return;
+      }
+  
+      const htmlContent = ReactDOMServer.renderToStaticMarkup(
+        <EmailApprovalSender userFirstName={renterInfo.fullName} />
+      );
+  
+      const response = await fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: renterInfo.email,  
+          subject: 'Reservation Approved',  
+          htmlContent, 
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.success) {
+        toast.success(`Reservation approved and email sent to ${renterInfo.fullName}`);
+      } else {
+        toast.error(`Failed to send email to ${renterInfo.fullName}: ${data.message}`);
+      }
     } catch (error) {
-      console.error("Error approving reservation:", error);
-      toast.error("Failed to approve reservation.");
+      console.error('Error approving reservation:', error);
+      toast.error('Failed to approve reservation.');
     }
   };
-
-  // Cancel a reservation
+  
+  
   const handleCancel = async (reservation: Reservation) => {
     try {
-      console.log(`Cancelling reservation for ${reservation.renterInfo.email}`);
-      // Simulated email logic
-      toast.success(`Reservation cancelled for ${reservation.renterInfo.fullName}`);
+      const { renterInfo } = reservation;
+  
+      if (!renterInfo) {
+        toast.error("No renter information available.");
+        return;
+      }
+  
+      // Assuming you have a cancellation reason for real cancellations
+      const cancellationReason = "The car is not available at the requested time."; // Replace this with actual reason
+  
+      // Create HTML content for the cancellation email
+      const htmlContent = ReactDOMServer.renderToStaticMarkup(
+        <EmailCancellationSender userFirstName={renterInfo.fullName} cancellationReason={cancellationReason} />
+      );
+  
+      // Send email via API
+      const emailResponse = await fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: renterInfo.email,
+          subject: 'Your Reservation Has Been Cancelled',
+          htmlContent,
+        }),
+      });
+  
+      const emailData = await emailResponse.json();
+  
+      if (emailData.success) {
+        toast.success(`Reservation has been cancelled and email sent to ${renterInfo.fullName}`);
+  
+        // Archive and delete the reservation after email success
+        const archiveResponse = await fetch('/api/archiveReservation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            reservationId: reservation._id,
+          }),
+        });
+  
+        const archiveData = await archiveResponse.json();
+  
+        if (archiveData.success) {
+          toast.success(`Reservation archived and deleted successfully`);
+        } else {
+          toast.error(`Failed to archive reservation: ${archiveData.message}`);
+        }
+      } else {
+        toast.error(`Failed to send email to ${renterInfo.fullName}: ${emailData.message}`);
+      }
     } catch (error) {
-      console.error("Error cancelling reservation:", error);
-      toast.error("Failed to cancel reservation.");
+      console.error('Error cancelling reservation:', error);
+      toast.error('Failed to cancel reservation.');
     }
   };
+  
+  
+    
 
   // Open email modal
   const handleOpenEmailModal = (renterInfo: RenterInfo) => {

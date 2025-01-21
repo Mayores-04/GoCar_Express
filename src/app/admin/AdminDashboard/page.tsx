@@ -35,7 +35,7 @@ const AdminHome: React.FC = () => {
   });
   const [rentals, setRentals] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isClient, setIsClient] = useState(false); // Track if we're on the client
+  const [isClient, setIsClient] = useState(false);  
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
 
   const fetchTotals = async () => {
@@ -62,6 +62,7 @@ const AdminHome: React.FC = () => {
 
   const fetchRentals = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("/api/rentals");
       if (response.data.success) {
         setRentals(response.data.rentals);
@@ -159,8 +160,8 @@ const AdminHome: React.FC = () => {
   
   useEffect(() => {
     setIsClient(true); 
-    fetchTotals();
     fetchRentals(); 
+    fetchTotals();
   }, []);
 
   const token = process.env.NEXT_PUBLIC_SECRET_KEY;

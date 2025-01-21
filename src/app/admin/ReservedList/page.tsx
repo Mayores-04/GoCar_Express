@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import ReactDOMServer from 'react-dom/server';
+import ReactDOMServer from "react-dom/server";
+import { useRouter } from "next/router";
 import EmailApprovalSender from "@/app/emails/EmailApprovalSender";
 import { toast } from "react-toastify";
 import EmailCancellationSender from "@/app/emails/EmailCancellationSender";
 
 interface RenterInfo {
+  _id: string;
   fullName: string;
   phoneNumber: string;
   email: string;
@@ -43,7 +45,9 @@ interface Reservation {
 
 const ReservationTable: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [expandedReservationId, setExpandedReservationId] = useState<string | null>(null);
+  const [expandedReservationId, setExpandedReservationId] = useState<
+    string | null
+  >(null);
   const [emailModal, setEmailModal] = useState<{
     show: boolean;
     recipient: RenterInfo | null;
@@ -68,48 +72,52 @@ const ReservationTable: React.FC = () => {
   };
 
   const toggleDetails = (reservationId: string) => {
-    setExpandedReservationId((prevId) => (prevId === reservationId ? null : reservationId));
+    setExpandedReservationId((prevId) =>
+      prevId === reservationId ? null : reservationId
+    );
   };
 
   const handleApprove = async (reservation: Reservation) => {
     try {
       const { renterInfo } = reservation;
-  
+
       if (!renterInfo) {
         toast.error("No renter information available.");
         return;
       }
-  
+
       const htmlContent = ReactDOMServer.renderToStaticMarkup(
         <EmailApprovalSender userFirstName={renterInfo.fullName} />
       );
-  
-      const response = await fetch('/api/email', {
-        method: 'POST',
+
+      const response = await fetch("/api/email", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: renterInfo.email,  
-          subject: 'Reservation Approved',  
-          htmlContent, 
+          email: renterInfo.email,
+          subject: "Reservation Approved",
+          htmlContent,
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (data.success) {
-        toast.success(`Reservation approved and email sent to ${renterInfo.fullName}`);
+        toast.success(
+          `Reservation approved and email sent to ${renterInfo.fullName}`
+        );
       } else {
-        toast.error(`Failed to send email to ${renterInfo.fullName}: ${data.message}`);
+        toast.error(
+          `Failed to send email to ${renterInfo.fullName}: ${data.message}`
+        );
       }
     } catch (error) {
-      console.error('Error approving reservation:', error);
-      toast.error('Failed to approve reservation.');
+      console.error("Error approving reservation:", error);
+      toast.error("Failed to approve reservation.");
     }
   };
-  
-  
   const handleCancel = async (reservation: Reservation) => {
     try {
       const { renterInfo } = reservation;
@@ -119,61 +127,69 @@ const ReservationTable: React.FC = () => {
         return;
       }
   
-      // Assuming you have a cancellation reason for real cancellations
-      const cancellationReason = "The car is not available at the requested time."; // Replace this with actual reason
+      const cancellationReason =
+        "The car is not available at the requested time.";
   
-      // Create HTML content for the cancellation email
+      // Step 1: Generate email content
       const htmlContent = ReactDOMServer.renderToStaticMarkup(
-        <EmailCancellationSender userFirstName={renterInfo.fullName} cancellationReason={cancellationReason} />
+        <EmailCancellationSender
+          userFirstName={renterInfo.fullName}
+          cancellationReason={cancellationReason}
+        />
       );
   
-      // Send email via API
-      const emailResponse = await fetch('/api/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Step 2: Send cancellation email
+      const emailResponse = await fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: renterInfo._id,
           email: renterInfo.email,
-          subject: 'Your Reservation Has Been Cancelled',
+          subject: "Your Reservation Has Been Cancelled",
           htmlContent,
         }),
       });
   
       const emailData = await emailResponse.json();
   
-      if (emailData.success) {
-        toast.success(`Reservation has been cancelled and email sent to ${renterInfo.fullName}`);
-  
-        // Archive and delete the reservation after email success
-        const archiveResponse = await fetch('/api/archiveReservation', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            reservationId: reservation._id,
-          }),
-        });
-  
-        const archiveData = await archiveResponse.json();
-  
-        if (archiveData.success) {
-          toast.success(`Reservation archived and deleted successfully`);
-        } else {
-          toast.error(`Failed to archive reservation: ${archiveData.message}`);
-        }
-      } else {
-        toast.error(`Failed to send email to ${renterInfo.fullName}: ${emailData.message}`);
+      if (!emailResponse.ok || !emailData.success) {
+        toast.error(
+          `Failed to send email to ${renterInfo.fullName}: ${emailData.message}`
+        );
+        return;
       }
+  
+      toast.success(
+        `Reservation cancelled. Email sent to ${renterInfo.fullName}.`
+      );
+  
+      // Step 3: Archive reservation
+      const archiveResponse = await fetch("/api/archiveReservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reservationId: reservation._id,
+          archivedData: reservation, // Pass full reservation data
+        }),
+      });
+  
+      const archiveData = await archiveResponse.json();
+  
+      if (!archiveResponse.ok || !archiveData.success) {
+        toast.error(`Failed to archive reservation: ${archiveData.message}`);
+        return;
+      }
+  
+      toast.success("Reservation archived and deleted successfully.");
+  
+      // Optional: Redirect or refresh UI after cancellation
+      const router = useRouter();
+      router.reload(); // Reload the page to fetch updated data
     } catch (error) {
-      console.error('Error cancelling reservation:', error);
-      toast.error('Failed to cancel reservation.');
+      console.error("Error cancelling reservation:", error);
+      toast.error("An error occurred while cancelling the reservation.");
     }
   };
-  
-  
-    
 
   // Open email modal
   const handleOpenEmailModal = (renterInfo: RenterInfo) => {
@@ -215,7 +231,9 @@ const ReservationTable: React.FC = () => {
             <th className="px-4 py-2 text-left text-gray-600">Renter Name</th>
             <th className="px-4 py-2 text-left text-gray-600">Email</th>
             {/* <th className="px-4 py-2 text-left text-gray-600">Passengers</th> */}
-            <th className="px-4 py-2 text-left text-gray-600">Pickup Location</th>
+            <th className="px-4 py-2 text-left text-gray-600">
+              Pickup Location
+            </th>
             <th className="px-4 py-2 text-left text-gray-600">Actions</th>
           </tr>
         </thead>
@@ -225,16 +243,24 @@ const ReservationTable: React.FC = () => {
               <tr>
                 <td className="border px-4 py-2">{index + 1}</td>
                 <td className="border px-4 py-2">{reservation.service}</td>
-                <td className="border px-4 py-2">{reservation.renterInfo.fullName}</td>
-                <td className="border px-4 py-2">{reservation.renterInfo.email}</td>
+                <td className="border px-4 py-2">
+                  {reservation.renterInfo.fullName}
+                </td>
+                <td className="border px-4 py-2">
+                  {reservation.renterInfo.email}
+                </td>
                 {/* <td className="border px-4 py-2">{reservation.numberOfPassengers}</td> */}
-                <td className="border px-4 py-2">{reservation.pickupLocation}</td>
+                <td className="border px-4 py-2">
+                  {reservation.pickupLocation}
+                </td>
                 <td className="border px-4 py-2 space-x-2">
                   <button
                     onClick={() => toggleDetails(reservation._id)}
                     className="text-blue-500 hover:underline"
                   >
-                    {expandedReservationId === reservation._id ? "Hide Details" : "View Details"}
+                    {expandedReservationId === reservation._id
+                      ? "Hide Details"
+                      : "View Details"}
                   </button>
                   <button
                     onClick={() => handleOpenEmailModal(reservation.renterInfo)}
@@ -263,9 +289,18 @@ const ReservationTable: React.FC = () => {
                       <h3 className="font-semibold text-gray-800">Details</h3>
                       <div>
                         <strong>Driver Information:</strong>
-                        <p>Full Name: {reservation.ownDriverInfo.fullName || "N/A"}</p>
-                        <p>License: {reservation.ownDriverInfo.licenseNumber || "N/A"}</p>
-                        <p>Phone: {reservation.ownDriverInfo.phoneNumber || "N/A"}</p>
+                        <p>
+                          Full Name:{" "}
+                          {reservation.ownDriverInfo.fullName || "N/A"}
+                        </p>
+                        <p>
+                          License:{" "}
+                          {reservation.ownDriverInfo.licenseNumber || "N/A"}
+                        </p>
+                        <p>
+                          Phone:{" "}
+                          {reservation.ownDriverInfo.phoneNumber || "N/A"}
+                        </p>
                       </div>
                       {reservation.passengerDetails.map((passenger, i) => (
                         <div key={i}>
@@ -273,15 +308,24 @@ const ReservationTable: React.FC = () => {
                           <p>Name: {passenger.fullName}</p>
                           <p>DOB: {passenger.dateOfBirth}</p>
                           <p>Relationship: {passenger.relationship}</p>
-                          <p>Authorized Driver: {passenger.authorizedDriver ? "Yes" : "No"}</p>
+                          <p>
+                            Authorized Driver:{" "}
+                            {passenger.authorizedDriver ? "Yes" : "No"}
+                          </p>
                           {passenger.authorizedDriver && (
-                            <p>Driver's License: {passenger.driverLicense || "N/A"}</p>
+                            <p>
+                              Driver's License:{" "}
+                              {passenger.driverLicense || "N/A"}
+                            </p>
                           )}
                         </div>
                       ))}
                       <div>
                         <strong>Additional Details:</strong>
-                        <p>Time/Travel Duration: {reservation.additionalDetails.timeTravelDuration}</p>
+                        <p>
+                          Time/Travel Duration:{" "}
+                          {reservation.additionalDetails.timeTravelDuration}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -296,7 +340,9 @@ const ReservationTable: React.FC = () => {
       {emailModal.show && emailModal.recipient && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-lg font-semibold mb-4">Send Message to {emailModal.recipient.fullName}</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Send Message to {emailModal.recipient.fullName}
+            </h3>
             <textarea
               className="w-full border rounded p-2 mb-4"
               rows={5}

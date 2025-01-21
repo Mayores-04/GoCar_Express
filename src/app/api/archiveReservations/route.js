@@ -1,27 +1,61 @@
-const { MongoClient, ObjectId } = require('mongodb');
-
-const client = new MongoClient(process.env.MONGODB_URI);
-const database = client.db('your-database-name');
-const reservationsCollection = database.collection('reservations');
-const archiveCollection = database.collection('archive');
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import ConnectDB from "@/lib/config/db";
+import ReservationArchiveModel from "@/lib/models/reservationArchive";
+import ReservationModel from "@/lib/models/ReservationModel";
 
 export async function POST(req) {
   try {
-    const { reservationId } = await req.json();
+    // Connect to the database
+    await ConnectDB();
 
-    const reservation = await reservationsCollection.findOne({ _id: new ObjectId(reservationId) });
+    // Parse the request body
+    const { reservationId, archivedData } = await req.json();
 
-    if (!reservation) {
-      return NextResponse.json({ success: false, message: 'Reservation not found' }, { status: 404 });
+    // Validate reservation ID
+    if (!mongoose.Types.ObjectId.isValid(reservationId)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid reservation ID" },
+        { status: 400 }
+      );
     }
 
-    await archiveCollection.insertOne(reservation);
+    // Check if the reservation exists
+    const existingReservation = await ReservationModel.findById(reservationId);
 
-    await reservationsCollection.deleteOne({ _id: new ObjectId(reservationId) });
+    if (!existingReservation) {
+      return NextResponse.json(
+        { success: false, message: "Reservation not found" },
+        { status: 404 }
+      );
+    }
 
-    return NextResponse.json({ success: true, message: 'Reservation archived and deleted successfully' });
+    // Prepare the data to archive
+    const archiveData = archivedData || existingReservation.toObject();
+
+    // Save to the archive collection
+    const archivedReservation = new ReservationArchiveModel(archiveData);
+    await archivedReservation.save();
+
+    // Delete from the original reservations collection
+    await ReservationModel.findByIdAndDelete(reservationId);
+
+    // Return success response
+    return NextResponse.json({
+      success: true,
+      message: "Reservation archived and deleted successfully",
+      archivedReservation,
+    });
   } catch (error) {
-    console.error('Error archiving reservation:', error);
-    return NextResponse.json({ success: false, message: 'Failed to archive reservation' }, { status: 500 });
+    console.error("Error archiving reservation:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "An error occurred while processing the request.",
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

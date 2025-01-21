@@ -1,224 +1,224 @@
-import { NextResponse } from "next/server";
-import ConnectDB from "@/lib/config/db";
-import ReservationModel from "@/lib/models/ReservationModel";
+  import { NextResponse } from "next/server";
+  import ConnectDB from "@/lib/config/db";
+  import ReservationModel from "@/lib/models/ReservationModel";
 
-export async function POST(request) {
-  try {
-    await ConnectDB();
+  export async function POST(request) {
+    try {
+      await ConnectDB();
 
-    const formData = await request.json();
+      const formData = await request.json();
 
-    console.log("Received reservation data:", formData);
+      console.log("Received reservation data:", formData);
 
-    const transformedPassengerDetails = formData.passengerDetails.map(
-      (passenger) => ({
-        ...passenger,
-        authorizedDriver: passenger.authorizedDriver === "Yes",  
-      })
-    );
-
-    const pickupLocation = Array.isArray(formData.pickupLocation)
-      ? formData.pickupLocation.join(",")
-      : formData.pickupLocation;
-
-    // Structure reservationData
-    const reservationData = {
-      car: "6789f3819dc5bed2f7e8f0ec" || "",  
-      service: formData.service || "",
-      rentalDuration: parseInt(formData.rentalDuration || "0", 10),
-      ownDriverInfo:
-      formData.service === "Without Driver"
-        ? {
-            fullName: formData.ownDriverInfo?.fullName || "",
-            licenseNumber: formData.ownDriverInfo?.licenseNumber || "",
-            phoneNumber: formData.ownDriverInfo?.phoneNumber || "",
-          }
-        : { fullName: "", licenseNumber: "", phoneNumber: "" },
-      renterInfo: {
-        fullName: formData.renterInfo?.fullName || "",
-        dateOfBirth: new Date(formData.renterInfo?.dateOfBirth || ""),
-        address: formData.renterInfo?.address || "",
-        phoneNumber: formData.renterInfo?.phoneNumber || "",
-        email: formData.renterInfo?.email || "",
-        driverLicense: formData.renterInfo?.driverLicense || "",
-      },
-      numberOfPassengers: parseInt(formData.numberOfPassengers || "0", 10),
-      passengerDetails: transformedPassengerDetails,
-      additionalDetails: formData.additionalDetails || {},
-      pickupLocation: pickupLocation,  
-    };
-
-    console.log("Structured reservation data:", reservationData);
-
-    const newReservation = await ReservationModel.create(reservationData);
-    console.log("Saved Reservation:", newReservation);
-    return NextResponse.json(
-      { msg: "Reservation added successfully", reservation: newReservation },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error in POST /api/reservation:", error.message);
-    return NextResponse.json(
-      {
-        success: false,
-        msg: "Failed to add reservation",
-        error: error.message,
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET() {
-  try {
-    await ConnectDB();
-
-    const reservations = await ReservationModel.find();
-
-    return NextResponse.json({ success: true, reservations });
-  } catch (error) {
-    console.error("Error in GET /api/reservation:", error);
-    return NextResponse.json(
-      { success: false, msg: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request) {
-  try {
-    await ConnectDB();
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, msg: "Reservation ID is required." },
-        { status: 400 }
+      const transformedPassengerDetails = formData.passengerDetails.map(
+        (passenger) => ({
+          ...passenger,
+          authorizedDriver: passenger.authorizedDriver === "Yes",  
+        })
       );
-    }
 
-    const formData = await request.formData();
+      const pickupLocation = Array.isArray(formData.pickupLocation)
+        ? formData.pickupLocation.join(",")
+        : formData.pickupLocation;
 
-    const updateData = {
-      ...(formData.has("car") && { car: formData.get("car").toString() }),
-      ...(formData.has("service") && {
-        service: formData.get("service").toString(),
-      }),
-      ...(formData.has("rentalDuration") && {
-        rentalDuration: parseInt(formData.get("rentalDuration").toString(), 10),
-      }),
-      ...(formData.has("ownDriverInfo") && {
-        ownDriverInfo: {
-          fullName: formData.get("ownDriverInfo.fullName").toString(),
-          licenseNumber: formData.get("ownDriverInfo.licenseNumber").toString(),
-          phoneNumber: formData.get("ownDriverInfo.phoneNumber").toString(),
-        },
-      }),
-      ...(formData.has("renterInfo") && {
+      // Structure reservationData
+      const reservationData = {
+        car: "6789f3819dc5bed2f7e8f0ec" || "",  
+        service: formData.service || "",
+        rentalDuration: parseInt(formData.rentalDuration || "0", 10),
+        ownDriverInfo:
+        formData.service === "Without Driver"
+          ? {
+              fullName: formData.ownDriverInfo?.fullName || "",
+              licenseNumber: formData.ownDriverInfo?.licenseNumber || "",
+              phoneNumber: formData.ownDriverInfo?.phoneNumber || "",
+            }
+          : { fullName: "", licenseNumber: "", phoneNumber: "" },
         renterInfo: {
-          fullName: formData.get("renterInfo.fullName").toString(),
-          dateOfBirth: formData.get("renterInfo.dateOfBirth").toString(),
-          address: formData.get("renterInfo.address").toString(),
-          phoneNumber: formData.get("renterInfo.phoneNumber").toString(),
-          email: formData.get("renterInfo.email").toString(),
-          driverLicense: formData.get("renterInfo.driverLicense").toString(),
+          fullName: formData.renterInfo?.fullName || "",
+          dateOfBirth: new Date(formData.renterInfo?.dateOfBirth || ""),
+          address: formData.renterInfo?.address || "",
+          phoneNumber: formData.renterInfo?.phoneNumber || "",
+          email: formData.renterInfo?.email || "",
+          driverLicense: formData.renterInfo?.driverLicense || "",
         },
-      }),
-      ...(formData.has("numberOfPassengers") && {
-        numberOfPassengers: parseInt(
-          formData.get("numberOfPassengers").toString(),
-          10
-        ),
-      }),
-      ...(formData.has("passengerDetails") && {
-        passengerDetails: JSON.parse(formData.get("passengerDetails")),
-      }),
-      ...(formData.has("additionalDetails") && {
-        additionalDetails: JSON.parse(formData.get("additionalDetails")),
-      }),
-      ...(formData.has("pickupLocation") && {
-        pickupLocation: formData.get("pickupLocation").toString(),
-      }),
-    };
+        numberOfPassengers: parseInt(formData.numberOfPassengers || "0", 10),
+        passengerDetails: transformedPassengerDetails,
+        additionalDetails: formData.additionalDetails || {},
+        pickupLocation: pickupLocation,  
+      };
 
-    // Validate service-specific logic
-    if (updateData.service === "With Driver" && !updateData.pickupLocation) {
+      console.log("Structured reservation data:", reservationData);
+
+      const newReservation = await ReservationModel.create(reservationData);
+      console.log("Saved Reservation:", newReservation);
+      return NextResponse.json(
+        { msg: "Reservation added successfully", reservation: newReservation },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.error("Error in POST /api/reservation:", error.message);
       return NextResponse.json(
         {
           success: false,
-          msg: "Pickup location is required for service 'With Driver'.",
+          msg: "Failed to add reservation",
+          error: error.message,
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
+  }
 
-    if (updateData.service === "Without Driver" && updateData.ownDriverInfo) {
-      updateData.ownDriverInfo = null; // Remove ownDriverInfo if the service is "Without Driver"
+  export async function GET() {
+    try {
+      await ConnectDB();
+
+      const reservations = await ReservationModel.find();
+
+      return NextResponse.json({ success: true, reservations });
+    } catch (error) {
+      console.error("Error in GET /api/reservation:", error);
+      return NextResponse.json(
+        { success: false, msg: "Internal server error" },
+        { status: 500 }
+      );
     }
+  }
 
-    const updatedReservation = await ReservationModel.findByIdAndUpdate(
-      id,
-      updateData,
-      {
-        new: true,
+  export async function PUT(request) {
+    try {
+      await ConnectDB();
+
+      const { searchParams } = new URL(request.url);
+      const id = searchParams.get("id");
+
+      if (!id) {
+        return NextResponse.json(
+          { success: false, msg: "Reservation ID is required." },
+          { status: 400 }
+        );
       }
-    );
 
-    if (!updatedReservation) {
+      const formData = await request.formData();
+
+      const updateData = {
+        ...(formData.has("car") && { car: formData.get("car").toString() }),
+        ...(formData.has("service") && {
+          service: formData.get("service").toString(),
+        }),
+        ...(formData.has("rentalDuration") && {
+          rentalDuration: parseInt(formData.get("rentalDuration").toString(), 10),
+        }),
+        ...(formData.has("ownDriverInfo") && {
+          ownDriverInfo: {
+            fullName: formData.get("ownDriverInfo.fullName").toString(),
+            licenseNumber: formData.get("ownDriverInfo.licenseNumber").toString(),
+            phoneNumber: formData.get("ownDriverInfo.phoneNumber").toString(),
+          },
+        }),
+        ...(formData.has("renterInfo") && {
+          renterInfo: {
+            fullName: formData.get("renterInfo.fullName").toString(),
+            dateOfBirth: formData.get("renterInfo.dateOfBirth").toString(),
+            address: formData.get("renterInfo.address").toString(),
+            phoneNumber: formData.get("renterInfo.phoneNumber").toString(),
+            email: formData.get("renterInfo.email").toString(),
+            driverLicense: formData.get("renterInfo.driverLicense").toString(),
+          },
+        }),
+        ...(formData.has("numberOfPassengers") && {
+          numberOfPassengers: parseInt(
+            formData.get("numberOfPassengers").toString(),
+            10
+          ),
+        }),
+        ...(formData.has("passengerDetails") && {
+          passengerDetails: JSON.parse(formData.get("passengerDetails")),
+        }),
+        ...(formData.has("additionalDetails") && {
+          additionalDetails: JSON.parse(formData.get("additionalDetails")),
+        }),
+        ...(formData.has("pickupLocation") && {
+          pickupLocation: formData.get("pickupLocation").toString(),
+        }),
+      };
+
+      // Validate service-specific logic
+      if (updateData.service === "With Driver" && !updateData.pickupLocation) {
+        return NextResponse.json(
+          {
+            success: false,
+            msg: "Pickup location is required for service 'With Driver'.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (updateData.service === "Without Driver" && updateData.ownDriverInfo) {
+        updateData.ownDriverInfo = null; // Remove ownDriverInfo if the service is "Without Driver"
+      }
+
+      const updatedReservation = await ReservationModel.findByIdAndUpdate(
+        id,
+        updateData,
+        {
+          new: true,
+        }
+      );
+
+      if (!updatedReservation) {
+        return NextResponse.json(
+          { success: false, msg: "Reservation not found." },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        reservation: updatedReservation,
+      });
+    } catch (error) {
+      console.error("Error in PUT /api/reservation:", error.message);
       return NextResponse.json(
-        { success: false, msg: "Reservation not found." },
-        { status: 404 }
+        { success: false, msg: "Internal server error", error: error.message },
+        { status: 500 }
       );
     }
-
-    return NextResponse.json({
-      success: true,
-      reservation: updatedReservation,
-    });
-  } catch (error) {
-    console.error("Error in PUT /api/reservation:", error.message);
-    return NextResponse.json(
-      { success: false, msg: "Internal server error", error: error.message },
-      { status: 500 }
-    );
   }
-}
 
-// Handle DELETE request to remove a reservation
-export async function DELETE(request) {
-  try {
-    await ConnectDB();
+  // Handle DELETE request to remove a reservation
+  export async function DELETE(request) {
+    try {
+      await ConnectDB();
 
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+      const { searchParams } = new URL(request.url);
+      const id = searchParams.get("id");
 
-    if (!id) {
+      if (!id) {
+        return NextResponse.json(
+          { success: false, msg: "Reservation ID is required." },
+          { status: 400 }
+        );
+      }
+
+      const result = await ReservationModel.findByIdAndDelete(id);
+
+      if (!result) {
+        return NextResponse.json(
+          { success: false, msg: "Reservation not found." },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        msg: "Reservation deleted successfully.",
+      });
+    } catch (error) {
+      console.error("Error in DELETE /api/reservation:", error.message);
       return NextResponse.json(
-        { success: false, msg: "Reservation ID is required." },
-        { status: 400 }
+        { success: false, msg: "Internal server error", error: error.message },
+        { status: 500 }
       );
     }
-
-    const result = await ReservationModel.findByIdAndDelete(id);
-
-    if (!result) {
-      return NextResponse.json(
-        { success: false, msg: "Reservation not found." },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      msg: "Reservation deleted successfully.",
-    });
-  } catch (error) {
-    console.error("Error in DELETE /api/reservation:", error.message);
-    return NextResponse.json(
-      { success: false, msg: "Internal server error", error: error.message },
-      { status: 500 }
-    );
   }
-}

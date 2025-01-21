@@ -30,6 +30,6 @@ const ReservationSchema = {
 };
 
 
-const ReservationArchiveModel = mongoose.models.Reservation || mongoose.model("Reservation", ReservationSchema);
+const ReservationArchive = mongoose.models.Reservation || mongoose.model("Reservation", ReservationSchema);
 
-export default ReservationArchiveModel;
+export default ReservationArchive;

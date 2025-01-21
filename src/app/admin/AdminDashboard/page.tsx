@@ -288,50 +288,53 @@ const AdminHome: React.FC = () => {
             {isClient && <Pie data={pieChartData} options={pieChartOptions} />}
           </div>
           <div className="w-full bg-white flex-row flex">
-            <div className=" bg-white p-4 rounded shadow">
-              <h2 className="text-lg font-bold mb-4">Rental Calendar</h2>
-              {isClient && (
-                <Calendar
-                  value={selectedMonth}
-                  onActiveStartDateChange={({ activeStartDate }) =>
-                    handleMonthChange({ activeStartDate })
-                  }
-                  tileClassName={highlightRentalDates}
-                  className="custom-calendar"
-                />
-              )}
-            </div>
+  <div className="bg-white p-4 rounded shadow">
+    <h2 className="text-lg font-bold mb-4">Rental Calendar</h2>
+    {isClient && (
+      <Calendar
+        value={selectedMonth}
+        onActiveStartDateChange={({ activeStartDate }) =>
+          handleMonthChange({ activeStartDate })
+        }
+        tileClassName={highlightRentalDates}
+        className="custom-calendar"
+      />
+    )}
+  </div>
 
-            <div className="w-full bg-white p-4 rounded shadow">
-              <h2 className="text-lg font-bold mb-4">
-                Rentals for{" "}
-                {selectedMonth.toLocaleString("default", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </h2>
+  <div className="w-full bg-white p-4 rounded shadow">
+    <h2 className="text-lg font-bold mb-4">
+      Rentals for{" "}
+      {selectedMonth.toLocaleString("default", {
+        month: "long",
+        year: "numeric",
+      })}
+    </h2>
 
-              <ul className="space-y-4">
-                {rentalsForSelectedMonth.map((rental) => {
-                  const car = totals.cars.find(
-                    (car) => car._id === rental.carId
-                  );
-                  return (
-                    <li
-                      key={rental._id}
-                      className="flex justify-between items-center"
-                    >
-                      <span>{`Car: ${car ? car.name : "Unknown"}, User: ${
-                        rental.userId
-                      }, Rental Date: ${new Date(
-                        rental.rentalDate
-                      ).toLocaleDateString()}`}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </div>
+    {rentalsForSelectedMonth.length > 0 ? (
+      <ul className="space-y-4">
+        {rentalsForSelectedMonth.map((rental) => {
+          const car = totals.cars.find((car) => car._id === rental.carId);
+          return (
+            <li
+              key={rental._id}
+              className="flex justify-between items-center"
+            >
+              <span>{`Car: ${car ? car.name : "Unknown"}, User: ${
+                rental.userId
+              }, Rental Date: ${new Date(
+                rental.rentalDate
+              ).toLocaleDateString()}`}</span>
+            </li>
+          );
+        })}
+      </ul>
+    ) : (
+      <p className="text-gray-600 italic">No rentals for this month.</p>
+    )}
+  </div>
+</div>
+
         </div>
 
         {/* Recent Activity */}

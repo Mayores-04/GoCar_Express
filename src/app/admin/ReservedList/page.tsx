@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import ReactDOMServer from "react-dom/server";
-import { useRouter } from "next/router";
-import EmailApprovalSender from "@/app/emails/EmailApprovalSender";
 import { toast } from "react-toastify";
+import EmailApprovalSender from "@/app/emails/EmailApprovalSender";
 import EmailCancellationSender from "@/app/emails/EmailCancellationSender";
 
 interface RenterInfo {
@@ -34,6 +33,7 @@ interface AdditionalDetails {
 
 interface Reservation {
   _id: string;
+  status: string;
   service: string;
   renterInfo: RenterInfo;
   ownDriverInfo: DriverInfo;
@@ -45,6 +45,9 @@ interface Reservation {
 
 const ReservationTable: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [filteredReservations, setFilteredReservations] = useState<
+    Reservation[]
+  >([]);
   const [expandedReservationId, setExpandedReservationId] = useState<
     string | null
   >(null);
@@ -56,6 +59,9 @@ const ReservationTable: React.FC = () => {
     recipient: null,
   });
   const [emailMessage, setEmailMessage] = useState<string>("");
+  const [buttonStates, setButtonStates] = useState<
+    Record<string, { disabled: boolean; text: string }>
+  >({});
 
   const fetchReservations = async () => {
     try {
@@ -63,6 +69,7 @@ const ReservationTable: React.FC = () => {
       const data = await response.json();
       if (data.success) {
         setReservations(data.reservations);
+        setFilteredReservations(data.reservations);
 
         const initialButtonStates = data.reservations.reduce(
           (acc: any, reservation: Reservation) => {
@@ -83,6 +90,17 @@ const ReservationTable: React.FC = () => {
     }
   };
 
+  const [currentView, setCurrentView] = useState<string>("All");
+
+  const filterReservations = (status: string) => {
+    setCurrentView(status);
+    if (status === "All") {
+      setFilteredReservations(reservations);
+    } else {
+      setFilteredReservations(reservations.filter((r) => r.status === status));
+    }
+  };
+
   const toggleDetails = (reservationId: string) => {
     setExpandedReservationId((prevId) =>
       prevId === reservationId ? null : reservationId
@@ -98,11 +116,24 @@ const ReservationTable: React.FC = () => {
         return;
       }
 
+      const response = await fetch(`/api/reservations?id=${reservation._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Approved" }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        toast.error(`Failed to approve reservation: ${data.msg}`);
+        return;
+      }
+
       const htmlContent = ReactDOMServer.renderToStaticMarkup(
         <EmailApprovalSender userFirstName={renterInfo.fullName} />
       );
 
-      const response = await fetch("/api/email", {
+      const emailResponse = await fetch("/api/email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -114,45 +145,65 @@ const ReservationTable: React.FC = () => {
         }),
       });
 
-      const data = await response.json();
+      const emailData = await emailResponse.json();
 
-      if (data.success) {
-        toast.success(
-          `Reservation approved and email sent to ${renterInfo.fullName}`
-        );
-      } else {
-        toast.error(
-          `Failed to send email to ${renterInfo.fullName}: ${data.message}`
-        );
+      if (!emailResponse.ok || !emailData.success) {
+        toast.error(`Failed to send approval email: ${emailData.message}`);
+        return;
       }
+
+      toast.success(
+        `Reservation approved and email sent to ${renterInfo.fullName}.`
+      );
+
+      setButtonStates((prev) => ({
+        ...prev,
+        [reservation._id]: { disabled: true, text: "Approved" },
+      }));
+
+      setReservations((prev) =>
+        prev.map((r) =>
+          r._id === reservation._id ? { ...r, status: "Approved" } : r
+        )
+      );
     } catch (error) {
       console.error("Error approving reservation:", error);
       toast.error("Failed to approve reservation.");
     }
   };
-  const [cancellationModal, setCancellationModal] = useState<{
-    show: boolean;
-    reservation: Reservation | null;
-    reason: string;
-  }>({ show: false, reservation: null, reason: "" });
-  const [buttonStates, setButtonStates] = useState<
-    Record<string, { disabled: boolean; text: string }>
-  >({});
-  const handleCancelConfirmation = (reservation: Reservation) => {
-    setCancellationModal({ show: true, reservation, reason: "" });
-  };
 
-  const handleCancel = async () => {
-    if (!cancellationModal.reservation) return;
-    const { reservation, reason } = cancellationModal;
+  const handleCancel = async (reservation: Reservation) => {
+    const { renterInfo } = reservation;
 
     try {
-      const { renterInfo } = reservation;
+      if (!renterInfo) {
+        toast.error("No renter information available.");
+        return;
+      }
+
+      const cancellationReason =
+        "The car is not available at the requested time.";
+
+      const response = await fetch(`/api/reservations?id=${reservation._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "Cancelled",
+          cancellationReason,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        toast.error(`Failed to cancel reservation: ${data.msg}`);
+        return;
+      }
 
       const htmlContent = ReactDOMServer.renderToStaticMarkup(
         <EmailCancellationSender
           userFirstName={renterInfo.fullName}
-          cancellationReason={reason}
+          cancellationReason={cancellationReason}
         />
       );
 
@@ -160,9 +211,8 @@ const ReservationTable: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: renterInfo._id,
           email: renterInfo.email,
-          subject: "Your Reservation Has Been Cancelled",
+          subject: "Reservation Cancelled",
           htmlContent,
         }),
       });
@@ -170,50 +220,27 @@ const ReservationTable: React.FC = () => {
       const emailData = await emailResponse.json();
 
       if (!emailResponse.ok || !emailData.success) {
-        toast.error(
-          `Failed to send email to ${renterInfo.fullName}: ${emailData.message}`
-        );
+        toast.error(`Failed to send cancellation email: ${emailData.message}`);
         return;
       }
 
       toast.success(
-        `Reservation cancelled. Email sent to ${renterInfo.fullName}.`
+        `Reservation cancelled and email sent to ${renterInfo.fullName}.`
       );
 
       setButtonStates((prev) => ({
         ...prev,
-        [reservation._id]: { disabled: true, text: "Cancelled Successfully" },
+        [reservation._id]: { disabled: true, text: "Cancelled Reservation" },
       }));
 
-      setCancellationModal({ show: false, reservation: null, reason: "" });
+      setReservations((prev) =>
+        prev.map((r) =>
+          r._id === reservation._id ? { ...r, status: "Cancelled" } : r
+        )
+      );
     } catch (error) {
       console.error("Error cancelling reservation:", error);
       toast.error("An error occurred while cancelling the reservation.");
-    }
-  };
-  // Open email modal
-  const handleOpenEmailModal = (renterInfo: RenterInfo) => {
-    setEmailModal({ show: true, recipient: renterInfo });
-  };
-
-  // Close email modal
-  const handleCloseEmailModal = () => {
-    setEmailModal({ show: false, recipient: null });
-    setEmailMessage("");
-  };
-
-  // Send email
-  const handleSendEmail = async () => {
-    if (!emailModal.recipient) return;
-
-    try {
-      console.log("Sending custom message to:", emailModal.recipient.email);
-      console.log("Message:", emailMessage);
-      toast.success(`Message sent to ${emailModal.recipient.fullName}`);
-      handleCloseEmailModal();
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast.error("Failed to send message.");
     }
   };
 
@@ -223,14 +250,38 @@ const ReservationTable: React.FC = () => {
 
   return (
     <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
+      <div className="flex space-x-4 mb-4">
+      <h2 className="text-2xl font-bold mb-4">
+        Viewing {currentView} Reservations
+      </h2>
+        <div className="flex space-x-4 mb-6">
+          <button
+            onClick={() => filterReservations("All")}
+            className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
+          >
+            All
+          </button>
+          <button
+            onClick={() => filterReservations("Approved")}
+            className="bg-green-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-200"
+          >
+            Show Approved
+          </button>
+          <button
+            onClick={() => filterReservations("Cancelled")}
+            className="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition duration-200"
+          >
+            Show Cancelled
+          </button>
+        </div>
+      </div>
       <table className="min-w-full table-auto">
         <thead>
           <tr>
-            <th className="px-4 py-2 text-left text-gray-600">Reservation #</th>
+            <th className="px-4 py-2 text-left text-gray-600">#</th>
             <th className="px-4 py-2 text-left text-gray-600">Service</th>
             <th className="px-4 py-2 text-left text-gray-600">Renter Name</th>
             <th className="px-4 py-2 text-left text-gray-600">Email</th>
-            {/* <th className="px-4 py-2 text-left text-gray-600">Passengers</th> */}
             <th className="px-4 py-2 text-left text-gray-600">
               Pickup Location
             </th>
@@ -238,7 +289,7 @@ const ReservationTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {reservations.map((reservation, index) => (
+          {filteredReservations.map((reservation, index) => (
             <React.Fragment key={reservation._id}>
               <tr>
                 <td className="border px-4 py-2">{index + 1}</td>
@@ -249,7 +300,6 @@ const ReservationTable: React.FC = () => {
                 <td className="border px-4 py-2">
                   {reservation.renterInfo.email}
                 </td>
-                {/* <td className="border px-4 py-2">{reservation.numberOfPassengers}</td> */}
                 <td className="border px-4 py-2">
                   {reservation.pickupLocation}
                 </td>
@@ -263,27 +313,20 @@ const ReservationTable: React.FC = () => {
                       : "View Details"}
                   </button>
                   <button
-                    onClick={() => handleOpenEmailModal(reservation.renterInfo)}
-                    className="text-green-500 hover:underline"
-                  >
-                    Message
-                  </button>
-                  <button
                     onClick={() => handleApprove(reservation)}
-                    className="text-green-600 hover:underline"
+                    disabled={reservation.status === "Approved"}
+                    className={`btn ${reservation.status === "Approved" ? "btn-disabled text-gray-400" : "btn-primary hover:underline text-green-500"}`}
                   >
-                    Approve
+                    {reservation.status === "Approved" ? "Approved" : "Approve"}
                   </button>
                   <button
-                    onClick={() => handleCancelConfirmation(reservation)}
-                    disabled={buttonStates[reservation._id]?.disabled}
-                    className={`btn text-red-500 ${
-                      buttonStates[reservation._id]?.disabled
-                        ? "btn-disabled text-black"
-                        : "btn-primary"
-                    }`}
+                    onClick={() => handleCancel(reservation)}
+                    disabled={reservation.status === "Cancelled"}
+                    className={`btn ${reservation.status === "Cancelled" ? "btn-disabled text-gray-400" : "btn-primary hover:underline text-red-500"}`}
                   >
-                    {buttonStates[reservation._id]?.text}
+                    {reservation.status === "Cancelled"
+                      ? "Cancelled Reservation"
+                      : "Cancel Reservation"}
                   </button>
                 </td>
               </tr>
@@ -298,39 +341,9 @@ const ReservationTable: React.FC = () => {
                           Full Name:{" "}
                           {reservation.ownDriverInfo.fullName || "N/A"}
                         </p>
-                        <p>
-                          License:{" "}
-                          {reservation.ownDriverInfo.licenseNumber || "N/A"}
-                        </p>
-                        <p>
-                          Phone:{" "}
-                          {reservation.ownDriverInfo.phoneNumber || "N/A"}
-                        </p>
                       </div>
-                      {reservation.passengerDetails.map((passenger, i) => (
-                        <div key={i}>
-                          <strong>Passenger {i + 1}:</strong>
-                          <p>Name: {passenger.fullName}</p>
-                          <p>DOB: {passenger.dateOfBirth}</p>
-                          <p>Relationship: {passenger.relationship}</p>
-                          <p>
-                            Authorized Driver:{" "}
-                            {passenger.authorizedDriver ? "Yes" : "No"}
-                          </p>
-                          {passenger.authorizedDriver && (
-                            <p>
-                              Driver's License:{" "}
-                              {passenger.driverLicense || "N/A"}
-                            </p>
-                          )}
-                        </div>
-                      ))}
                       <div>
-                        <strong>Additional Details:</strong>
-                        <p>
-                          Time/Travel Duration:{" "}
-                          {reservation.additionalDetails.timeTravelDuration}
-                        </p>
+                        Passengers: {reservation.passengerDetails.length || 0}
                       </div>
                     </div>
                   </td>
@@ -340,80 +353,6 @@ const ReservationTable: React.FC = () => {
           ))}
         </tbody>
       </table>
-      {/* Cancellation Modal */}
-      {cancellationModal.show && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-lg font-semibold mb-4">
-              Cancel Reservation for{" "}
-              {cancellationModal.reservation?.renterInfo.fullName}
-            </h3>
-            <textarea
-              className="w-full border rounded p-2 mb-4"
-              rows={3}
-              placeholder="Enter cancellation reason..."
-              value={cancellationModal.reason}
-              onChange={(e) =>
-                setCancellationModal((prev) => ({
-                  ...prev,
-                  reason: e.target.value,
-                }))
-              }
-            ></textarea>
-            <div className="flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded"
-                onClick={() =>
-                  setCancellationModal({
-                    show: false,
-                    reservation: null,
-                    reason: "",
-                  })
-                }
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white rounded"
-                onClick={handleCancel}
-              >
-                Confirm Cancellation
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Email Modal */}
-      {emailModal.show && emailModal.recipient && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-lg font-semibold mb-4">
-              Send Message to {emailModal.recipient.fullName}
-            </h3>
-            <textarea
-              className="w-full border rounded p-2 mb-4"
-              rows={5}
-              placeholder="Enter your message..."
-              value={emailMessage}
-              onChange={(e) => setEmailMessage(e.target.value)}
-            ></textarea>
-            <div className="flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded"
-                onClick={handleCloseEmailModal}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={handleSendEmail}
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

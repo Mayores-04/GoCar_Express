@@ -20,7 +20,7 @@ interface Totals {
   totalCarsOnService: number;
   totalCarsRented: number;
   revenue: number;
-  cars: any[];  
+  cars: any[];
 }
 
 const AdminHome: React.FC = () => {
@@ -35,7 +35,7 @@ const AdminHome: React.FC = () => {
   });
   const [rentals, setRentals] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isClient, setIsClient] = useState(false);  
+  const [isClient, setIsClient] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
 
   const fetchTotals = async () => {
@@ -157,17 +157,17 @@ const AdminHome: React.FC = () => {
       },
     },
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-  
+
         const [totalsResponse, rentalsResponse] = await Promise.all([
           axios.get("/api/cars"),
           axios.get("/api/rentals"),
         ]);
-  
+
         if (totalsResponse.data.success) {
           setTotals({
             totalCars: totalsResponse.data.totalCars,
@@ -181,7 +181,7 @@ const AdminHome: React.FC = () => {
         } else {
           toast.error("Failed to fetch totals. Please try again.");
         }
-  
+
         if (rentalsResponse.data.success) {
           const rentalsData = rentalsResponse.data.rentals;
           const totalRevenue = rentalsData.reduce(
@@ -189,7 +189,7 @@ const AdminHome: React.FC = () => {
             0
           );
           const totalCarsRented = rentalsData.length;
-  
+
           setRentals(rentalsData);
           setTotals((prev) => ({
             ...prev,
@@ -205,8 +205,8 @@ const AdminHome: React.FC = () => {
         setLoading(false);
       }
     };
-  
-    setIsClient(true); 
+
+    setIsClient(true);
     fetchData();
   }, []);
 
@@ -288,53 +288,56 @@ const AdminHome: React.FC = () => {
             {isClient && <Pie data={pieChartData} options={pieChartOptions} />}
           </div>
           <div className="w-full bg-white flex-row flex">
-  <div className="bg-white p-4 rounded shadow">
-    <h2 className="text-lg font-bold mb-4">Rental Calendar</h2>
-    {isClient && (
-      <Calendar
-        value={selectedMonth}
-        onActiveStartDateChange={({ activeStartDate }) =>
-          handleMonthChange({ activeStartDate })
-        }
-        tileClassName={highlightRentalDates}
-        className="custom-calendar"
-      />
-    )}
-  </div>
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-lg font-bold mb-4">Rental Calendar</h2>
+              {isClient && (
+                <Calendar
+                  value={selectedMonth}
+                  onActiveStartDateChange={({ activeStartDate }) =>
+                    handleMonthChange({ activeStartDate })
+                  }
+                  tileClassName={highlightRentalDates}
+                  className="custom-calendar"
+                />
+              )}
+            </div>
 
-  <div className="w-full bg-white p-4 rounded shadow">
-    <h2 className="text-lg font-bold mb-4">
-      Rentals for{" "}
-      {selectedMonth.toLocaleString("default", {
-        month: "long",
-        year: "numeric",
-      })}
-    </h2>
+            <div className="w-full bg-white p-4 rounded shadow">
+              <h2 className="text-lg font-bold mb-4">
+                Rentals for{" "}
+                {selectedMonth.toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h2>
 
-    {rentalsForSelectedMonth.length > 0 ? (
-      <ul className="space-y-4">
-        {rentalsForSelectedMonth.map((rental) => {
-          const car = totals.cars.find((car) => car._id === rental.carId);
-          return (
-            <li
-              key={rental._id}
-              className="flex justify-between items-center"
-            >
-              <span>{`Car: ${car ? car.name : "Unknown"}, User: ${
-                rental.userId
-              }, Rental Date: ${new Date(
-                rental.rentalDate
-              ).toLocaleDateString()}`}</span>
-            </li>
-          );
-        })}
-      </ul>
-    ) : (
-      <p className="text-gray-600 italic">No rentals for this month.</p>
-    )}
-  </div>
-</div>
-
+              {rentalsForSelectedMonth.length > 0 ? (
+                <ul className="space-y-4">
+                  {rentalsForSelectedMonth.map((rental) => {
+                    const car = totals.cars.find(
+                      (car) => car._id === rental.carId
+                    );
+                    return (
+                      <li
+                        key={rental._id}
+                        className="flex justify-between items-center"
+                      >
+                        <span>{`Car: ${car ? car.name : "Unknown"}, User: ${
+                          rental.userId
+                        }, Rental Date: ${new Date(
+                          rental.rentalDate
+                        ).toLocaleDateString()}`}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-gray-600 italic">
+                  No rentals for this month.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Recent Activity */}

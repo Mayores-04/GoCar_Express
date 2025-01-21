@@ -251,15 +251,21 @@ const ReservationTable: React.FC = () => {
   return (
     <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
       <div className="flex space-x-4 mb-4">
-      <h2 className="text-2xl font-bold mb-4">
-        Viewing {currentView} Reservations
-      </h2>
+        <h2 className="text-2xl font-bold mb-4">
+          Viewing {currentView} Reservations
+        </h2>
         <div className="flex space-x-4 mb-6">
           <button
             onClick={() => filterReservations("All")}
             className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
           >
             All
+          </button>
+          <button
+            onClick={() => filterReservations("Pending")}
+            className="bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition duration-200"
+          >
+            Show Pending
           </button>
           <button
             onClick={() => filterReservations("Approved")}
@@ -336,14 +342,55 @@ const ReservationTable: React.FC = () => {
                     <div className="space-y-4">
                       <h3 className="font-semibold text-gray-800">Details</h3>
                       <div>
-                        <strong>Driver Information:</strong>
+                        <strong>Renter Information:</strong>
+                        <p>Full Name: {reservation.renterInfo.fullName}</p>
                         <p>
-                          Full Name:{" "}
-                          {reservation.ownDriverInfo.fullName || "N/A"}
+                          Phone Number: {reservation.renterInfo.phoneNumber}
+                        </p>
+                        <p>Email: {reservation.renterInfo.email}</p>
+                      </div>
+                      <div>
+                        <strong>Driver Information:</strong>
+                        <p>Full Name: {reservation.ownDriverInfo.fullName}</p>
+                        <p>
+                          License Number:{" "}
+                          {reservation.ownDriverInfo.licenseNumber}
+                        </p>
+                        <p>
+                          Phone Number: {reservation.ownDriverInfo.phoneNumber}
                         </p>
                       </div>
                       <div>
-                        Passengers: {reservation.passengerDetails.length || 0}
+                        <strong>Passenger Details:</strong>
+                        {reservation.passengerDetails.length === 0 ? (
+                          <p>No passengers listed.</p>
+                        ) : (
+                          reservation.passengerDetails.map(
+                            (passenger, index) => (
+                              <div key={index} className="ml-4">
+                                <p>Full Name: {passenger.fullName}</p>
+                                <p>Date of Birth: {passenger.dateOfBirth}</p>
+                                <p>Relationship: {passenger.relationship}</p>
+                                <p>
+                                  Authorized Driver:{" "}
+                                  {passenger.authorizedDriver ? "Yes" : "No"}
+                                </p>
+                                {passenger.driverLicense && (
+                                  <p>
+                                    Driver License: {passenger.driverLicense}
+                                  </p>
+                                )}
+                              </div>
+                            )
+                          )
+                        )}
+                      </div>
+                      <div>
+                        <strong>Additional Details:</strong>
+                        <p>
+                          Time Travel Duration:{" "}
+                          {reservation.additionalDetails.timeTravelDuration}
+                        </p>
                       </div>
                     </div>
                   </td>

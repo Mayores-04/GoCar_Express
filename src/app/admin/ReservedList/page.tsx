@@ -63,6 +63,18 @@ const ReservationTable: React.FC = () => {
       const data = await response.json();
       if (data.success) {
         setReservations(data.reservations);
+
+        const initialButtonStates = data.reservations.reduce(
+          (acc: any, reservation: Reservation) => {
+            acc[reservation._id] = {
+              disabled: false,
+              text: "Cancel Reservation",
+            };
+            return acc;
+          },
+          {}
+        );
+        setButtonStates(initialButtonStates);
       } else {
         console.error("Failed to fetch reservations:", data.msg);
       }
@@ -118,27 +130,32 @@ const ReservationTable: React.FC = () => {
       toast.error("Failed to approve reservation.");
     }
   };
-  const handleCancel = async (reservation: Reservation) => {
+  const [cancellationModal, setCancellationModal] = useState<{
+    show: boolean;
+    reservation: Reservation | null;
+    reason: string;
+  }>({ show: false, reservation: null, reason: "" });
+  const [buttonStates, setButtonStates] = useState<
+    Record<string, { disabled: boolean; text: string }>
+  >({});
+  const handleCancelConfirmation = (reservation: Reservation) => {
+    setCancellationModal({ show: true, reservation, reason: "" });
+  };
+
+  const handleCancel = async () => {
+    if (!cancellationModal.reservation) return;
+    const { reservation, reason } = cancellationModal;
+
     try {
       const { renterInfo } = reservation;
-  
-      if (!renterInfo) {
-        toast.error("No renter information available.");
-        return;
-      }
-  
-      const cancellationReason =
-        "The car is not available at the requested time.";
-  
-      // Step 1: Generate email content
+
       const htmlContent = ReactDOMServer.renderToStaticMarkup(
         <EmailCancellationSender
           userFirstName={renterInfo.fullName}
-          cancellationReason={cancellationReason}
+          cancellationReason={reason}
         />
       );
-  
-      // Step 2: Send cancellation email
+
       const emailResponse = await fetch("/api/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,48 +166,31 @@ const ReservationTable: React.FC = () => {
           htmlContent,
         }),
       });
-  
+
       const emailData = await emailResponse.json();
-  
+
       if (!emailResponse.ok || !emailData.success) {
         toast.error(
           `Failed to send email to ${renterInfo.fullName}: ${emailData.message}`
         );
         return;
       }
-  
+
       toast.success(
         `Reservation cancelled. Email sent to ${renterInfo.fullName}.`
       );
-  
-      // Step 3: Archive reservation
-      const archiveResponse = await fetch("/api/archiveReservations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reservationId: reservation._id,
-          archivedData: reservation, // Pass full reservation data
-        }),
-      });
-  
-      const archiveData = await archiveResponse.json();
-  
-      if (!archiveResponse.ok || !archiveData.success) {
-        toast.error(`Failed to archive reservation: ${archiveData.message}`);
-        return;
-      }
-  
-      toast.success("Reservation archived and deleted successfully.");
-  
-      // Optional: Redirect or refresh UI after cancellation
-      const router = useRouter();
-      router.reload(); // Reload the page to fetch updated data
+
+      setButtonStates((prev) => ({
+        ...prev,
+        [reservation._id]: { disabled: true, text: "Cancelled Successfully" },
+      }));
+
+      setCancellationModal({ show: false, reservation: null, reason: "" });
     } catch (error) {
       console.error("Error cancelling reservation:", error);
       toast.error("An error occurred while cancelling the reservation.");
     }
   };
-
   // Open email modal
   const handleOpenEmailModal = (renterInfo: RenterInfo) => {
     setEmailModal({ show: true, recipient: renterInfo });
@@ -275,10 +275,15 @@ const ReservationTable: React.FC = () => {
                     Approve
                   </button>
                   <button
-                    onClick={() => handleCancel(reservation)}
-                    className="text-red-600 hover:underline"
+                    onClick={() => handleCancelConfirmation(reservation)}
+                    disabled={buttonStates[reservation._id]?.disabled}
+                    className={`btn text-red-500 ${
+                      buttonStates[reservation._id]?.disabled
+                        ? "btn-disabled text-black"
+                        : "btn-primary"
+                    }`}
                   >
-                    Cancel
+                    {buttonStates[reservation._id]?.text}
                   </button>
                 </td>
               </tr>
@@ -335,7 +340,49 @@ const ReservationTable: React.FC = () => {
           ))}
         </tbody>
       </table>
-
+      {/* Cancellation Modal */}
+      {cancellationModal.show && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h3 className="text-lg font-semibold mb-4">
+              Cancel Reservation for{" "}
+              {cancellationModal.reservation?.renterInfo.fullName}
+            </h3>
+            <textarea
+              className="w-full border rounded p-2 mb-4"
+              rows={3}
+              placeholder="Enter cancellation reason..."
+              value={cancellationModal.reason}
+              onChange={(e) =>
+                setCancellationModal((prev) => ({
+                  ...prev,
+                  reason: e.target.value,
+                }))
+              }
+            ></textarea>
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded"
+                onClick={() =>
+                  setCancellationModal({
+                    show: false,
+                    reservation: null,
+                    reason: "",
+                  })
+                }
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded"
+                onClick={handleCancel}
+              >
+                Confirm Cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Email Modal */}
       {emailModal.show && emailModal.recipient && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">

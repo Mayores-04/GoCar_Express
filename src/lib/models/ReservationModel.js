@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const ReservationSchema = new mongoose.Schema({
+  status: { type: String, required: true, default: "Pending" },
   car: { type: String, required: true },
   service: { type: String, required: true },
   rentalDuration: { type: Number, required: true },

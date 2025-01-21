@@ -23,6 +23,7 @@
 
       // Structure reservationData
       const reservationData = {
+        status: "Pending",
         car: "6789f3819dc5bed2f7e8f0ec" || "",  
         service: formData.service || "",
         rentalDuration: parseInt(formData.rentalDuration || "0", 10),
@@ -85,107 +86,55 @@
     }
   }
 
-  export async function PUT(request) {
-    try {
-      await ConnectDB();
+// PUT: Update reservation (including status)
+export async function PUT(request) {
+  try {
+    await ConnectDB();
 
-      const { searchParams } = new URL(request.url);
-      const id = searchParams.get("id");
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
 
-      if (!id) {
-        return NextResponse.json(
-          { success: false, msg: "Reservation ID is required." },
-          { status: 400 }
-        );
-      }
-
-      const formData = await request.formData();
-
-      const updateData = {
-        ...(formData.has("car") && { car: formData.get("car").toString() }),
-        ...(formData.has("service") && {
-          service: formData.get("service").toString(),
-        }),
-        ...(formData.has("rentalDuration") && {
-          rentalDuration: parseInt(formData.get("rentalDuration").toString(), 10),
-        }),
-        ...(formData.has("ownDriverInfo") && {
-          ownDriverInfo: {
-            fullName: formData.get("ownDriverInfo.fullName").toString(),
-            licenseNumber: formData.get("ownDriverInfo.licenseNumber").toString(),
-            phoneNumber: formData.get("ownDriverInfo.phoneNumber").toString(),
-          },
-        }),
-        ...(formData.has("renterInfo") && {
-          renterInfo: {
-            fullName: formData.get("renterInfo.fullName").toString(),
-            dateOfBirth: formData.get("renterInfo.dateOfBirth").toString(),
-            address: formData.get("renterInfo.address").toString(),
-            phoneNumber: formData.get("renterInfo.phoneNumber").toString(),
-            email: formData.get("renterInfo.email").toString(),
-            driverLicense: formData.get("renterInfo.driverLicense").toString(),
-          },
-        }),
-        ...(formData.has("numberOfPassengers") && {
-          numberOfPassengers: parseInt(
-            formData.get("numberOfPassengers").toString(),
-            10
-          ),
-        }),
-        ...(formData.has("passengerDetails") && {
-          passengerDetails: JSON.parse(formData.get("passengerDetails")),
-        }),
-        ...(formData.has("additionalDetails") && {
-          additionalDetails: JSON.parse(formData.get("additionalDetails")),
-        }),
-        ...(formData.has("pickupLocation") && {
-          pickupLocation: formData.get("pickupLocation").toString(),
-        }),
-      };
-
-      // Validate service-specific logic
-      if (updateData.service === "With Driver" && !updateData.pickupLocation) {
-        return NextResponse.json(
-          {
-            success: false,
-            msg: "Pickup location is required for service 'With Driver'.",
-          },
-          { status: 400 }
-        );
-      }
-
-      if (updateData.service === "Without Driver" && updateData.ownDriverInfo) {
-        updateData.ownDriverInfo = null; // Remove ownDriverInfo if the service is "Without Driver"
-      }
-
-      const updatedReservation = await ReservationModel.findByIdAndUpdate(
-        id,
-        updateData,
-        {
-          new: true,
-        }
-      );
-
-      if (!updatedReservation) {
-        return NextResponse.json(
-          { success: false, msg: "Reservation not found." },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json({
-        success: true,
-        reservation: updatedReservation,
-      });
-    } catch (error) {
-      console.error("Error in PUT /api/reservation:", error.message);
+    if (!id) {
       return NextResponse.json(
-        { success: false, msg: "Internal server error", error: error.message },
-        { status: 500 }
+        { success: false, msg: "Reservation ID is required." },
+        { status: 400 }
       );
     }
-  }
 
+    const updateData = await request.json();
+
+    if (updateData.status && !["Pending", "Confirmed", "Cancelled"].includes(updateData.status)) {
+      return NextResponse.json(
+        { success: false, msg: "Invalid status value." },
+        { status: 400 }
+      );
+    }
+
+    const updatedReservation = await ReservationModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedReservation) {
+      return NextResponse.json(
+        { success: false, msg: "Reservation not found." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      reservation: updatedReservation,
+    });
+  } catch (error) {
+    console.error("Error in PUT /api/reservation:", error.message);
+    return NextResponse.json(
+      { success: false, msg: "Internal server error", error: error.message },
+      { status: 500 }
+    );
+  }
+}
   // Handle DELETE request to remove a reservation
   export async function DELETE(request) {
     try {

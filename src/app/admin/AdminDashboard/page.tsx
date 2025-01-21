@@ -159,9 +159,55 @@ const AdminHome: React.FC = () => {
   };
   
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+  
+        const [totalsResponse, rentalsResponse] = await Promise.all([
+          axios.get("/api/cars"),
+          axios.get("/api/rentals"),
+        ]);
+  
+        if (totalsResponse.data.success) {
+          setTotals({
+            totalCars: totalsResponse.data.totalCars,
+            carsNotAvailable: totalsResponse.data.carsNotAvailable,
+            totalCarsAvailable: totalsResponse.data.totalCarsAvailable,
+            totalCarsOnService: totalsResponse.data.totalCarsOnService,
+            totalCarsRented: totalsResponse.data.totalCarsRented,
+            revenue: totalsResponse.data.revenue,
+            cars: totalsResponse.data.cars,
+          });
+        } else {
+          toast.error("Failed to fetch totals. Please try again.");
+        }
+  
+        if (rentalsResponse.data.success) {
+          const rentalsData = rentalsResponse.data.rentals;
+          const totalRevenue = rentalsData.reduce(
+            (acc: number, rental: any) => acc + rental.totalAmount,
+            0
+          );
+          const totalCarsRented = rentalsData.length;
+  
+          setRentals(rentalsData);
+          setTotals((prev) => ({
+            ...prev,
+            revenue: totalRevenue,
+            totalCarsRented: totalCarsRented,
+          }));
+        } else {
+          toast.error("Failed to fetch rentals. Please try again.");
+        }
+      } catch (error) {
+        toast.error("Failed to fetch data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     setIsClient(true); 
-    fetchRentals(); 
-    fetchTotals();
+    fetchData();
   }, []);
 
   const token = process.env.NEXT_PUBLIC_SECRET_KEY;

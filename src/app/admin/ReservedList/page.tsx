@@ -10,6 +10,7 @@ interface RenterInfo {
   _id: string;
   fullName: string;
   phoneNumber: string;
+  driverLicense: string;
   email: string;
 }
 
@@ -369,6 +370,7 @@ const ReservationTable: React.FC = () => {
                           Phone Number: {reservation.renterInfo.phoneNumber}
                         </p>
                         <p>Email: {reservation.renterInfo.email}</p>
+                        <p>Driver License: {reservation.renterInfo.driverLicense}</p>
                       </div>
                       <div>
                         <strong>Driver Information:</strong>

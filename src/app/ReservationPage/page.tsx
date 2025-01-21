@@ -34,6 +34,7 @@ type RenterInfo = {
   address: string;
   phoneNumber: string;
   email: string;
+  authorizedDriver: "Yes" | "No";
   driverLicense: string;
 };
 
@@ -67,6 +68,7 @@ export default function ReservationPage() {
     address: "",
     phoneNumber: "",
     email: "",
+    authorizedDriver: "No",
     driverLicense: "",
   });
   const [additionalDetails, setAdditionalDetails] = useState({
@@ -384,20 +386,46 @@ export default function ReservationPage() {
                     className="w-full p-2 border rounded"
                   />
                 </div>
+                {/* Authorized Driver */}
                 <div>
-                  <label className="block mb-2 text-gray-600">
-                    Driver's License
-                  </label>
-                  <input
-                    type="text"
-                    value={renterInfo.driverLicense}
-                    onChange={(e) =>
-                      handleRenterInfoChange("driverLicense", e.target.value)
-                    }
-                    placeholder="Driver's License Number"
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
+                      <label className="block mb-2 text-gray-600">
+                        Authorized Driver
+                      </label>
+                      <select
+                        value={renterInfo.authorizedDriver}
+                        onChange={(e) =>
+                          handleRenterInfoChange(
+                            "authorizedDriver",
+                            e.target.value
+                          )
+                        }
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+
+                    {/* Conditionally render Driver's License input */}
+                    {renterInfo.authorizedDriver === "Yes" && (
+                      <div className="col-span-2">
+                        <label className="block mb-2 text-gray-600">
+                          Driver's License
+                        </label>
+                        <input
+                          type="text"
+                          value={renterInfo.driverLicense || ""}
+                          onChange={(e) =>
+                            handleRenterInfoChange(
+                              "driverLicense",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Enter Driver's License Number"
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                    )}
               </div>
             </div>
 
@@ -415,7 +443,6 @@ export default function ReservationPage() {
                 <option value={1}>1</option>
                 <option value={2}>2</option>
                 <option value={3}>3</option>
-                <option value={4}>4</option>
               </select>
             </div>
 

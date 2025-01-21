@@ -9,17 +9,14 @@ export async function POST(req) {
   try {
     const { reservationId } = await req.json();
 
-    // Fetch the reservation by ID
     const reservation = await reservationsCollection.findOne({ _id: new ObjectId(reservationId) });
 
     if (!reservation) {
       return NextResponse.json({ success: false, message: 'Reservation not found' }, { status: 404 });
     }
 
-    // Insert the reservation into the archive collection
     await archiveCollection.insertOne(reservation);
 
-    // Delete the reservation from the main collection
     await reservationsCollection.deleteOne({ _id: new ObjectId(reservationId) });
 
     return NextResponse.json({ success: true, message: 'Reservation archived and deleted successfully' });

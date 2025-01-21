@@ -12,7 +12,7 @@ const ReservationSchema = new mongoose.Schema({
   },
   renterInfo: {
     fullName: { type: String, required: true },
-    dateOfBirth: { type: Date, required: true },  // Ensure this is a Date object
+    dateOfBirth: { type: Date, required: true },  
     address: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     email: { type: String, required: true },

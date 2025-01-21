@@ -101,6 +101,15 @@ const ReservationTable: React.FC = () => {
     }
   };
 
+  const filterServices = (service: string) => {
+    setCurrentView(service);
+    if(service === "All"){
+      setFilteredReservations(reservations);
+    } else{
+      setFilteredReservations(reservations.filter((e) => e.service === service));
+    }
+  }
+
   const toggleDetails = (reservationId: string) => {
     setExpandedReservationId((prevId) =>
       prevId === reservationId ? null : reservationId
@@ -281,6 +290,16 @@ const ReservationTable: React.FC = () => {
           </button>
         </div>
       </div>
+      <div className="flex">
+        <select
+          onChange={(e) => filterServices(e.target.value)}
+          className="p-2 border rounded"
+        >
+          <option value="All">All</option>
+          <option value="With Driver">With Driver</option>
+          <option value="Without Driver">Without Driver</option>
+        </select>
+      </div>
       <table className="min-w-full table-auto">
         <thead>
           <tr>
@@ -288,9 +307,7 @@ const ReservationTable: React.FC = () => {
             <th className="px-4 py-2 text-left text-gray-600">Service</th>
             <th className="px-4 py-2 text-left text-gray-600">Renter Name</th>
             <th className="px-4 py-2 text-left text-gray-600">Email</th>
-            <th className="px-4 py-2 text-left text-gray-600">
-              Pickup Location
-            </th>
+            <th className="px-4 py-2 text-left text-gray-600">Contact #</th>
             <th className="px-4 py-2 text-left text-gray-600">Actions</th>
           </tr>
         </thead>
@@ -307,7 +324,7 @@ const ReservationTable: React.FC = () => {
                   {reservation.renterInfo.email}
                 </td>
                 <td className="border px-4 py-2">
-                  {reservation.pickupLocation}
+                  {reservation.renterInfo.phoneNumber}
                 </td>
                 <td className="border px-4 py-2 space-x-2">
                   <button
@@ -341,6 +358,10 @@ const ReservationTable: React.FC = () => {
                   <td colSpan={6} className="border px-4 py-2">
                     <div className="space-y-4">
                       <h3 className="font-semibold text-gray-800">Details</h3>
+                      <div>
+                        <strong>Pickup Location:</strong>
+                        <p>Location: {reservation.pickupLocation}</p>
+                      </div>
                       <div>
                         <strong>Renter Information:</strong>
                         <p>Full Name: {reservation.renterInfo.fullName}</p>

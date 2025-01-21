@@ -585,7 +585,7 @@ export default function ReservationPage() {
                 <label className="block mb-2 text-gray-600">
                   Pickup Location
                 </label>
-                <MapComponent
+                <MapWithNoSSR
                   setLocation={(setPickupLocation)}
                   pickupLocation={pickupLocation}
                 />

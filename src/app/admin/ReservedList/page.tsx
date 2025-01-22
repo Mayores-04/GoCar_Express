@@ -5,6 +5,8 @@ import ReactDOMServer from "react-dom/server";
 import { toast } from "react-toastify";
 import EmailApprovalSender from "@/app/emails/EmailApprovalSender";
 import EmailCancellationSender from "@/app/emails/EmailCancellationSender";
+import axios from "axios";
+import useActivities from "@/lib/hooks/useActivities";
 
 interface RenterInfo {
   _id: string;
@@ -96,12 +98,23 @@ const ReservationTable: React.FC = () => {
       } else {
         console.error("Failed to fetch reservations:", data.msg);
       }
+
+       // Fetch Recent Activities
+       const activitiesResponse = await axios.get("/api/activities");
+       if (activitiesResponse.data.success) {
+         fetchActivities(); // Fetch activities using the hook
+       } else {
+         toast.error("Failed to fetch activities data.");
+       }
     } catch (error) {
       console.error("Error fetching reservations:", error);
 
       setLoading(false);
     }
   };
+
+  
+  const { activities, addActivity, fetchActivities } = useActivities();
 
   const [currentStatus, setCurrentStatus] = useState<string>("All");
   const [currentService, setCurrentService] = useState<string>("All");
@@ -180,6 +193,7 @@ const ReservationTable: React.FC = () => {
         `Reservation approved and email sent to ${renterInfo.fullName}.`
       );
 
+      addActivity("Approved reservation")
       setButtonStates((prev) => ({
         ...prev,
         [reservation._id]: { disabled: true, text: "Approved" },
@@ -255,6 +269,8 @@ const ReservationTable: React.FC = () => {
       toast.success(
         `Reservation cancelled and email sent to ${renterInfo.fullName}.`
       );
+
+      addActivity("Cancel reservation");
 
       setButtonStates((prev) => ({
         ...prev,

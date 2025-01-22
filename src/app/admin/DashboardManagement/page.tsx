@@ -5,6 +5,8 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import axios from "axios";
 import { AxiosError } from "axios";
+import useActivities from "@/lib/hooks/useActivities";
+import { toast } from "react-toastify";
 
 interface Totals {
   revenue: number;
@@ -85,8 +87,8 @@ const AdminDashboardManagement = () => {
   const highlightRentalDates = ({ date }: { date: Date }) => {
     return rentalDates.some(
       ({ rentalDate, returnDate }) =>
-        rentalDate.toDateString() === date.toDateString() 
-        // || returnDate.toDateString() === date.toDateString()
+        rentalDate.toDateString() === date.toDateString()
+      // || returnDate.toDateString() === date.toDateString()
     )
       ? "highlighted-date"
       : "";
@@ -130,6 +132,8 @@ const AdminDashboardManagement = () => {
       });
 
       if (response.data.success) {
+        toast.success("Added rentals successfully");
+        addActivity("Added info in rentals");
         setNewRental({
           _id: "",
           carId: "",
@@ -159,6 +163,8 @@ const AdminDashboardManagement = () => {
     try {
       const response = await axios.delete(`/api/rentals?id=${rentalId}`);
       if (response.data.success) {
+        toast.success("Rentals deleted successfully");
+        addActivity("Delete info in rentals")
         fetchDashboardData();
       } else {
         setError("Failed to delete rental. Please try again.");
@@ -171,14 +177,23 @@ const AdminDashboardManagement = () => {
 
   const [cars, setCars] = useState<Car[]>([]);
 
+  const { activities, addActivity, fetchActivities } = useActivities();
   const fetchCars = async () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/cars");
       setCars(response.data.cars || []);
+
+        // Fetch Recent Activities
+        const activitiesResponse = await axios.get("/api/activities");
+        if (activitiesResponse.data.success) {
+          fetchActivities(); // Fetch activities using the hook
+        } else {
+          toast.error("Failed to fetch activities data.");
+        }
       setLoading(false);
     } catch (err: any) {
-      setError("Failed to fetch cars. Please try again later.");
+      toast.error("Failed to fetch cars. Please try again later.");
       setLoading(false);
     }
   };
@@ -198,17 +213,26 @@ const AdminDashboardManagement = () => {
     return returnDate < new Date(); // Rentals that have already ended
   });
 
-  const [view, setView] = useState<'current' | 'past'>('current');
+  const [view, setView] = useState<"current" | "past">("current");
 
-  const handleViewToggle = (viewType: 'current' | 'past') => {
+  const handleViewToggle = (viewType: "current" | "past") => {
     setView(viewType);
   };
 
-  const rentalsToDisplay = view === 'current' ? currentRentals : pastRentals;
+  const rentalsToDisplay = view === "current" ? currentRentals : pastRentals;
 
   return (
     <div className="p-6">
-      {loading && <p className="text-gray-500">Loading...</p>}
+      {loading && (
+        <div>
+          <div className="flex items-center justify-center h-screen">
+            <div className="relative">
+              <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+              <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+            </div>
+          </div>
+        </div>
+      )}
       {error && <p className="text-red-500">{error}</p>}
 
       {!loading && !error && (
@@ -225,7 +249,7 @@ const AdminDashboardManagement = () => {
                 >
                   <option value="">Select Car</option>
                   {cars
-                    .filter((car) => car.carstatus !== "On Service")  
+                    .filter((car) => car.carstatus !== "On Service")
                     .map((car) => (
                       <option key={car._id} value={car._id}>
                         {car.name} ({car.brand}) - ₱{car.price}
@@ -271,14 +295,14 @@ const AdminDashboardManagement = () => {
             {/* View toggle buttons */}
             <div className="mb-4">
               <button
-                onClick={() => handleViewToggle('current')}
-                className={`p-2 ${view === 'current' ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`}
+                onClick={() => handleViewToggle("current")}
+                className={`p-2 ${view === "current" ? "bg-blue-500 text-white" : "bg-gray-200"} rounded`}
               >
                 Current Rentals
               </button>
               <button
-                onClick={() => handleViewToggle('past')}
-                className={`p-2 ml-4 ${view === 'past' ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`}
+                onClick={() => handleViewToggle("past")}
+                className={`p-2 ml-4 ${view === "past" ? "bg-blue-500 text-white" : "bg-gray-200"} rounded`}
               >
                 Past Rentals
               </button>

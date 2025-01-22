@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import useActivities from "@/lib/hooks/useActivities";
 
 interface Car {
   _id: string;
@@ -29,6 +30,15 @@ const CarListPage: React.FC = () => {
     try {
       const response = await axios.get("/api/cars");
       setCars(response.data.cars || []);
+
+       // Fetch Recent Activities
+       const activitiesResponse = await axios.get("/api/activities");
+       if (activitiesResponse.data.success) {
+         fetchActivities(); // Fetch activities using the hook
+       } else {
+         toast.error("Failed to fetch activities data.");
+       }
+
       setLoading(false);
     } catch (err: any) {
       console.error("Error fetching cars:", err.message);
@@ -37,6 +47,9 @@ const CarListPage: React.FC = () => {
     }
   };
 
+  
+  const { activities, addActivity, fetchActivities } = useActivities();
+  
   const handleEdit = (carId: string) => {
     setEditingCarId(carId);
     const car = cars.find((car) => car._id === carId);
@@ -47,6 +60,7 @@ const CarListPage: React.FC = () => {
     }
   };
 
+  
   const handleSave = async (carId: string) => {
     if (
       !editedCar.carstatus ||
@@ -92,6 +106,7 @@ const CarListPage: React.FC = () => {
         setEditingCarId(null);
         setEditedCar({});
         setImageFile(null);
+        addActivity("Edit Car");
       } else {
         toast.error(response.data.msg || "Failed to update car.");
       }
@@ -108,6 +123,7 @@ const CarListPage: React.FC = () => {
       const response = await axios.delete(`/api/cars?id=${carId}`);
       if (response.data.success) {
         toast.success("Car deleted successfully");
+        addActivity("Delete Car");
         setCars((prevCars) => prevCars.filter((car) => car._id !== carId));
       } else {
         toast.error("Error deleting car");

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import useActivities from "@/lib/hooks/useActivities";
 
 interface Car {
   _id: string;
@@ -52,6 +53,15 @@ const AddCarPage: React.FC = () => {
     try {
       const response = await axios.get("/api/cars");
       setCars(response.data.cars || []);
+
+      // Fetch Recent Activities
+      const activitiesResponse = await axios.get("/api/activities");
+      if (activitiesResponse.data.success) {
+        fetchActivities(); // Fetch activities using the hook
+      } else {
+        toast.error("Failed to fetch activities data.");
+      }
+      
       setLoading(false);
     } catch (err: any) {
       console.error("Error fetching cars:", err.message);
@@ -59,6 +69,8 @@ const AddCarPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const { activities, addActivity, fetchActivities } = useActivities();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +104,7 @@ const AddCarPage: React.FC = () => {
         response = await axios.post("/api/cars", formData);
         if (response.data.success) {
           toast.success("Car added successfully");
+          addActivity("Added Car")
         } else {
           toast.error("Error adding car");
         }
@@ -182,7 +195,7 @@ const AddCarPage: React.FC = () => {
                 <select
                   id="carstatus"
                   name="carstatus"
-                  value={data.carstatus} 
+                  value={data.carstatus}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"

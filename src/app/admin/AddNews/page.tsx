@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import useActivities from "@/lib/hooks/useActivities";
+import axios from "axios";
 
 interface FormData {
   title: string;
@@ -53,6 +55,7 @@ const AddNewsPage: React.FC = () => {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
 
+  const { activities, addActivity, fetchActivities } = useActivities();
   const fetchNews = async () => {
     try {
       const response = await fetch("/api/news");
@@ -62,6 +65,14 @@ const AddNewsPage: React.FC = () => {
       } else {
         toast.error("Failed to fetch news");
       }
+
+       // Fetch Recent Activities
+       const activitiesResponse = await axios.get("/api/activities");
+       if (activitiesResponse.data.success) {
+         fetchActivities(); // Fetch activities using the hook
+       } else {
+         toast.error("Failed to fetch activities data.");
+       }
     } catch (error) {
       console.error("Error fetching news:", error);
       toast.error("Error fetching news");
@@ -120,6 +131,7 @@ const AddNewsPage: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success("News deleted successfully!");
+        addActivity("Delete news");
         fetchNews();
       } else {
         toast.error(data.msg || "Failed to delete news");
@@ -206,6 +218,7 @@ const AddNewsPage: React.FC = () => {
 
       if (response.ok) {
         toast.success("News added successfully!");
+        addActivity("Added news")
         setFormData({
           title: "",
           customerName: "",

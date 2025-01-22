@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/news.ts", "src/app/api/cars/route.ts", "src/app/api/news/route.js", "src/lib/config/db.js", "src/app/admin/AdminDashboard/page.tsx", "src/app/api/cars/upload.js", "src/app/api/cars/[id].js", "src/app/api/email/route.ts", "src/lib/models/reservationArchive.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/news.ts", "src/app/api/cars/route.ts", "src/app/api/news/route.js", "src/lib/config/db.js", "src/app/admin/AdminDashboard/page.tsx", "src/app/api/cars/upload.js", "src/app/api/cars/[id].js", "src/app/api/email/route.ts", "src/lib/models/reservationArchive.js", "src/lib/hooks/useActivities.ts"],
   "exclude": ["node_modules"]
 }

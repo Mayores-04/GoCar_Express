@@ -10,6 +10,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import useActivities from "@/lib/hooks/useActivities";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -21,6 +22,12 @@ interface Totals {
   totalCarsRented: number;
   revenue: number;
   cars: any[];
+}
+
+interface Activity {
+  id: string;
+  message: string;
+  time: string;
 }
 
 const AdminHome: React.FC = () => {
@@ -37,54 +44,6 @@ const AdminHome: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isClient, setIsClient] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
-
-  const fetchTotals = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get("/api/cars");
-      if (response.data.success) {
-        setTotals({
-          totalCars: response.data.totalCars,
-          carsNotAvailable: response.data.carsNotAvailable,
-          totalCarsAvailable: response.data.totalCarsAvailable,
-          totalCarsOnService: response.data.totalCarsOnService,
-          totalCarsRented: response.data.totalCarsRented,
-          revenue: response.data.revenue,
-          cars: response.data.cars,
-        });
-      } else {
-        toast.error("Failed to fetch totals. Please try again.");
-      }
-    } catch (error) {
-      toast.error("Failed to fetch totals. Please try again.");
-    }
-  };
-
-  const fetchRentals = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get("/api/rentals");
-      if (response.data.success) {
-        setRentals(response.data.rentals);
-
-        const totalRevenue = response.data.rentals.reduce(
-          (acc: number, rental: any) => acc + rental.totalAmount,
-          0
-        );
-        const totalCarsRented = response.data.rentals.length;
-
-        setTotals((prev) => ({
-          ...prev,
-          revenue: totalRevenue,
-          totalCarsRented: totalCarsRented,
-        }));
-      } else {
-        toast.error("Failed to fetch rentals. Please try again.");
-      }
-    } catch (error) {
-      toast.error("Failed to fetch rentals. Please try again.");
-    }
-  };
 
   // Filter rentals based on the selected month
   const rentalsForSelectedMonth = rentals.filter((rental) => {
@@ -199,6 +158,13 @@ const AdminHome: React.FC = () => {
         } else {
           toast.error("Failed to fetch rentals. Please try again.");
         }
+
+        const activitiesResponse = await axios.get("/api/activities");
+        if (activitiesResponse.data.success) {
+          fetchActivities(); 
+        } else {
+          toast.error("Failed to fetch activities data.");
+        }
       } catch (error) {
         toast.error("Failed to fetch data. Please try again.");
       } finally {
@@ -209,6 +175,15 @@ const AdminHome: React.FC = () => {
     setIsClient(true);
     fetchData();
   }, []);
+
+  const { activities, addActivity, fetchActivities } = useActivities();
+
+  const [showAll, setShowAll] = useState(false);
+  
+  const displayedActivities = showAll
+    ? activities  
+    : activities.slice(0, 5); 
+  
 
   const token = process.env.NEXT_PUBLIC_SECRET_KEY;
   return (
@@ -228,7 +203,6 @@ const AdminHome: React.FC = () => {
             </span>
           </Link>
         </div>
-
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <h3 className="text-lg font-semibold text-gray-700">Total Cars</h3>
@@ -287,6 +261,7 @@ const AdminHome: React.FC = () => {
             </h3>
             {isClient && <Pie data={pieChartData} options={pieChartOptions} />}
           </div>
+
           <div className="w-full bg-white flex-row flex">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-lg font-bold mb-4">Rental Calendar</h2>
@@ -322,11 +297,9 @@ const AdminHome: React.FC = () => {
                         key={rental._id}
                         className="flex justify-between items-center"
                       >
-                        <span>{`Car: ${car ? car.name : "Unknown"}, User: ${
-                          rental.userId
-                        }, Rental Date: ${new Date(
-                          rental.rentalDate
-                        ).toLocaleDateString()}`}</span>
+                        <span>
+                          {`Car: ${car ? car.name : "Unknown"}, User: ${rental.userId}, Rental Date: ${new Date(rental.rentalDate).toLocaleDateString()}`}
+                        </span>
                       </li>
                     );
                   })}
@@ -339,36 +312,39 @@ const AdminHome: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Recent Activity */}
         <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold text-gray-700 mb-4">
             Recent Activity
           </h3>
+
+          {/* View All Button */}
+          <button
+            className=" text-black rounded-lg hover:underline"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? "Show Less" : "View All"}
+          </button>
+
           <div className="divide-y divide-gray-200">
-            {/* Activity Item 1 */}
-            <div className="py-4 flex justify-between">
-              <span className="text-gray-600">
-                Manager Jake add news update
-              </span>
-              <span className="text-gray-400 text-sm">6 hours ago</span>
-            </div>
-
-            {/* Activity Item 2 */}
-            <div className="py-4 flex justify-between">
-              <span className="text-gray-600">
-                Manager Jake add reservation list page
-              </span>
-              <span className="text-gray-400 text-sm">3 hours ago</span>
-            </div>
-
-            {/* Activity Item 3 */}
-            <div className="py-4 flex justify-between">
-              <span className="text-gray-600">
-                Manager Jake update the Admin Dashboard
-              </span>
-              <span className="text-gray-400 text-sm">1 hours ago</span>
-            </div>
+            {displayedActivities.map((activity, index) => {
+              const isRecent =
+                new Date().getTime() - new Date(activity.time).getTime() <
+                24 * 60 * 60 * 1000;  
+              return (
+                <div
+                  key={`${activity.id}-${Date.now()}-${index}`}
+                  className={`py-4 px-4 flex justify-between ${isRecent ? "bg-blue-50" : "bg-gray-50"}`} // Highlight recent activities
+                >
+                  <span className="text-gray-600">{activity.message}</span>
+                  <span className="text-gray-400 text-sm">
+                    {activity.time}{" "}
+                    {isRecent && (
+                      <span className="text-blue-500">(Recent)</span>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

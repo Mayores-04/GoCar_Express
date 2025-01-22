@@ -19,6 +19,7 @@
     "axios": "^1.7.9",
     "chart.js": "^4.4.7",
     "cloudinary": "^2.5.1",
+    "date-fns": "^4.1.0",
     "email": "^0.2.6",
     "express": "^4.21.2",
     "gsap": "^3.12.5",
@@ -39,7 +40,8 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.1.1",
     "react-toastify": "^11.0.2",
-    "resend": "^4.1.1"
+    "resend": "^4.1.1",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

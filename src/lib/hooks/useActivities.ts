@@ -9,10 +9,11 @@ interface Activity {
 const useActivities = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchActivities = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/activities");
       const data = await response.json();
 
@@ -22,47 +23,46 @@ const useActivities = () => {
         setError("Failed to fetch activities.");
       }
     } catch (err) {
+      console.error("Error fetching activities:", err);
       setError("Error fetching activities.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const addActivity = async (message: string) => {
     setLoading(true);
-  
-    // Get the current date and convert it to Philippine Time (PHT, UTC +8)
-    const philippinesTime = new Date();
-    const philippinesOffset = 8 * 60; // Philippines is UTC +8 hours
-    const localTime = new Date(
-      philippinesTime.getTime() + philippinesOffset * 60 * 1000
-    );
-  
-    // Format the time to show in the desired format (e.g., hh:mm AM/PM)
+
+    const now = new Date();  
+    const utcTime = now.getTime() + now.getTimezoneOffset() * 60 * 1000;  
+    const philippinesOffsetInMs = 8 * 60 * 60 * 1000; 
+    const philippinesTime = new Date(utcTime + philippinesOffsetInMs); // Philippines time
+    
     const formattedTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
-    }).format(localTime);
-  
-    // Optimistically add the new activity to the UI first
+    }).format(philippinesTime);
+
     const newActivity: Activity = {
-      id: `${Date.now()}-${Math.random()}`, // Use Date.now() and Math.random() for unique id
+      id: `${Date.now()}-${Math.random()}`,
       message,
-      time: formattedTime, // Use the correctly formatted time
+      time: formattedTime,
     };
-  
+
     setActivities((prev) => [...prev, newActivity]);
-  
+
     try {
       const response = await fetch("/api/activities", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message, time: formattedTime }), // Send formatted time to the database
+        body: JSON.stringify({ message, time: formattedTime }),
       });
-  
+
       const data = await response.json();
-  
+
       if (data.success) {
         setActivities((prev) =>
           prev.map((activity) =>
@@ -73,13 +73,14 @@ const useActivities = () => {
         setError("Failed to save activity.");
       }
     } catch (err) {
+      console.error("Error saving activity:", err);
       setError("Error saving activity.");
     } finally {
       setLoading(false);
     }
   };
 
-  return { activities, addActivity, fetchActivities, loading, error };
+  return { activities, addActivity, fetchActivities };
 };
 
 export default useActivities;

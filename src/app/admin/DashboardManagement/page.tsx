@@ -42,6 +42,7 @@ const AdminDashboardManagement = () => {
   const [rentals, setRentals] = useState<Rental[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { activities, addActivity, fetchActivities } = useActivities();
 
   const [newRental, setNewRental] = useState<Rental>({
     _id: "",
@@ -177,20 +178,12 @@ const AdminDashboardManagement = () => {
 
   const [cars, setCars] = useState<Car[]>([]);
 
-  const { activities, addActivity, fetchActivities } = useActivities();
   const fetchCars = async () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/cars");
       setCars(response.data.cars || []);
 
-        // Fetch Recent Activities
-        const activitiesResponse = await axios.get("/api/activities");
-        if (activitiesResponse.data.success) {
-          fetchActivities(); // Fetch activities using the hook
-        } else {
-          toast.error("Failed to fetch activities data.");
-        }
       setLoading(false);
     } catch (err: any) {
       toast.error("Failed to fetch cars. Please try again later.");
@@ -199,6 +192,7 @@ const AdminDashboardManagement = () => {
   };
 
   useEffect(() => {
+    fetchActivities();
     fetchCars();
   }, []);
 

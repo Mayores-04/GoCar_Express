@@ -25,19 +25,14 @@ const CarListPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const {activities, addActivity, fetchActivities } = useActivities();
+
   const fetchCars = async () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/cars");
       setCars(response.data.cars || []);
 
-       // Fetch Recent Activities
-       const activitiesResponse = await axios.get("/api/activities");
-       if (activitiesResponse.data.success) {
-         fetchActivities(); // Fetch activities using the hook
-       } else {
-         toast.error("Failed to fetch activities data.");
-       }
 
       setLoading(false);
     } catch (err: any) {
@@ -48,7 +43,6 @@ const CarListPage: React.FC = () => {
   };
 
   
-  const { activities, addActivity, fetchActivities } = useActivities();
   
   const handleEdit = (carId: string) => {
     setEditingCarId(carId);
@@ -122,8 +116,8 @@ const CarListPage: React.FC = () => {
     try {
       const response = await axios.delete(`/api/cars?id=${carId}`);
       if (response.data.success) {
-        toast.success("Car deleted successfully");
         addActivity("Delete Car");
+        toast.success("Car deleted successfully");
         setCars((prevCars) => prevCars.filter((car) => car._id !== carId));
       } else {
         toast.error("Error deleting car");
@@ -171,6 +165,7 @@ const CarListPage: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchActivities();
     fetchCars();
   }, []);
 

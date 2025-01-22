@@ -39,6 +39,8 @@ const AddCarPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
 
+  const { activities, addActivity, fetchActivities } = useActivities();
+
   const handleChange = (
     event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -54,14 +56,6 @@ const AddCarPage: React.FC = () => {
       const response = await axios.get("/api/cars");
       setCars(response.data.cars || []);
 
-      // Fetch Recent Activities
-      const activitiesResponse = await axios.get("/api/activities");
-      if (activitiesResponse.data.success) {
-        fetchActivities(); // Fetch activities using the hook
-      } else {
-        toast.error("Failed to fetch activities data.");
-      }
-      
       setLoading(false);
     } catch (err: any) {
       console.error("Error fetching cars:", err.message);
@@ -70,7 +64,6 @@ const AddCarPage: React.FC = () => {
     }
   };
 
-  const { activities, addActivity, fetchActivities } = useActivities();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +152,7 @@ const AddCarPage: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchActivities();
     fetchCars();
   }, []);
 

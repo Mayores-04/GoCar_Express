@@ -2,8 +2,8 @@
 
 import React from "react";
 import Header from "../components/Header";
-import { GsapAnimation } from "../hooks/GsapAnimation";
-import Footer from "../components/Footer"
+import { GsapAnimation } from "../../lib/hooks/GsapAnimation";
+import Footer from "../components/Footer";
 
 export default function AboutPage() {
   const headerRef = GsapAnimation();
@@ -117,30 +117,39 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Our Vehicle Section */}
-        <section className="text-center m-4 py-8 px-4 elements">
-          <h2 className="text-3xl font-semibold text-blue-800">Our Vehicle</h2>
-          <p className="mt-4 text-xl text-gray-600">
-            The Go Car Express Ride: We currently offer one carefully selected
-            vehicle that is perfect for city driving, business trips, and
-            weekend getaways. We maintain it regularly to ensure it stays in top
-            condition, giving you the best driving experience.
-          </p>
-        </section>
+        <div className="elements">
+          {/* Our Vehicle Section */}
+          <section className="text-center m-4 py-8 px-4 ">
+            <h2 className="text-3xl font-semibold text-blue-800">
+              Our Vehicle
+            </h2>
+            <p className="mt-4 text-xl text-gray-600">
+              The Go Car Express Ride: We currently offer one carefully selected
+              vehicle that is perfect for city driving, business trips, and
+              weekend getaways. We maintain it regularly to ensure it stays in
+              top condition, giving you the best driving experience.
+            </p>
+          </section>
 
-        {/* Contact Section */}
-        <section className="bg-gray-100 text-center py-8 px-4 m-4  elements">
-          <h2 className="text-3xl font-semibold text-blue-800">Contact Us</h2>
-          <p className="mt-4 text-xl text-gray-600">
-            Have any questions or need to book your rental? We're here to help!
-          </p>
-          <div className="mt-4">
-            <p className="text-lg">Phone: +63 920 907 5454</p>
-            <p className="text-lg">Email: gocarexpress0608@gmail.com</p>
-            <p className="text-lg">Address: Cainta Rizal, Philippines</p>
-          </div>
-        </section>
+          {/* Contact Section */}
+          <section className="bg-gray-100 text-center py-8 px-4 m-4  ">
+            <h2 className="text-3xl font-semibold text-blue-800">Contact Us</h2>
+            <p className="mt-4 text-xl text-gray-600">
+              Have any questions or need to book your rental? We're here to
+              help!
+            </p>
+            <div className="mt-4">
+              <p className="text-lg">Phone: +63 920 907 5454</p>
+              <p className="text-lg">Email: gocarexpress0608@gmail.com</p>
+              <p className="text-lg">Address: Cainta Rizal, Philippines</p>
+            </div>
+          </section>
+        </div>
       </main>
+
+      <footer>
+        <Footer />
+      </footer>
     </>
   );
 }

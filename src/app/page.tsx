@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
-import { GsapAnimation } from "./hooks/GsapAnimation";
+import { GsapAnimation } from "../lib/hooks/GsapAnimation";
 import FeatureCard from "./components/FeatureCard";
 import Footer from "./components/Footer";
 import Image from "next/image";
@@ -198,7 +198,7 @@ const Home: React.FC = () => {
         {/* Location Page Section */}
         <section
           id="LocationPage"
-          className="text-center bg-gray-200 py-16 px-6 w-full"
+          className="text-center  bg-gray-200 py-16 px-6 w-full"
         >
           <div className="flex flex-col elements justify-center items-center lg:flex-row md:flex-col xl:flex-row sm:flex-col w-full xl:w-[95%] lg:w-[95%]">
             <div className="w-full elements text-center px-0 xl:px-16 ">

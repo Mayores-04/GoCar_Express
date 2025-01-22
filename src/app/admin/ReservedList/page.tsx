@@ -99,13 +99,6 @@ const ReservationTable: React.FC = () => {
         console.error("Failed to fetch reservations:", data.msg);
       }
 
-       // Fetch Recent Activities
-       const activitiesResponse = await axios.get("/api/activities");
-       if (activitiesResponse.data.success) {
-         fetchActivities(); // Fetch activities using the hook
-       } else {
-         toast.error("Failed to fetch activities data.");
-       }
     } catch (error) {
       console.error("Error fetching reservations:", error);
 
@@ -293,6 +286,7 @@ const ReservationTable: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchActivities();
     fetchReservations();
   }, []);
 

@@ -196,13 +196,13 @@ export default function ReservationPage() {
       const formattedPickupLocation =
         service === "With Driver" ? pickupLocation : null;
 
-      const selectedCar  = cars.find((car) => car._id === renterInfo.carId);
+      const selectedCar = cars.find((car) => car._id === renterInfo.carId);
 
       const reservationData = {
         car: {
-          ...selectedCar ,
-          carId: selectedCar ?._id || "", 
-          carName: selectedCar ?.name || "",
+          ...selectedCar,
+          carId: selectedCar?._id || "",
+          carName: selectedCar?.name || "",
         },
         service,
         renterInfo,
@@ -290,7 +290,7 @@ export default function ReservationPage() {
               >
                 <option value="">Select Car</option>
                 {cars
-                  .filter((car) => car.carstatus !== "On Service")
+                  .filter((car) => car.carstatus === "Available") // Only show available cars
                   .map((car) => (
                     <option key={car._id} value={car._id}>
                       {car.name} ({car.brand}) - ₱{car.price}
@@ -457,7 +457,7 @@ export default function ReservationPage() {
                   />
                 </div>
                 <div>
-                  <label className=" mb-6 text-gray-600">
+                  <label className="block mb-2 text-gray-600">
                     Driver's License
                   </label>
                   <input
@@ -466,7 +466,7 @@ export default function ReservationPage() {
                     onChange={(e) =>
                       handleRenterInfoChange("driverLicense", e.target.value)
                     }
-                    placeholder="Enter Driver's License Number"
+                    placeholder="Enter Driver's License Number or none"
                     className="w-full p-2 border rounded"
                   />
                 </div>

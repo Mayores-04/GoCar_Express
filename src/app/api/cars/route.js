@@ -169,20 +169,50 @@ export async function PUT(request) {
     const formData = await request.formData();
     const updateData = {};
 
-    if (formData.has("carstatus"))
+    // Map form data to updateData fields
+    if (formData.has("carstatus")) {
       updateData.carstatus = formData.get("carstatus").toString();
-    if (formData.has("name")) updateData.name = formData.get("name").toString();
-    if (formData.has("brand"))
+    }
+    if (formData.has("name")) {
+      updateData.name = formData.get("name").toString();
+    }
+    if (formData.has("brand")) {
       updateData.brand = formData.get("brand").toString();
-    if (formData.has("seats"))
-      updateData.seats = parseInt(formData.get("seats").toString());
-    if (formData.has("price"))
-      updateData.seats = parseInt(formData.get("price").toString());
-    if (formData.has("description"))
+    }
+    if (formData.has("seats")) {
+      const seats = parseInt(formData.get("seats").toString());
+      if (isNaN(seats)) {
+        return NextResponse.json(
+          { success: false, msg: "Invalid seats value" },
+          { status: 400 }
+        );
+      }
+      updateData.seats = seats;
+    }
+    if (formData.has("price")) {
+      const price = parseFloat(formData.get("price").toString());
+      if (isNaN(price)) {
+        return NextResponse.json(
+          { success: false, msg: "Invalid price value" },
+          { status: 400 }
+        );
+      }
+      updateData.price = price;
+    }
+    if (formData.has("description")) {
       updateData.description = formData.get("description").toString();
+    }
 
+    // Handle image upload if a new image is provided
     if (formData.has("picture")) {
-      const buffer = Buffer.from(await formData.get("picture").arrayBuffer());
+      const image = formData.get("picture");
+      if (!image || typeof image.arrayBuffer !== "function") {
+        return NextResponse.json(
+          { success: false, msg: "Invalid image file" },
+          { status: 400 }
+        );
+      }
+      const buffer = Buffer.from(await image.arrayBuffer());
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.v2.uploader
           .upload_stream({ resource_type: "auto" }, (error, result) => {
@@ -194,6 +224,7 @@ export async function PUT(request) {
       updateData.picture = uploadResult.secure_url;
     }
 
+    // Update car in the database
     const updatedCar = await CarsModel.findByIdAndUpdate(id, updateData, {
       new: true,
     });

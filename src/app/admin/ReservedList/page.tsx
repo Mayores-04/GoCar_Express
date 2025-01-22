@@ -32,9 +32,15 @@ interface AdditionalDetails {
   timeTravelDuration: string;
 }
 
+interface CarDetails {
+  carId: string;
+  carName: string;
+}
+
 interface Reservation {
   _id: string;
   status: string;
+  car: CarDetails;
   service: string;
   renterInfo: RenterInfo;
   ownDriverInfo: DriverInfo;
@@ -91,25 +97,26 @@ const ReservationTable: React.FC = () => {
     }
   };
 
-  const [currentView, setCurrentView] = useState<string>("All");
-
-  const filterReservations = (status: string) => {
-    setCurrentView(status);
-    if (status === "All") {
-      setFilteredReservations(reservations);
-    } else {
-      setFilteredReservations(reservations.filter((r) => r.status === status));
-    }
+  const [currentStatus, setCurrentStatus] = useState<string>("All");
+  const [currentService, setCurrentService] = useState<string>("All");
+  
+  const combinedFilter = (status: string, service: string) => {
+    return reservations.filter((reservation) => {
+      const statusMatch = status === "All" || reservation.status === status;
+      const serviceMatch = service === "All" || reservation.service === service;
+      return statusMatch && serviceMatch;
+    });
   };
-
+  
+  const filterReservations = (status: string) => {
+    setCurrentStatus(status);
+    setFilteredReservations(combinedFilter(status, currentService));  
+  };
+  
   const filterServices = (service: string) => {
-    setCurrentView(service);
-    if(service === "All"){
-      setFilteredReservations(reservations);
-    } else{
-      setFilteredReservations(reservations.filter((e) => e.service === service));
-    }
-  }
+    setCurrentService(service);
+    setFilteredReservations(combinedFilter(currentStatus, service));  
+  };
 
   const toggleDetails = (reservationId: string) => {
     setExpandedReservationId((prevId) =>
@@ -262,7 +269,7 @@ const ReservationTable: React.FC = () => {
     <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
       <div className="flex space-x-4 mb-4">
         <h2 className="text-2xl font-bold mb-4">
-          Viewing {currentView} Reservations
+          Viewing {currentStatus} Reservations
         </h2>
         <div className="flex space-x-4 mb-6">
           <button
@@ -360,6 +367,11 @@ const ReservationTable: React.FC = () => {
                     <div className="space-y-4">
                       <h3 className="font-semibold text-gray-800">Details</h3>
                       <div>
+                        <strong>Car Details:</strong>
+                        <p>Car Name: {reservation.car.carName}</p>
+                        <p>Car Id: {reservation.car.carId}</p>
+                      </div>
+                      <div>
                         <strong>Pickup Location:</strong>
                         <p>Location: {reservation.pickupLocation}</p>
                       </div>
@@ -370,7 +382,9 @@ const ReservationTable: React.FC = () => {
                           Phone Number: {reservation.renterInfo.phoneNumber}
                         </p>
                         <p>Email: {reservation.renterInfo.email}</p>
-                        <p>Driver License: {reservation.renterInfo.driverLicense}</p>
+                        <p>
+                          Driver License: {reservation.renterInfo.driverLicense}
+                        </p>
                       </div>
                       <div>
                         <strong>Driver Information:</strong>

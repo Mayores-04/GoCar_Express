@@ -24,7 +24,10 @@ export async function POST(request) {
     // Structure reservationData
     const reservationData = {
       status: "Pending",
-      car: "6789f3819dc5bed2f7e8f0ec" || "",
+      car: {
+        carId: formData.car.carId,   
+        carName: formData.car.carName  
+      },
       service: formData.service || "",
       rentalDuration: parseInt(formData.rentalDuration || "0", 10),
       ownDriverInfo:

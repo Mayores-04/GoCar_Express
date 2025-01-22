@@ -8,7 +8,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import MapComponent from "../components/MapComponent";
 
 const MapWithNoSSR = dynamic(() => import("../components/MapComponent"), {
   ssr: false,
@@ -29,6 +28,7 @@ type DriverInfo = {
 };
 
 type RenterInfo = {
+  carId: string;
   fullName: string;
   dateOfBirth: string;
   address: string;
@@ -38,7 +38,37 @@ type RenterInfo = {
   driverLicense: string;
 };
 
+interface Car {
+  _id: string;
+  carstatus: string;
+  name: string;
+  brand: string;
+  seats: number;
+  price: number;
+  picture: string;
+  description: string;
+}
+
 export default function ReservationPage() {
+  const [cars, setCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchCars = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("api/cars");
+
+      setCars(response.data.cars || []);
+      setLoading(false);
+    } catch (erro) {
+      toast.error("Failed to fetch cars. Please try again later.");
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
   const [pickupLocation, setPickupLocation] = useState<string>("");
 
   const [isClient, setIsClient] = useState(false);
@@ -63,6 +93,7 @@ export default function ReservationPage() {
   });
 
   const [renterInfo, setRenterInfo] = useState<RenterInfo>({
+    carId: "",
     fullName: "",
     dateOfBirth: "",
     address: "",
@@ -165,8 +196,14 @@ export default function ReservationPage() {
       const formattedPickupLocation =
         service === "With Driver" ? pickupLocation : null;
 
-      // Prepare reservation data
+      const selectedCar  = cars.find((car) => car._id === renterInfo.carId);
+
       const reservationData = {
+        car: {
+          ...selectedCar ,
+          carId: selectedCar ?._id || "", 
+          carName: selectedCar ?.name || "",
+        },
         service,
         renterInfo,
         ownDriverInfo:
@@ -211,6 +248,21 @@ export default function ReservationPage() {
     }
   };
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    if (name === "carId") {
+      const selectedCar = cars.find((car) => car._id === value);
+      setRenterInfo((prev) => ({
+        ...prev,
+        carId: value,
+        carName: selectedCar?.name || "",
+      }));
+    }
+  };
+
   if (!isClient) return null;
 
   return (
@@ -229,6 +281,24 @@ export default function ReservationPage() {
             onSubmit={handleFormSubmit}
             className="w-full bg-white shadow-md rounded-lg p-8"
           >
+            {/* Available Cars */}
+            <div className="border border-gray-300 px-4 py-2">
+              <select
+                name="carId"
+                onChange={handleInputChange}
+                className="p-2 border rounded"
+              >
+                <option value="">Select Car</option>
+                {cars
+                  .filter((car) => car.carstatus !== "On Service")
+                  .map((car) => (
+                    <option key={car._id} value={car._id}>
+                      {car.name} ({car.brand}) - ₱{car.price}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
             {/* Service Selection */}
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -386,46 +456,20 @@ export default function ReservationPage() {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                {/* Authorized Driver */}
                 <div>
-                      <label className="block mb-2 text-gray-600">
-                        Authorized Driver
-                      </label>
-                      <select
-                        value={renterInfo.authorizedDriver}
-                        onChange={(e) =>
-                          handleRenterInfoChange(
-                            "authorizedDriver",
-                            e.target.value
-                          )
-                        }
-                        className="w-full p-2 border rounded"
-                      >
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </div>
-
-                    {/* Conditionally render Driver's License input */}
-                    {renterInfo.authorizedDriver === "Yes" && (
-                      <div className="col-span-2">
-                        <label className="block mb-2 text-gray-600">
-                          Driver's License
-                        </label>
-                        <input
-                          type="text"
-                          value={renterInfo.driverLicense || ""}
-                          onChange={(e) =>
-                            handleRenterInfoChange(
-                              "driverLicense",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Enter Driver's License Number"
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                    )}
+                  <label className=" mb-6 text-gray-600">
+                    Driver's License
+                  </label>
+                  <input
+                    type="text"
+                    value={renterInfo.driverLicense || ""}
+                    onChange={(e) =>
+                      handleRenterInfoChange("driverLicense", e.target.value)
+                    }
+                    placeholder="Enter Driver's License Number"
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
               </div>
             </div>
 
@@ -613,7 +657,7 @@ export default function ReservationPage() {
                   Pickup Location
                 </label>
                 <MapWithNoSSR
-                  setLocation={(setPickupLocation)}
+                  setLocation={setPickupLocation}
                   pickupLocation={pickupLocation}
                 />
               </div>

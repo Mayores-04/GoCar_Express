@@ -33,21 +33,26 @@ const useActivities = () => {
   const addActivity = async (message: string) => {
     setLoading(true);
 
-    const now = new Date();  
-    const utcTime = now.getTime() + now.getTimezoneOffset() * 60 * 1000;  
-    const philippinesOffsetInMs = 8 * 60 * 60 * 1000; 
+    const now = new Date();
+    const utcTime = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+    const philippinesOffsetInMs = 8 * 60 * 60 * 1000;
     const philippinesTime = new Date(utcTime + philippinesOffsetInMs); // Philippines time
-    
-    const formattedTime = new Intl.DateTimeFormat("en-US", {
+
+    // Format the date and time
+    const formattedDateTime = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
+      timeZone: "Asia/Manila", // Specify timezone explicitly
     }).format(philippinesTime);
 
     const newActivity: Activity = {
       id: `${Date.now()}-${Math.random()}`,
       message,
-      time: formattedTime,
+      time: formattedDateTime,
     };
 
     setActivities((prev) => [...prev, newActivity]);
@@ -58,7 +63,7 @@ const useActivities = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message, time: formattedTime }),
+        body: JSON.stringify({ message, time: formattedDateTime }),
       });
 
       const data = await response.json();

@@ -52,6 +52,7 @@ interface Reservation {
 
 const ReservationTable: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [filteredReservations, setFilteredReservations] = useState<
     Reservation[]
   >([]);
@@ -71,6 +72,7 @@ const ReservationTable: React.FC = () => {
   >({});
 
   const fetchReservations = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/reservations");
       const data = await response.json();
@@ -88,18 +90,22 @@ const ReservationTable: React.FC = () => {
           },
           {}
         );
+
+        setLoading(false);
         setButtonStates(initialButtonStates);
       } else {
         console.error("Failed to fetch reservations:", data.msg);
       }
     } catch (error) {
       console.error("Error fetching reservations:", error);
+
+      setLoading(false);
     }
   };
 
   const [currentStatus, setCurrentStatus] = useState<string>("All");
   const [currentService, setCurrentService] = useState<string>("All");
-  
+
   const combinedFilter = (status: string, service: string) => {
     return reservations.filter((reservation) => {
       const statusMatch = status === "All" || reservation.status === status;
@@ -107,15 +113,15 @@ const ReservationTable: React.FC = () => {
       return statusMatch && serviceMatch;
     });
   };
-  
+
   const filterReservations = (status: string) => {
     setCurrentStatus(status);
-    setFilteredReservations(combinedFilter(status, currentService));  
+    setFilteredReservations(combinedFilter(status, currentService));
   };
-  
+
   const filterServices = (service: string) => {
     setCurrentService(service);
-    setFilteredReservations(combinedFilter(currentStatus, service));  
+    setFilteredReservations(combinedFilter(currentStatus, service));
   };
 
   const toggleDetails = (reservationId: string) => {
@@ -125,6 +131,7 @@ const ReservationTable: React.FC = () => {
   };
 
   const handleApprove = async (reservation: Reservation) => {
+    setLoading(true);
     try {
       const { renterInfo } = reservation;
 
@@ -183,15 +190,19 @@ const ReservationTable: React.FC = () => {
           r._id === reservation._id ? { ...r, status: "Approved" } : r
         )
       );
+
+      setLoading(false);
     } catch (error) {
       console.error("Error approving reservation:", error);
       toast.error("Failed to approve reservation.");
+
+      setLoading(false);
     }
   };
 
   const handleCancel = async (reservation: Reservation) => {
     const { renterInfo } = reservation;
-
+    setLoading(true);
     try {
       if (!renterInfo) {
         toast.error("No renter information available.");
@@ -255,15 +266,32 @@ const ReservationTable: React.FC = () => {
           r._id === reservation._id ? { ...r, status: "Cancelled" } : r
         )
       );
+
+      setLoading(false);
     } catch (error) {
       console.error("Error cancelling reservation:", error);
       toast.error("An error occurred while cancelling the reservation.");
+
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchReservations();
   }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <div className="flex items-center justify-center h-screen">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+            <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">

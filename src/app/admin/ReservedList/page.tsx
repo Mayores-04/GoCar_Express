@@ -7,6 +7,7 @@ import EmailApprovalSender from "@/app/emails/EmailApprovalSender";
 import EmailCancellationSender from "@/app/emails/EmailCancellationSender";
 import axios from "axios";
 import useActivities from "@/lib/hooks/useActivities";
+import EmailPendingNotification from "@/app/emails/EmailPendingSender";
 
 interface RenterInfo {
   _id: string;
@@ -98,7 +99,6 @@ const ReservationTable: React.FC = () => {
       } else {
         console.error("Failed to fetch reservations:", data.msg);
       }
-
     } catch (error) {
       console.error("Error fetching reservations:", error);
 
@@ -106,7 +106,6 @@ const ReservationTable: React.FC = () => {
     }
   };
 
-  
   const { activities, addActivity, fetchActivities } = useActivities();
 
   const [currentStatus, setCurrentStatus] = useState<string>("All");
@@ -186,7 +185,7 @@ const ReservationTable: React.FC = () => {
         `Reservation approved and email sent to ${renterInfo.fullName}.`
       );
 
-      addActivity("Approved reservation")
+      addActivity("Approved reservation");
       setButtonStates((prev) => ({
         ...prev,
         [reservation._id]: { disabled: true, text: "Approved" },
@@ -285,6 +284,90 @@ const ReservationTable: React.FC = () => {
     }
   };
 
+  const handlePending = async (reservation: Reservation) => {
+    const { renterInfo } = reservation;
+    setLoading(true);
+    try {
+      if (!renterInfo) {
+        toast.error("No renter information available.");
+        return;
+      }
+  
+      const pendingReasons = "We are still reviewing your reservation...";
+  
+      console.log("Sending update request to set status to Pending...");
+  
+      const response = await fetch(`/api/reservations?id=${reservation._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "Pending",
+          pendingReasons,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok || !data.success) {
+        console.error("Failed to set status to Pending:", data.msg);
+        toast.error(`Failed to Pending reservation: ${data.msg}`);
+        return;
+      }
+  
+      console.log("Reservation status successfully updated to Pending.");
+  
+      const htmlContent = ReactDOMServer.renderToStaticMarkup(
+        <EmailPendingNotification
+          userFirstName={renterInfo.fullName}
+          pendingReason={pendingReasons}
+        />
+      );
+  
+      const emailResponse = await fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: renterInfo.email,
+          subject: "Reservation Set to Pending",
+          htmlContent,
+        }),
+      });
+  
+      const emailData = await emailResponse.json();
+  
+      if (!emailResponse.ok || !emailData.success) {
+        console.error("Failed to send Pending email:", emailData.message);
+        toast.error(`Failed to send Pending email: ${emailData.message}`);
+        return;
+      }
+  
+      console.log("Pending email sent successfully.");
+  
+      toast.success(
+        `Reservation status updated to Pending and email sent to ${renterInfo.fullName}.`
+      );
+  
+      addActivity("Set to Pending reservation");
+  
+      setButtonStates((prev) => ({
+        ...prev,
+        [reservation._id]: { disabled: true, text: "Pending" },
+      }));
+  
+      setReservations((prev) =>
+        prev.map((r) =>
+          r._id === reservation._id ? { ...r, status: "Pending" } : r
+        )
+      );
+    } catch (error) {
+      console.error("Error setting reservation to Pending:", error);
+      toast.error("Failed to update reservation status to Pending.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
   useEffect(() => {
     fetchActivities();
     fetchReservations();
@@ -318,7 +401,7 @@ const ReservationTable: React.FC = () => {
           </button>
           <button
             onClick={() => filterReservations("Pending")}
-            className="bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition duration-200"
+            className="bg-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-purple-600 transition duration-200"
           >
             Show Pending
           </button>
@@ -380,6 +463,15 @@ const ReservationTable: React.FC = () => {
                     {expandedReservationId === reservation._id
                       ? "Hide Details"
                       : "View Details"}
+                  </button>
+                  <button
+                    onClick={() => handlePending(reservation)}
+                    disabled={reservation.status === "Pending"}
+                    className={`btn ${reservation.status === "Pending" ? "btn-disabled text-gray-400" : "btn-primary hover:underline text-purple-500"}`}
+                  >
+                    {reservation.status === "Pending"
+                      ? "Pending"
+                      : "Set to Pending"}
                   </button>
                   <button
                     onClick={() => handleApprove(reservation)}

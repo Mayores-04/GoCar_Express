@@ -21,7 +21,6 @@ export async function POST(request) {
       ? formData.pickupLocation.join(",")
       : formData.pickupLocation;
 
-    // Structure reservationData
     const reservationData = {
       status: "Pending",
       car: {
@@ -105,7 +104,7 @@ export async function PUT(request) {
     }
 
     // Check if status is either "Approved" or "Cancelled"
-    if (!["Approved", "Cancelled"].includes(status)) {
+    if (!["Approved", "Cancelled", "Pending"].includes(status)) {
       return NextResponse.json(
         { success: false, msg: "Invalid status provided." },
         { status: 400 }

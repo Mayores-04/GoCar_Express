@@ -161,7 +161,8 @@ const AdminHome: React.FC = () => {
 
         const activitiesResponse = await axios.get("/api/activities");
         if (activitiesResponse.data.success) {
-          fetchActivities(); 
+          fetchActivities();
+          setLoading(false);
         } else {
           toast.error("Failed to fetch activities data.");
         }
@@ -179,11 +180,8 @@ const AdminHome: React.FC = () => {
   const { activities, addActivity, fetchActivities } = useActivities();
 
   const [showAll, setShowAll] = useState(false);
-  
-  const displayedActivities = showAll
-    ? activities  
-    : activities.slice(0, 5); 
-  
+
+  const displayedActivities = showAll ? activities : activities.slice(0, 5);
 
   const token = process.env.NEXT_PUBLIC_SECRET_KEY;
   return (
@@ -325,27 +323,33 @@ const AdminHome: React.FC = () => {
             {showAll ? "Show Less" : "View All"}
           </button>
 
-          <div className="divide-y divide-gray-200">
-            {displayedActivities.map((activity, index) => {
-              const isRecent =
-                new Date().getTime() - new Date(activity.time).getTime() <
-                24 * 60 * 60 * 1000;  
-              return (
-                <div
-                  key={`${activity.id}-${Date.now()}-${index}`}
-                  className={`py-4 px-4 flex justify-between ${isRecent ? "bg-blue-50" : "bg-gray-50"}`} // Highlight recent activities
-                >
-                  <span className="text-gray-600">{activity.message}</span>
-                  <span className="text-gray-400 text-sm">
-                    {activity.time}{" "}
-                    {isRecent && (
-                      <span className="text-blue-500">(Recent)</span>
-                    )}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          {loading ? (
+            <div className="mt-4 text-gray-500">Loading...</div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {displayedActivities.map((activity, index) => {
+                const isRecent =
+                  new Date().getTime() - new Date(activity.time).getTime() <
+                  24 * 60 * 60 * 1000;  
+                return (
+                  <div
+                    key={activity.id || index}  
+                    className={`py-4 px-4 flex justify-between ${
+                      isRecent ? "bg-blue-50" : "bg-gray-50"
+                    }`}
+                  >
+                    <span className="text-gray-600">{activity.message}</span>
+                    <span className="text-gray-400 text-sm">
+                      {new Date(activity.time).toLocaleString()}{" "}
+                      {isRecent && (
+                        <span className="text-blue-500">(Recent)</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

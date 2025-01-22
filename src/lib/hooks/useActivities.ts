@@ -11,6 +11,7 @@ const useActivities = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+
   const fetchActivities = async () => {
     try {
       setLoading(true);
@@ -46,7 +47,7 @@ const useActivities = () => {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
-      timeZone: "Asia/Manila", // Specify timezone explicitly
+      timeZone: "Asia/Manila",  
     }).format(philippinesTime);
 
     const newActivity: Activity = {

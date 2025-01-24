@@ -3,7 +3,6 @@ import ConnectDB from "@/lib/config/db";
 import CarsModel from "@/lib/models/CarsModel";
 import cloudinary from "cloudinary";
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,

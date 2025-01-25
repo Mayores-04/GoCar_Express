@@ -65,7 +65,6 @@ export async function POST(request) {
     };
 
     console.log(CarData);
-    // Save car data to the database
     await CarsModel.create(CarData);
 
     return NextResponse.json({ success: true, msg: "Car added successfully" });
@@ -105,7 +104,6 @@ export async function GET() {
       totalCarsAvailable,
       totalCarsOnService
     });
-    // return NextResponse.json({ cars });
   } catch (error) {
     console.error("Error in GET /api/cars:", error.message);
     return NextResponse.json(
@@ -168,7 +166,6 @@ export async function PUT(request) {
     const formData = await request.formData();
     const updateData = {};
 
-    // Map form data to updateData fields
     if (formData.has("carstatus")) {
       updateData.carstatus = formData.get("carstatus").toString();
     }
@@ -223,7 +220,6 @@ export async function PUT(request) {
       updateData.picture = uploadResult.secure_url;
     }
 
-    // Update car in the database
     const updatedCar = await CarsModel.findByIdAndUpdate(id, updateData, {
       new: true,
     });

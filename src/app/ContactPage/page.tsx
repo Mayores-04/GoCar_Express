@@ -1,12 +1,23 @@
-"use client";
-
-import React, { useState } from "react";
+"use client"
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faMapMarkerAlt, faPhoneAlt } from "@fortawesome/free-solid-svg-icons";
 import emailjs from "emailjs-com";
+import axios from "axios";
+
+interface Car {
+  _id: string;
+  carstatus: string;  
+  name: string;
+  brand: string;
+  seats: number;
+  price: number;
+  picture: string;
+  description: string;
+}
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +25,10 @@ const ContactPage: React.FC = () => {
     email: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cars, setCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showAllCars, setShowAllCars] = useState<boolean>(false);  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -24,7 +38,7 @@ const ContactPage: React.FC = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const { name, email, message } = formData;
-    
+
     if (!name || !email || !message) {
       toast.error("Please fill out all fields before submitting.");
       return;
@@ -59,6 +73,26 @@ const ContactPage: React.FC = () => {
       .finally(() => {
         setIsSubmitting(false);
       });
+  };
+
+  const fetchCars = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("/api/cars");
+      setCars(response.data.cars || []);
+    } catch (err: any) {
+      console.error("Error fetching cars:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const toggleShowAllCars = () => {
+    setShowAllCars(!showAllCars);
   };
 
   return (
@@ -99,7 +133,7 @@ const ContactPage: React.FC = () => {
                   ></textarea>
                   <button
                     type="submit"
-                    disabled={isSubmitting}   
+                    disabled={isSubmitting}
                     className="relative inline-flex w-full items-center text-gray-200 justify-center p-0.5 text-sm font-medium  rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300"
                   >
                     <span className="relative w-full px-5 py-2.5 dark:bg-gray-900 rounded-md">
@@ -118,7 +152,7 @@ const ContactPage: React.FC = () => {
                       <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-900 w-5 h-5" />
                       <div>
                         <h4 className="font-semibold text-gray-900 text-sm mb-1">Our Location</h4>
-                        <p className="text-gray-600 text-sm">123 Business Street, New York, NY 10001</p>
+                        <p className="text-gray-600 text-sm">DM7 Barangay San Andres, Cainta Rizal</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
@@ -138,57 +172,45 @@ const ContactPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Availability */}
-                <div className="bg-white min-h-[190px] rounded-lg p-6 shadow-lg">
-                  <h3 className="text-xl font-semibold text-indigo-900 mb-6">
-                    Car Availability
-                  </h3>
+                {/* Car Availability */}
+                <div className="bg-white min-h-[170px] rounded-lg p-6 shadow-lg">
+                  <h3 className="text-xl font-semibold text-indigo-900 mb-6">Car Availability</h3>
                   <div className="space-y-4">
-                    <OperationHours
-                      day="Sunday - Saturday"
-                      time="All Day"
-                      available={false}
-                    />
-                    <OperationHours
-                      day="February 23, 2025"
-                      time="All Day"
-                      available={false}
-                    />
+                    {loading ? (
+                      <p>Loading car availability...</p>
+                    ) : (
+                      (showAllCars ? cars : cars.slice(0, 3)).map((car) => (
+                        <div key={car._id} className="grid grid-cols-3 items-center gap-3">
+                          <span className="text-gray-600 text-sm text-left">{car.name}</span>
+                          <span
+                            className={`text-sm font-semibold ${car.carstatus === "available" ? "text-green-500" : "text-red-500"}`}
+                          >
+                            {car.carstatus === "available" ? "Available" : "Not Available"}
+                          </span>
+                        </div>
+                      ))
+                    )}
                   </div>
+                  {cars.length > 3 && (
+                    <button
+                      onClick={toggleShowAllCars}
+                      className="mt-4 text-indigo-500 hover:underline"
+                    >
+                      {showAllCars ? "Show Less" : "Show More"}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </section>
       </div>
-      
+
       <footer>
         <Footer />
       </footer>
     </>
   );
 };
-
-const OperationHours = ({
-  day,
-  time,
-  available,
-}: {
-  day: string;
-  time: string;
-  available?: boolean;
-}) => (
-  <div className="grid grid-cols-3 items-center gap-3">
-    <span className="text-gray-600 text-sm text-left">{day}</span>
-    <span className="text-gray-800 text-sm text-left">{time}</span>
-    {available !== undefined && (
-      <span
-        className={`text-sm font-semibold ${available ? "text-green-500" : "text-red-500"}`}
-      >
-        {available ? "Available" : "No Available Cars"}
-      </span>
-    )}
-  </div>
-);
 
 export default ContactPage;

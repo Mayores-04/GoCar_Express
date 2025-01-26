@@ -42,8 +42,6 @@ const CarListPage: React.FC = () => {
     }
   };
 
-  
-  
   const handleEdit = (carId: string) => {
     setEditingCarId(carId);
     const car = cars.find((car) => car._id === carId);
@@ -54,7 +52,6 @@ const CarListPage: React.FC = () => {
     }
   };
 
-  
   const handleSave = async (carId: string) => {
     if (
       !editedCar.carstatus ||

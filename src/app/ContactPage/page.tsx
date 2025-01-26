@@ -1,58 +1,109 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMapMarkerAlt,
-  faPhoneAlt,
-  faEnvelope,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faMapMarkerAlt, faPhoneAlt } from "@fortawesome/free-solid-svg-icons";
+import emailjs from "emailjs-com";
 
 const ContactPage: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);   
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const { name, email, message } = formData;
+    
+    if (!name || !email || !message) {
+      toast.error("Please fill out all fields before submitting.");
+      return;
+    }
+
+    const templateParams = {
+      from_name: name,
+      from_email: email,
+      message: message,
+    };
+
+    setIsSubmitting(true);
+
+    emailjs
+      .send(
+        "service_m3dpnab", // EmailJS service ID
+        "template_q6jrl2a", // EmailJS template ID
+        templateParams,
+        "iBZ8SO0eOANEm6G86" // EmailJS public key
+      )
+      .then(
+        (response) => {
+          console.log("Message sent successfully:", response);
+          toast.success("Thank you for your message! We will assure you that Jake will receive this message.");
+          setFormData({ name: "", email: "", message: "" });
+        },
+        (error) => {
+          console.error("Failed to send message:", error);
+          toast.error("Something went wrong. Please try again later.");
+        }
+      )
+      .finally(() => {
+        setIsSubmitting(false);
+      });
+  };
+
   return (
     <>
-      {/* Header */}
       <header>
         <Header />
       </header>
 
       <div id="ContactPage" className="bg-[#263033] text-white">
-        {/* Contact Section */}
         <section className="w-full justify-center px-6 pt-24 py-5">
           <div className="max-w-7xl mx-auto px-4 py-12 md:px-8">
             <div className="grid md:grid-cols-2 gap-8 items-start">
-              {/* Contact Form */}
               <div className="bg-gray-50 rounded-lg p-6 shadow-lg">
-                <h2 className="text-3xl font-bold text-indigo-900 mb-4">
-                  Get in Touch
-                </h2>
-                <p className="text-gray-600 mb-6 text-sm">
-                  Feel free to contact us, and we’ll get back to you as soon as
-                  possible.
-                </p>
-                <form className="space-y-4">
+                <h2 className="text-3xl font-bold text-indigo-900 mb-4">Get in Touch</h2>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   <input
                     type="text"
+                    name="name"
                     placeholder="Name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                     className="text-black w-full p-3 rounded-lg bg-white border text-sm border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                   />
                   <input
                     type="email"
+                    name="email"
                     placeholder="Email"
+                    value={formData.email}
+                    onChange={handleInputChange}
                     className="text-black w-full p-3 rounded-lg bg-white border text-sm border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
                   />
                   <textarea
+                    name="message"
                     placeholder="Message"
+                    value={formData.message}
+                    onChange={handleInputChange}
                     className="text-black w-full min-h-[175px] p-3 rounded-lg bg-white border text-sm border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none"
                   ></textarea>
                   <button
                     type="submit"
-                    className="relative inline-flex w-full items-center justify-center  p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
+                    disabled={isSubmitting}   
+                    className="relative inline-flex w-full items-center text-gray-200 justify-center p-0.5 text-sm font-medium  rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300"
                   >
-                    <span className="relative w-full  px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                      SEND
+                    <span className="relative w-full px-5 py-2.5 dark:bg-gray-900 rounded-md">
+                      {isSubmitting ? "Sending..." : "SEND"}
                     </span>
                   </button>
                 </form>
@@ -60,61 +111,28 @@ const ContactPage: React.FC = () => {
 
               {/* Contact Information */}
               <div className="space-y-8">
-                {/* Location Info */}
                 <div className="bg-white rounded-lg p-6 shadow-lg">
-                  <h3 className="text-xl font-semibold text-indigo-900 mb-6">
-                    Contact Information
-                  </h3>
-                  {/* Contact Information */}
-                  {/* Location Info */}
-
+                  <h3 className="text-xl font-semibold text-indigo-900 mb-6">Contact Information</h3>
                   <div className="space-y-4">
-                    {/* Location */}
                     <div className="flex items-start space-x-3">
-                      <FontAwesomeIcon
-                        icon={faMapMarkerAlt}
-                        className="text-indigo-900 w-5 h-5"
-                      />
+                      <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-900 w-5 h-5" />
                       <div>
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                          Our Location
-                        </h4>
-                        <p className="text-gray-600 text-sm">
-                          123 Business Street
-                        </p>
-                        <p className="text-gray-600 text-sm">
-                          New York, NY 10001
-                        </p>
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">Our Location</h4>
+                        <p className="text-gray-600 text-sm">123 Business Street, New York, NY 10001</p>
                       </div>
                     </div>
-                    {/* Phone */}
                     <div className="flex items-start space-x-3">
-                      <FontAwesomeIcon
-                        icon={faPhoneAlt}
-                        className="text-indigo-900 w-5 h-5"
-                      />
+                      <FontAwesomeIcon icon={faPhoneAlt} className="text-indigo-900 w-5 h-5" />
                       <div>
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                          Phone Number
-                        </h4>
-                        <p className="text-gray-600 text-sm">
-                          +63 920 907 5454
-                        </p>
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">Phone Number</h4>
+                        <p className="text-gray-600 text-sm">+63 920 907 5454</p>
                       </div>
                     </div>
-                    {/* Email */}
                     <div className="flex items-start space-x-3">
-                      <FontAwesomeIcon
-                        icon={faEnvelope}
-                        className="text-indigo-900 w-5 h-5"
-                      />
+                      <FontAwesomeIcon icon={faEnvelope} className="text-indigo-900 w-5 h-5" />
                       <div>
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                          Email Address
-                        </h4>
-                        <p className="text-gray-600 text-sm">
-                          gocarexpress0608@gmail.com
-                        </p>
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">Email Address</h4>
+                        <p className="text-gray-600 text-sm">gocarexpress0608@gmail.com</p>
                       </div>
                     </div>
                   </div>
@@ -161,16 +179,11 @@ const OperationHours = ({
   available?: boolean;
 }) => (
   <div className="grid grid-cols-3 items-center gap-3">
-    {/* Day */}
     <span className="text-gray-600 text-sm text-left">{day}</span>
-    {/* Time */}
     <span className="text-gray-800 text-sm text-left">{time}</span>
-    {/* Availability */}
     {available !== undefined && (
       <span
-        className={`text-sm font-semibold ${
-          available ? "text-green-500" : "text-red-500"
-        }`}
+        className={`text-sm font-semibold ${available ? "text-green-500" : "text-red-500"}`}
       >
         {available ? "Available" : "No Available Cars"}
       </span>

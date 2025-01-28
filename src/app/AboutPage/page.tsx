@@ -16,7 +16,6 @@ export default function AboutPage() {
         <Header />
       </header>
       <main className="space-y-4 px-4 pt-24 pb-8 bg-gray-200">
-        {/* Welcome Section */}
         <section className="text-center m-4 bg-gray-100 py-8  px-4 elements">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-800">
             Welcome to Go Car Express
@@ -31,7 +30,6 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* Mission Section */}
         <section className="bg-blue-800 m-4 text-white text-center py-8 px-4 elements">
           <h2 className="text-3xl font-semibold">Our Mission</h2>
           <p className="mt-4 text-xl">
@@ -43,7 +41,6 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* Why Choose Us Section */}
         <section className="py-8 px-4">
           <h2 className="text-3xl elements font-semibold text-center text-blue-800">
             Why Choose Go Car Express?
@@ -84,7 +81,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Our Values Section */}
         <section className="bg-blue-800 m-4 text-white text-center py-8 px-4 elements">
           <h2 className="text-3xl font-semibold">Our Values</h2>
           <div className="mt-8 space-y-6">
@@ -118,7 +114,6 @@ export default function AboutPage() {
         </section>
 
         <div className="elements">
-          {/* Our Vehicle Section */}
           <section className="text-center m-4 py-8 px-4 ">
             <h2 className="text-3xl font-semibold text-blue-800">
               Our Vehicle
@@ -131,7 +126,6 @@ export default function AboutPage() {
             </p>
           </section>
 
-          {/* Contact Section */}
           <section className="bg-gray-100 text-center py-8 px-4 m-4  ">
             <h2 className="text-3xl font-semibold text-blue-800">Contact Us</h2>
             <p className="mt-4 text-xl text-gray-600">

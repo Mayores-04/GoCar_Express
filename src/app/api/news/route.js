@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import ConnectDB from "@/lib/config/db";
 import NewsModel from "@/lib/models/NewsModel";
 import cloudinary from "cloudinary";
+import { toast } from "react-toastify";
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -78,7 +79,7 @@ export async function POST(req) {
             gallery_picture: galleryUploadResult.secure_url,
           });
         } catch (error) {
-          console.error(`Failed to upload gallery image: ${error.message}`);
+          toast.error(`Failed to upload gallery image: ${error.message}`);
         }
       }
     }
@@ -102,7 +103,7 @@ export async function POST(req) {
 
     return NextResponse.json({ msg: "News added successfully" }, { status: 200 });
   } catch (error) {
-    console.error("Error saving news:", error.message);
+    toast.error("Error saving news:", error.message);
     return NextResponse.json({ msg: "Failed to add news", error: error.message }, { status: 500 });
   }
 }

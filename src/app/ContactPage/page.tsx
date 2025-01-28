@@ -52,6 +52,9 @@ const ContactPage: React.FC = () => {
 
     setIsSubmitting(true);
 
+    // const EmailJsServiceId = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+    // const EmailJsTemplateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
+    // const EmailJsPublicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
     emailjs
       .send(
         "service_m3dpnab", // EmailJS service ID

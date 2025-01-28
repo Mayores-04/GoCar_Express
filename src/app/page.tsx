@@ -9,6 +9,7 @@ import Image from "next/image";
 import NewsCard from "./components/NewsCard";
 import Link from "next/link";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 interface GalleryItem {
   title: string;
@@ -43,8 +44,8 @@ const Home: React.FC = () => {
         const response = await axios.get("/api/news");
         setNews(response.data.news);
       } catch (err: any) {
-        console.error("Error fetching news:", err.message);
-        setError("Failed to fetch news. Please try again later.");
+        toast.error("Error fetching news:", err.message);
+        // setError("Failed to fetch news. Please try again later.");
       } finally {
         setLoading(false);
       }

@@ -176,7 +176,7 @@ const ContactPage: React.FC = () => {
                 </div>
 
                 {/* Car Availability */}
-                <div className="bg-white min-h-[170px] rounded-lg p-6 shadow-lg">
+                <div className="bg-white min-h-[170px] text-indigo-900 rounded-lg p-6 shadow-lg">
                   <h3 className="text-xl font-semibold text-indigo-900 mb-6">Car Availability</h3>
                   <div className="space-y-4">
                     {loading ? (

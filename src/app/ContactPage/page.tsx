@@ -186,9 +186,9 @@ const ContactPage: React.FC = () => {
                         <div key={car._id} className="grid grid-cols-3 items-center gap-3">
                           <span className="text-gray-600 text-sm text-left">{car.name}</span>
                           <span
-                            className={`text-sm font-semibold ${car.carstatus === "available" ? "text-green-500" : "text-red-500"}`}
+                            className={`text-sm font-semibold ${car.carstatus === "Available" ? "text-green-500" : "text-red-500"}`}
                           >
-                            {car.carstatus === "available" ? "Available" : "Not Available"}
+                            {car.carstatus === "Available" ? "Available" : "Not Available"}
                           </span>
                         </div>
                       ))

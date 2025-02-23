@@ -289,13 +289,17 @@ export default function ReservationPage() {
                 className="p-2 border rounded"
               >
                 <option value="">Select Car</option>
-                {cars
-                  .filter((car) => car.carstatus === "Available") // Only show available cars
-                  .map((car) => (
-                    <option key={car._id} value={car._id}>
-                      {car.name} ({car.brand}) - ₱{car.price}
-                    </option>
-                  ))}
+                {cars.some((car) => car.carstatus === "Available") ? (
+                  cars
+                    .filter((car) => car.carstatus === "Available")
+                    .map((car) => (
+                      <option key={car._id} value={car._id}>
+                        {car.name} ({car.brand}) {/* - ₱{car.price} */}
+                      </option>
+                    ))
+                ) : (
+                  <option disabled>No available cars</option>
+                )}
               </select>
             </div>
 

@@ -78,6 +78,7 @@ export async function GET() {
 
     const reservations = await ReservationModel.find();
 
+    console.log("get");
     return NextResponse.json({ success: true, reservations });
   } catch (error) {
     console.error("Error in GET /api/reservation:", error);

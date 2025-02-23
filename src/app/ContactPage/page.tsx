@@ -65,7 +65,7 @@ const ContactPage: React.FC = () => {
       .then(
         (response) => {
           console.log("Message sent successfully:", response);
-          toast.success("Thank you for your message! We will assure you that Jake will receive this message.");
+          toast.success("Thank you for your message! We will assure you that GoCar Express will receive this message.");
           setFormData({ name: "", email: "", message: "" });
         },
         (error) => {

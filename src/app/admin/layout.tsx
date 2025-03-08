@@ -1,20 +1,21 @@
 "use client";
 
 import React, { ReactNode, useEffect, useState } from "react";
-import { useRouter, usePathname  } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "../components/AdminComponents/Sidebar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AdminSettings } from "../components/AdminComponents/AdminSettings";
+import Cookies from "js-cookie";
 
 type AdminLayoutProps = {
   children: ReactNode;
 };
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [pageTitle, setPageTitle] = useState<string>("Dashboard");
 
   useEffect(() => {
@@ -27,40 +28,35 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       "/admin/DashboardManagement": "Dashboard Management",
     };
 
-    const title = routeToTitleMap[pathname] || "Unknown Page";
-    setPageTitle(title);
+    setPageTitle(routeToTitleMap[pathname] || "Unknown Page");
   }, [pathname]);
 
+  useEffect(() => {
+    const token = Cookies.get("adminToken");
+  
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const validateToken = () => {
-      const token = new URLSearchParams(window.location.search).get("token");
-      const SECRET_KEY =
-        process.env.NEXT_PUBLIC_SECRET_KEY || "fallback_secret_key";
+    if (isAuthenticated === false) {
+      router.replace("/forbidden"); // Redirect to Forbidden page
+    }
+  }, [isAuthenticated, router]);
 
-      if (token === SECRET_KEY) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-        router.push("/forbidden");
-      }
-    };
-
-    validateToken();
-  }, [router]);
-
-  // if (isAuthenticated === null) {
-  //   return (
-  //     <div>
-  //       <div className="flex items-center justify-center h-screen">
-  //         <div className="relative">
-  //           <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
-  //           <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="relative">
+          <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+          <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return null;

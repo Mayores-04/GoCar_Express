@@ -2,14 +2,22 @@
 
 import React from "react";
 import AdminHome from "./AdminDashboard/page";
-import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const AdminDashboardPage = () => {
-  return (
-    <>
-      <AdminHome />
-    </>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (!token) {
+      router.push("/forbidden");  
+    }
+  }, []);
+
+  return <AdminHome />;
 };
 
 export default AdminDashboardPage;

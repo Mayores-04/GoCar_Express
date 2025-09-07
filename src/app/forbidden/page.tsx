@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
 const ForbiddenPage = () => {
   const [email, setEmail] = useState("");
@@ -29,7 +30,11 @@ const ForbiddenPage = () => {
         params.set("token", data.token);
 
         toast.success("Login successful!");
-        router.push(`/admin?${params.toString()}`);
+        // router.push(`/admin?${params.toString()}`);
+
+        // after successful login
+        Cookies.set("adminToken", data.token, { expires: 1 }); // expires in 1 day
+        router.push("/admin");
       } else {
         toast.error(data.error || "Invalid credentials");
       }
@@ -67,9 +72,8 @@ const ForbiddenPage = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-2 rounded text-white ${
-              isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
-            }`}
+            className={`w-full py-2 rounded text-white ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
+              }`}
           >
             {isLoading ? "Logging in..." : "Login"}
           </button>

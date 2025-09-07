@@ -21,3 +21,33 @@ const AdminDashboardPage = () => {
 };
 
 export default AdminDashboardPage;
+
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import Cookies from "js-cookie";
+// import { useRouter } from "next/navigation";
+// import AdminHome from "./AdminDashboard/page";
+
+// const AdminPage = () => {
+//   const [isAuthenticated, setIsAuthenticated] = useState(false);
+//   const router = useRouter();
+
+//   useEffect(() => {
+//     const token = Cookies.get("adminToken");
+//     if (!token) {
+//       router.push("/forbidden");
+//     } else {
+//       setIsAuthenticated(true);
+//     }
+//   }, [router]);
+
+//   if (!isAuthenticated) {
+//     return <div>Loading...</div>;
+//   }
+
+//   return <AdminHome />;
+// };
+
+// export default AdminPage;
+

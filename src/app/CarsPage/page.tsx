@@ -73,7 +73,7 @@ const CarsPage: React.FC = () => {
         <Header />
       </header>
 
-      <section className="py-16 pt-24 px-8 justify-center bg-[#263033] w-full items-center">
+      <section className="py-16 pt-24 px-8 justify-center bg-[#263033] w-full h-screen items-center">
         <h1 className="text-left text-gray-600 text-3xl mt-4 lg:text-5xl font-bold leading-tight mb-8">
           <span className="text-[#4169e1]">GoCar Express</span> CARS
         </h1>

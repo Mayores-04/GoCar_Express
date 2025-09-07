@@ -37,15 +37,16 @@ export async function POST(req) {
 
     // Upload the main image to Cloudinary
     const buffer = Buffer.from(await image.arrayBuffer());
-    const uploadResult = await new Promise((resolve, reject) => {
-      cloudinary.v2.uploader.upload_stream(
-        { resource_type: "auto" },
-        (error, result) => {
-          if (error) reject(error);
-          resolve(result);
-        }
-      ).end(buffer);
-    });
+   const uploadResult = await new Promise((resolve, reject) => {
+  cloudinary.v2.uploader.upload_stream(
+    { resource_type: "auto" },
+    (error, result) => {
+      if (error) reject(error);
+      resolve(result);
+    }
+  ).end(buffer);
+});
+
     
     const pictureUrl = uploadResult.secure_url;
 
